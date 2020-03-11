@@ -1,0 +1,26 @@
+<tool id="recetox_xmsannotator" name="xMSannotator" version="0.0.0.1">
+	<requirements>
+		<container type="docker">recetox/xmsannotator:v0.0.0.1</container>
+	</requirements>
+
+	<version_command>
+	</version_command>
+
+	<command>
+	</command>
+
+	<inputs>
+	</inputs>
+
+	<outputs>
+	</outputs>
+
+	<help>
+		xMSannotator tool performs metabolite annotation using HMDB, KEGG,
+		LipidMaps, T3DB, and selected data sources in ChemSpider.
+	</help>
+
+	<citations>
+		<citation type="doi">https://doi.org/10.1021/acs.analchem.6b01214</citation>
+	</citations>
+</tool>
