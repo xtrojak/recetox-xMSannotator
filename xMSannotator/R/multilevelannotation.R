@@ -458,7 +458,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
 
                 formula_table <- table(chemCompMZ_unique_formulas$Formula)
                 uniq_formulas <- names(formula_table)
-                formula_ID <- paste("Formula", seq(1:length(uniq_formulas)), sep = "_")
+                formula_ID <- paste("Formula", seq(seq_along(uniq_formulas)), sep = "_")
                 
                 formula_id_mat <- cbind(formula_ID, uniq_formulas)
                 formula_id_mat <- as.data.frame(formula_id_mat)
@@ -495,7 +495,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                 rm(chemCompMZ)
                 levelB_res <- {
                 }
-                for (j in 1:length(l2)) {
+                for (j in seq_along(l2)) {
                   if (length(l2[[j]]) > 1) {
                     levelB_res <- rbind(levelB_res, l2[[j]])
                   }
@@ -529,7 +529,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                 clusterExport(cl, "check_golden_rules")
                 clusterExport(cl, "check_element")
 
-                levelB_res_check <- parLapply(cl, 1:length(uniq_formula), function(j, uniq_formula, NOPS_check) {
+                levelB_res_check <- parLapply(cl, seq_along(uniq_formula), function(j, uniq_formula, NOPS_check) {
                   curformula <- as.character(uniq_formula[j])
                   return(check_golden_rules(curformula, NOPS_check = NOPS_check))
                 }, uniq_formula = uniq_formula, NOPS_check = NOPS_check)
@@ -641,7 +641,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             diffmatB <- {
             }
             # gnum in
-            diffmatB <- lapply(1:length(massdefect_cor_groups), function(gnum) {
+            diffmatB <- lapply(seq_along(massdefect_cor_groups), function(gnum) {
                 cur_group <- {
                 }
                 
@@ -834,10 +834,10 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             if (length(chemids) > list_winsize) {
                 g <- seq(1, length(chemids), list_size)
                 g <- factor(g)
-                chemids_split <- split(1:length(chemids), f = g)
+                chemids_split <- split(seq_along(chemids), f = g)
                 split_size <- 1:list_winsize
             } else {
-                chemids_split <- split(1:length(chemids), f = length(chemids))
+                chemids_split <- split(seq_along(chemids), f = length(chemids))
                 split_size <- c(1)
             }
 
