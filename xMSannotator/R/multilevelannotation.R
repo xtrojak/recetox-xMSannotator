@@ -13,11 +13,11 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
     dataA[, -c(1:2)] <- round(dataA[, -c(1:2)], 1)
     
     if (is.na(module.merge.dissimilarity) == TRUE) {
-        module.merge.dissimilarity = 1 - corthresh
+        module.merge.dissimilarity <- 1 - corthresh
     }
 
     if (is.na(customIDs) == FALSE) {
-        customIDs = as.data.frame(customIDs)
+        customIDs <- as.data.frame(customIDs)
     }
 
     data(adduct_table)
@@ -25,9 +25,9 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
     print(paste0("Annotating using ", db_name, " database:"))
     
     max_diff_rt <- max.rt.diff
-    cutheight = 1 - corthresh  #module.merge.dissimilarity
-    time_step = 1
-    step1log2scale = FALSE
+    cutheight <- 1 - corthresh  #module.merge.dissimilarity
+    time_step <- 1
+    step1log2scale <- FALSE
     
     if (FALSE) {
         adduct_table$Adduct <- gsub(adduct_table$Adduct, pattern = "2M\\+2H", replacement = "M+H")
@@ -60,7 +60,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
     
     adduct_names <- unique(adduct_names)
     res_list <- new("list")
-    db_name_list = db_name
+    db_name_list <- db_name
     outloc_allres <- outloc
 
     # for(db_index in 1:length(db_name_list))
@@ -103,8 +103,8 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             
             save(global_cor, file = "global_cor.Rda")
             
-            mycl_metabs = NA
-            hr = flashClust(as.dist(1 - global_cor), method = "complete")
+            mycl_metabs <- NA
+            hr <- flashClust(as.dist(1 - global_cor), method = "complete")
             dissTOMCormat <- (1 - global_cor)
             
             a1 <- apply(global_cor, 1, function(x) {
@@ -122,7 +122,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             mycl_metabs <- cutreeDynamic(hr, distM = dissTOMCormat, deepSplit = 1, minClusterSize = minclustsize, pamRespectsDendro = FALSE, pamStage = TRUE, verbose = 0)
             # mycl_metabs <-cutree(hr, h=max(hr$height)/2) save(mycl_metabs,file='mycl_metabs.Rda')
             
-            clustmethod = "WGCNA"
+            clustmethod <- "WGCNA"
             if (length(check_levelA) < 1) {
                 if (clustmethod == "WGCNA") {
                   levelA_res <- get_peak_blocks_modulesvhclust(dataA = dataA, simmat = NA, adjacencyfromsimilarity = FALSE, time_step = time_step, max.rt.diff = max_diff_rt, outloc, column.rm.index = NA, cor.thresh = NA, deepsplit = deepsplit, minclustsize = minclustsize, cutheight = cutheight, cormethod = cormethod, networktype = networktype,
@@ -182,7 +182,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                 data(hmdbAllinf)
                 
                 hmdbAllinf$Name <- gsub(hmdbAllinf$Name, pattern = "[\\\"']", replacement = "")
-                hmdbAllinfv3.6 = hmdbAllinf
+                hmdbAllinfv3.6 <- hmdbAllinf
 
                 rm(hmdbAllinf)
                 rm(hmdbAllinf, envir = .GlobalEnv)
@@ -507,7 +507,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                   stop("No matches found.")
                 }
                 
-                MatchCategory = rep("Multiple", dim(levelB_res)[1])
+                MatchCategory <- rep("Multiple", dim(levelB_res)[1])
 
                 levelB_res$mz <- as.numeric(as.character(levelB_res$mz))
                 levelB_res$time <- as.numeric(as.character(levelB_res$time))
@@ -841,7 +841,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                 split_size <- c(1)
             }
 
-            num_sets = length(chemids_split)
+            num_sets <- length(chemids_split)
             
             # if(FALSE)
             {
