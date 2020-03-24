@@ -22,7 +22,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
 
     data(adduct_table)
 
-    print(paste("Annotating using ", db_name, " database:", sep = ""))
+    print(paste0("Annotating using ", db_name, " database:"))
     
     max_diff_rt <- max.rt.diff
     cutheight = 1 - corthresh  #module.merge.dissimilarity
@@ -111,7 +111,8 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                 length(which(x > corthresh))
             })
             
-            fname_c <- paste("NumberOfCorrelationsPerFeature_cor", corthresh, ".csv", sep = "")
+            fname_c <- paste0("NumberOfCorrelationsPerFeature_cor",
+              corthresh, ".csv")
             
             write.csv(a1, file = fname_c)
             
@@ -629,7 +630,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             t1 <- d1$x
             gid <- {
             }
-            gid <- paste("ISgroup", dim(dataA)[1], sep = "")
+            gid <- paste0("ISgroup", dim(dataA)[1])
             levelA_res2 <- cbind(mzdefect, levelA_res)
             
             massdefect_cor_groups <- sapply(list(myData1 = levelA_res2), function(x) split(x, cut(levelA_res2$mzdefect, breaks = seq(0, 1, 0.01))))
@@ -683,7 +684,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                 
                 if (nrow(diffmatC) > 0) {
                   t1 <- table(diffmatB[, 1])
-                  isop_last <- paste("ISgroup_", diffmatC$Module_RTclust, "_", 1, sep = "")
+                  isop_last <- paste0("ISgroup_", diffmatC$Module_RTclust, "_", 1)
                   
                   diffmatC <- cbind(isop_last, diffmatC)
                   colnames(diffmatC) <- colnames(diffmatB)
@@ -853,7 +854,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             
             if (max_diff_rt >= 9999) {
                 module_num <- gsub(mchemdata$Module_RTclust, pattern = "_[0-9]{1,}", replacement = "")
-                module_num <- paste(module_num, "_0", sep = "")
+                module_num <- paste0(module_num, "_0")
                 mchemdata$Module_RTclust <- module_num
             }
             # write.table(mchemdata,file='Stage2.txt',sep='\t',row.names=FALSE)
@@ -910,14 +911,14 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                 clusterExport(cl, "adduct_weights")
                 
                 parLapply(cl, 1:num_sets, function(arg1) {
-                  cur_fname <- paste(outloc, "/stage2/chem_score", arg1, ".Rda", sep = "")
+                  cur_fname <- paste0(outloc, "/stage2/chem_score", arg1, ".Rda")
                   check_if_exists <- suppressWarnings(try(load(cur_fname)))
                   
                   if (is(check_if_exists, "try-error")) {
                     # suppressWarnings(multilevelannotationstep2(outloc1=outloc,list_number=arg1))
                     multilevelannotationstep2(outloc1 = outloc, list_number = arg1)
                   } else {
-                    print(paste("List ", arg1, " already exists.", sep = ""))
+                    print(paste0("List ", arg1, " already exists."))
                   }
                 })
                 
