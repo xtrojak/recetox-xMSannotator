@@ -4,7 +4,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
     
     options(warn = -1)
     
-    WGCNA::allowWGCNAThreads(nThreads = num_nodes)
+    WGCNA::enableWGCNAThreads(nThreads = num_nodes)
     
     dataA <- as.data.frame(dataA)
     dataA$mz <- round(dataA$mz, 5)
