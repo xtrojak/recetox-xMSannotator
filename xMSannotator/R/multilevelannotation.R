@@ -10,7 +10,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
     dataA$mz <- round(dataA$mz, 5)
     dataA$time <- round(dataA$time, 1)
     
-    dataA[, -c(1:2)] <- round(dataA[, -c(1:2)], 1)
+    dataA[, -(1:2)] <- round(dataA[, -(1:2)], 1)
     
     if (is.na(customIDs) == FALSE) {
         customIDs <- as.data.frame(customIDs)
@@ -76,7 +76,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             dataA <- dataA[-which(duplicated(mzid) == TRUE), ]
         }
         
-        system.time(global_cor <- WGCNA::cor(t(dataA[, -c(1:2)]), nThreads = num_nodes, method = cormethod, use = "p"))
+        system.time(global_cor <- WGCNA::cor(t(dataA[, -(1:2)]), nThreads = num_nodes, method = cormethod, use = "p"))
         
         global_cor <- round(global_cor, 2)
         
@@ -112,7 +112,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                   cutheight = cutheight, cormethod = cormethod, networktype = networktype, num_nodes = num_nodes, step1log2scale = step1log2scale, mycl_metabs = mycl_metabs)
                 
                 setwd(outloc_allres)
-                levelA_res <- levelA_res[, -c(1:4)]
+                levelA_res <- levelA_res[, -(1:4)]
                 save(levelA_res, file = "xMSannotator_levelA_modules.Rda")
             } else {
                 if (clustmethod == "graph") {
@@ -134,15 +134,15 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
         setwd(outloc)
         
         levelA_res <- levelA_res[order(levelA_res$mz, levelA_res$time), ]
-        levelA_res <- levelA_res[, c(1:3)]
+        levelA_res <- levelA_res[, 1:3]
         
         dataA <- dataA[order(dataA$mz, dataA$time), ]
         
-        mean_int_vec <- apply(dataA[, -c(1:2)], 1, function(x) {
+        mean_int_vec <- apply(dataA[, -(1:2)], 1, function(x) {
             mean(x, na.rm = TRUE)
         })
         
-        dataA <- dataA[, c(1:2)]
+        dataA <- dataA[, 1:2]
         
         if (queryadductlist == "all" & mode == "pos") {
             adduct_names <- adduct_table$Adduct[(adduct_table$Type == "S" & adduct_table$Mode == "positive") | (adduct_table$Type == gradienttype & adduct_table$Mode == "positive")]
@@ -433,7 +433,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             
             adduct_names <- as.character(adduct_names)
             
-            l2 <- parLapply(cl, s1, Annotationbychemical_IDschild, dataA = dataA, queryadductlist = c(adduct_names), adduct_type = c("S", gradienttype), adduct_table = adduct_table, max.mz.diff = max.mz.diff, outloc = outloc, keggCompMZ = chemCompMZ_unique_formulas, 
+            l2 <- parLapply(cl, s1, Annotationbychemical_IDschild, dataA = dataA, queryadductlist = adduct_names, adduct_type = c("S", gradienttype), adduct_table = adduct_table, max.mz.diff = max.mz.diff, outloc = outloc, keggCompMZ = chemCompMZ_unique_formulas,
                 otherdbs = FALSE, otherinfo = FALSE, num_nodes = num_nodes)
             
             stopCluster(cl)
@@ -467,7 +467,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             uniq_formula <- as.character(unique(levelB_res$Formula))
             bad_formula <- which(is.na(uniq_formula) == TRUE)
             if (length(bad_formula) > 0) {
-                uniq_formula <- uniq_formula[-c(bad_formula)]
+                uniq_formula <- uniq_formula[-bad_formula]
             }
             
             cl <- makeSOCKcluster(num_nodes)
@@ -493,8 +493,8 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             clusterExport(cl, "check_element")
             
             if (length(water_adduct_ind) > 0) {
-                levelB_res2 <- levelB_res[c(water_adduct_ind), ]
-                levelB_res <- levelB_res[-c(water_adduct_ind), ]
+                levelB_res2 <- levelB_res[water_adduct_ind, ]
+                levelB_res <- levelB_res[-water_adduct_ind, ]
                 sind1 <- seq(1:dim(levelB_res2)[1])
                 levelB_res_check3 <- parLapply(cl, sind1, function(j) {
                   curformula <- as.character(levelB_res2$Formula[j])
@@ -548,7 +548,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
         
         levelA_res <- levelA_res[order(levelA_res$Module_RTclust), ]
         module_num <- gsub(levelA_res$Module_RTclust, pattern = "_[0-9]{1,}", replacement = "")
-        levelA_res_all <- levelA_res[, c(1:2)]
+        levelA_res_all <- levelA_res[, 1:2]
         levelA_res_all$Module_RTclust <- module_num
         mzdefect <- 1 * ((levelA_res$mz - floor(levelA_res$mz)))
         
@@ -596,7 +596,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                 
                 diffmatC <- cbind(isop_last, diffmatC)
                 colnames(diffmatC) <- colnames(diffmatB)
-                diffmatD <- rbind(diffmatB[, c(1:10)], diffmatC[, c(1:10)])
+                diffmatD <- rbind(diffmatB[, 1:10], diffmatC[, 1:10])
                 
                 rm(diffmatC)
                 rm(diffmatB)
@@ -616,11 +616,11 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
         levelA_res <- levelA_res[order(levelA_res$mz, levelA_res$time), ]
         levelA_res1 <- cbind(diffmatD[, 1], levelA_res)
         
-        isop_res_md <- cbind(diffmatD[, c(4, 5, 1, 3)], mean_int_vec, diffmatD[, c(2)])
+        isop_res_md <- cbind(diffmatD[, c(4, 5, 1, 3)], mean_int_vec, diffmatD[, 2])
         colnames(isop_res_md) <- c("mz", "time", "ISgroup", "Module_RTclust", "AvgIntensity", "MD")
         
-        MD <- diffmatD[, c(2)]
-        levelA_res1 <- cbind(levelA_res1[, c(1:4)], mean_int_vec, MD)
+        MD <- diffmatD[, 2]
+        levelA_res1 <- cbind(levelA_res1[, 1:4], mean_int_vec, MD)
         rm(MD)
         
         cnames <- colnames(levelA_res1)
