@@ -426,7 +426,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             adduct_names <- as.character(adduct_names)
             
             l2 <- parallel::parLapply(cl, s1, Annotationbychemical_IDschild, dataA = dataA, queryadductlist = adduct_names, adduct_type = c("S", gradienttype), adduct_table = adduct_table, max.mz.diff = max.mz.diff, outloc = outloc, keggCompMZ = chemCompMZ_unique_formulas,
-                otherdbs = FALSE, otherinfo = FALSE, num_nodes = num_nodes)
+                otherdbs = FALSE, otherinfo = FALSE, num_nodes = 1)
             
             parallel::stopCluster(cl)
             
