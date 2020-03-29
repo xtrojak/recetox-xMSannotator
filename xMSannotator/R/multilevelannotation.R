@@ -4,7 +4,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
     
     options(warn = -1)
     
-    allowWGCNAThreads(nThreads = num_nodes)
+    WGCNA::allowWGCNAThreads(nThreads = num_nodes)
     
     dataA <- as.data.frame(dataA)
     dataA$mz <- round(dataA$mz, 5)
@@ -78,7 +78,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
         
         save(global_cor, file = "global_cor.Rda")
         
-        hr <- flashClust(as.dist(1 - global_cor), method = "complete")
+        hr <- flashClust::flashClust(as.dist(1 - global_cor), method = "complete")
         dissTOMCormat <- (1 - global_cor)
         
         a1 <- apply(global_cor, 1, function(x) {
@@ -92,7 +92,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
         rm(global_cor)
         
         # using dynamic
-        mycl_metabs <- cutreeDynamic(hr, distM = dissTOMCormat, deepSplit = 1, minClusterSize = minclustsize, pamRespectsDendro = FALSE, pamStage = TRUE, verbose = 0)
+        mycl_metabs <- dynamicTreeCut::cutreeDynamic(hr, distM = dissTOMCormat, deepSplit = 1, minClusterSize = minclustsize, pamRespectsDendro = FALSE, pamStage = TRUE, verbose = 0)
         
         clustmethod <- "WGCNA"
         if (length(check_levelA) < 1) {
@@ -327,12 +327,12 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                       mz_search_list <- lapply(1:dim(inputmassmat)[1], function(m) {
                         adduct_names <- as.character(adduct_names)
                         
-                        mz_search_list <- get_mz_by_monoisotopicmass(monoisotopicmass = as.numeric(as.character(inputmassmat[m, 4])), dbid = inputmassmat[m, 1], name = as.character(inputmassmat[m, 2]), formula = as.character(inputmassmat[m, 3]), queryadductlist = adduct_names, 
+                        mz_search_list <- xMSannotator::get_mz_by_monoisotopicmass(monoisotopicmass = as.numeric(as.character(inputmassmat[m, 4])), dbid = inputmassmat[m, 1], name = as.character(inputmassmat[m, 2]), formula = as.character(inputmassmat[m, 3]), queryadductlist = adduct_names,
                           adduct_table = adduct_table)
                         return(mz_search_list)
                       })
                       
-                      mz_search_list <- ldply(mz_search_list, rbind)
+                      mz_search_list <- plyr::ldply(mz_search_list, rbind)
                       save(mz_search_list, file = "mz_search_list.Rda")
                       chemCompMZ <- mz_search_list
                       rm(mz_search_list)
@@ -373,21 +373,21 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
         save(chemCompMZ, file = "chemCompMZ.Rda")
         
         if (length(check_levelB) < 1) {
-            cl <- makeSOCKcluster(num_nodes)
-            clusterEvalQ(cl, library(XML))
-            clusterEvalQ(cl, library(R2HTML))
-            clusterEvalQ(cl, library(RCurl))
-            clusterEvalQ(cl, library(SSOAP))
-            clusterEvalQ(cl, library(limma))
-            clusterEvalQ(cl, library(plyr))
-            clusterEvalQ(cl, "processWSDL")
-            clusterEvalQ(cl, library(png))
-            clusterExport(cl, "Annotationbychemical_IDschild_multilevel")
-            clusterExport(cl, "Annotationbychemical_IDschild")
-            clusterExport(cl, "find.Overlapping.mzs")
-            clusterExport(cl, "find.Overlapping.mzsvparallel")
-            clusterExport(cl, "overlapmzchild")
-            clusterExport(cl, "getVenn")
+            cl <- parallel::makeCluster(num_nodes)
+            parallel::clusterEvalQ(cl, library(XML))
+            parallel::clusterEvalQ(cl, library(R2HTML))
+            parallel::clusterEvalQ(cl, library(RCurl))
+            parallel::clusterEvalQ(cl, library(SSOAP))
+            parallel::clusterEvalQ(cl, library(limma))
+            parallel::clusterEvalQ(cl, library(plyr))
+            parallel::clusterEvalQ(cl, "processWSDL")
+            parallel::clusterEvalQ(cl, library(png))
+            parallel::clusterExport(cl, "Annotationbychemical_IDschild_multilevel")
+            parallel::clusterExport(cl, "Annotationbychemical_IDschild")
+            parallel::clusterExport(cl, "find.Overlapping.mzs")
+            parallel::clusterExport(cl, "find.Overlapping.mzsvparallel")
+            parallel::clusterExport(cl, "overlapmzchild")
+            parallel::clusterExport(cl, "getVenn")
             
             if (length(which(duplicated(chemCompMZ$Formula) == TRUE)) > 0) {
                 if (db_name == "Custom") {
@@ -422,10 +422,10 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             
             adduct_names <- as.character(adduct_names)
             
-            l2 <- parLapply(cl, s1, Annotationbychemical_IDschild, dataA = dataA, queryadductlist = adduct_names, adduct_type = c("S", gradienttype), adduct_table = adduct_table, max.mz.diff = max.mz.diff, outloc = outloc, keggCompMZ = chemCompMZ_unique_formulas,
+            l2 <- parallel::parLapply(cl, s1, Annotationbychemical_IDschild, dataA = dataA, queryadductlist = adduct_names, adduct_type = c("S", gradienttype), adduct_table = adduct_table, max.mz.diff = max.mz.diff, outloc = outloc, keggCompMZ = chemCompMZ_unique_formulas,
                 otherdbs = FALSE, otherinfo = FALSE, num_nodes = num_nodes)
             
-            stopCluster(cl)
+            parallel::stopCluster(cl)
             
             rm(chemCompMZ)
             levelB_res <- {
@@ -459,35 +459,35 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                 uniq_formula <- uniq_formula[-bad_formula]
             }
             
-            cl <- makeSOCKcluster(num_nodes)
+            cl <- parallel::makeCluster(num_nodes)
             
-            clusterExport(cl, "check_golden_rules")
-            clusterExport(cl, "check_element")
+            parallel::clusterExport(cl, "check_golden_rules")
+            parallel::clusterExport(cl, "check_element")
             
-            levelB_res_check <- parLapply(cl, seq_along(uniq_formula), function(j, uniq_formula, NOPS_check) {
+            levelB_res_check <- parallel::parLapply(cl, seq_along(uniq_formula), function(j, uniq_formula, NOPS_check) {
                 curformula <- as.character(uniq_formula[j])
-                return(check_golden_rules(curformula, NOPS_check = NOPS_check))
+                return(xMSannotator::check_golden_rules(curformula, NOPS_check = NOPS_check))
             }, uniq_formula = uniq_formula, NOPS_check = NOPS_check)
-            stopCluster(cl)
+            parallel::stopCluster(cl)
             
             
-            levelB_res_check2 <- ldply(levelB_res_check, rbind)
+            levelB_res_check2 <- plyr::ldply(levelB_res_check, rbind)
             levelB_res_check3 <- levelB_res_check2[which(levelB_res_check2[, 2] == 1), ]
             levelB_res <- levelB_res[which(levelB_res$Formula %in% as.character(levelB_res_check3[, 1])), ]
             
             water_adducts <- c("M+H-H2O", "M+H-2H2O", "M-H2O-H")
             water_adduct_ind <- which(levelB_res$Adduct %in% water_adducts)
             
-            cl <- makeSOCKcluster(num_nodes)
-            clusterExport(cl, "check_element")
+            cl <- parallel::makeCluster(num_nodes)
+            parallel::clusterExport(cl, "check_element")
             
             if (length(water_adduct_ind) > 0) {
                 levelB_res2 <- levelB_res[water_adduct_ind, ]
                 levelB_res <- levelB_res[-water_adduct_ind, ]
                 sind1 <- seq(1:dim(levelB_res2)[1])
-                levelB_res_check3 <- parLapply(cl, sind1, function(j) {
+                levelB_res_check3 <- parallel::parLapply(cl, sind1, function(j) {
                   curformula <- as.character(levelB_res2$Formula[j])
-                  numoxygens <- check_element(curformula, "O")
+                  numoxygens <- xMSannotator::check_element(curformula, "O")
                   
                   if (numoxygens > 0) {
                     bool_check <- 1
@@ -500,7 +500,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                   return(res)
                 })
                 
-                levelB_res_check4 <- ldply(levelB_res_check3, rbind)
+                levelB_res_check4 <- plyr::ldply(levelB_res_check3, rbind)
                 valid_form <- {
                 }
                 
@@ -567,7 +567,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             return(cur_group)
         })
         
-        diffmatB <- ldply(diffmatB, rbind)
+        diffmatB <- plyr::ldply(diffmatB, rbind)
         diffmatB <- as.data.frame(diffmatB)
         
         if (dim(diffmatB)[1] > 0) {
@@ -749,36 +749,36 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
         print("Status 3: Calculating scores for individual chemicals/metabolites")
         
         if (num_sets > num_nodes) {
-            cl <- makeSOCKcluster(num_nodes)
-            clusterEvalQ(cl, "multilevelannotationstep2")
-            clusterExport(cl, "multilevelannotationstep2")
-            clusterEvalQ(cl, "library(Rdisop)")
-            clusterEvalQ(cl, "library(plyr)")
-            clusterExport(cl, "get_chemscorev1.6.71")
-            clusterExport(cl, "getMolecule")
-            clusterExport(cl, "ldply")
-            clusterExport(cl, "get_confidence_stage2")
+            cl <- parallel::makeCluster(num_nodes)
+            parallel::clusterEvalQ(cl, "multilevelannotationstep2")
+            parallel::clusterExport(cl, "multilevelannotationstep2")
+            parallel::clusterEvalQ(cl, "library(Rdisop)")
+            parallel::clusterEvalQ(cl, "library(plyr)")
+            parallel::clusterExport(cl, "get_chemscorev1.6.71")
+            parallel::clusterExport(cl, "getMolecule")
+            parallel::clusterExport(cl, "ldply")
+            parallel::clusterExport(cl, "get_confidence_stage2")
             
-            clusterExport(cl, "check_element")
-            clusterExport(cl, "group_by_rt_histv2")
-            clusterExport(cl, "adduct_table")
-            clusterExport(cl, "adduct_weights")
+            parallel::clusterExport(cl, "check_element")
+            parallel::clusterExport(cl, "group_by_rt_histv2")
+            parallel::clusterExport(cl, "adduct_table")
+            parallel::clusterExport(cl, "adduct_weights")
             
-            parLapply(cl, 1:num_sets, function(arg1) {
+            parallel::parLapply(cl, 1:num_sets, function(arg1) {
                 cur_fname <- paste0(outloc, "/stage2/chem_score", arg1, ".Rda")
                 check_if_exists <- suppressWarnings(try(load(cur_fname)))
                 
                 if (is(check_if_exists, "try-error")) {
-                  multilevelannotationstep2(outloc1 = outloc, list_number = arg1)
+                  xMSannotator::multilevelannotationstep2(outloc1 = outloc, list_number = arg1)
                 } else {
                   print(paste0("List ", arg1, " already exists."))
                 }
             })
             
-            stopCluster(cl)
+            parallel::stopCluster(cl)
         } else {
             for (arg1 in 1:num_sets) {
-                multilevelannotationstep2(outloc1 = outloc, list_number = arg1)
+                xMSannotator::multilevelannotationstep2(outloc1 = outloc, list_number = arg1)
             }
         }
         
