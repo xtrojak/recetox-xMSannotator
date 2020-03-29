@@ -25,17 +25,6 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
     time_step <- 1
     step1log2scale <- FALSE
     
-    if (FALSE) {
-        adduct_table$Adduct <- gsub(adduct_table$Adduct, pattern = "2M\\+2H", replacement = "M+H")
-        adduct_table$Adduct <- gsub(adduct_table$Adduct, pattern = "3M\\+3H", replacement = "M+H")
-        
-        adduct_table$Adduct <- gsub(adduct_table$Adduct, pattern = "2M\\+2Na", replacement = "M+Na")
-        adduct_table$Adduct <- gsub(adduct_table$Adduct, pattern = "3M\\+3Na", replacement = "M+Na")
-        
-        adduct_table$Adduct <- gsub(adduct_table$Adduct, pattern = "2M\\+2K", replacement = "M+K")
-        adduct_table$Adduct <- gsub(adduct_table$Adduct, pattern = "3M\\+3K", replacement = "M+K")
-    }
-    
     adduct_table <- unique(adduct_table)
     
     suppressWarnings(dir.create(outloc))
