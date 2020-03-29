@@ -12,10 +12,6 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
     
     dataA[, -c(1:2)] <- round(dataA[, -c(1:2)], 1)
     
-    if (is.na(module.merge.dissimilarity) == TRUE) {
-        module.merge.dissimilarity <- 1 - corthresh
-    }
-
     if (is.na(customIDs) == FALSE) {
         customIDs <- as.data.frame(customIDs)
     }
@@ -58,9 +54,6 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
         }
     }
     
-    adduct_names <- unique(adduct_names)
-    res_list <- new("list")
-    db_name_list <- db_name
     outloc_allres <- outloc
 
     # for(db_index in 1:length(db_name_list))
@@ -88,8 +81,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             }
             
             # dataA<-dataA[order(dataA$mz,dataA$time),]
-            mzid <- paste(dataA$mz, dataA$time, sep = "_")
-            
+
             system.time(global_cor <- WGCNA::cor(t(dataA[, -c(1:2)]), nThreads = num_nodes, method = cormethod, use = "p"))
             
             global_cor <- round(global_cor, 2)
@@ -103,7 +95,6 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             
             save(global_cor, file = "global_cor.Rda")
             
-            mycl_metabs <- NA
             hr <- flashClust(as.dist(1 - global_cor), method = "complete")
             dissTOMCormat <- (1 - global_cor)
             
@@ -188,8 +179,6 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                 rm(hmdbAllinf, envir = .GlobalEnv)
 
                 suppressWarnings(if (is.na(customIDs) == TRUE) {
-                  customIDs <- hmdbAllinfv3.6[, c(1, 20)]
-
                   if (is.na(biofluid.location) == FALSE & is.na(origin) == TRUE) {
                     gres <- gregexpr(hmdbAllinfv3.6$BioFluidLocation, pattern = biofluid.location, ignore.case = TRUE)
                     
@@ -360,8 +349,6 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                           inputmassmat <- inputmassmat[-which(duplicated(inputmassmat[, 1]) == TRUE), ]
                         }
                         
-                        mz_search_list <- {
-                        }
                         mz_search_list <- lapply(1:dim(inputmassmat)[1], function(m) {
                           # print(head(adduct_table))
                           adduct_names <- as.character(adduct_names)
@@ -402,11 +389,6 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             cnames <- colnames(chemCompMZ)
             cnames[2] <- "chemical_ID"
             colnames(chemCompMZ) <- cnames
-
-            randsetsize <- 1000
-            if (dim(dataA)[1] < 1000) {
-                randsetsize <- dim(dataA)[1]
-            }
 
             chemCompMZ <- as.data.frame(chemCompMZ)
             
@@ -469,7 +451,6 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                 chemCompMZ_unique_formulas <- chemCompMZ_unique_formulas[, c("mz", "chemical_ID", "Name", "Formula", "MonoisotopicMass", "Adduct", "AdductMass")]
                 chemCompMZ_unique_formulas <- as.data.frame(chemCompMZ_unique_formulas)
                 
-                chemIDs <- unique(chemCompMZ_unique_formulas$chemical_ID)  #unique(chemCompMZ$Formula) #
                 # save(chemCompMZ_unique_formulas,file='chemCompMZ_unique_formulasB.Rda')
 
                 # s1<-seq(1,length(chemIDs))
@@ -551,7 +532,6 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                   levelB_res <- levelB_res[-c(water_adduct_ind), ]
                   sind1 <- seq(1:dim(levelB_res2)[1])
                   levelB_res_check3 <- parLapply(cl, sind1, function(j) {
-                    adduct <- as.character(levelB_res2$Adduct[j])
                     curformula <- as.character(levelB_res2$Formula[j])
                     numoxygens <- check_element(curformula, "O")
 
@@ -595,22 +575,6 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             levelA_res$mz <- round(levelA_res$mz, 5)
             levelB_res$mz <- round(levelB_res$mz, 5)
             
-            # print('here') no_match<-dataA[-which(dataA$mz%in%levelB_res$mz),1:2]
-            # no_match_annot<-matrix(nrow=dim(no_match)[1],ncol=8,'-')
-            # no_match_1<-cbind(no_match[,1],no_match_annot,no_match[,-c(1)])
-            
-            levelB_res <- levelB_res  #[,1:10]
-            
-            # colnames(no_match_1)<-colnames(levelB_res )
-            # levelB_res <-rbind(levelB_res ,no_match_1)
-
-            last_col_ind <- dim(levelB_res)[2]
-            levelB_res <- levelB_res  #[,c(1,10,2:8)]
-            levels_A <- levels(levelA_res$Module_RTclust)
-            levels_A <- table(levelA_res$Module_RTclust)
-            levels_A <- names(levels_A)
-            # dataA_orig<-dataA
-            
             levelA_res <- levelA_res[order(levelA_res$mz, levelA_res$time), ]
             
             if (length(which(duplicated(mzid) == TRUE)) > 0) {
@@ -619,18 +583,11 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             }
             
             levelA_res <- levelA_res[order(levelA_res$Module_RTclust), ]
-            levels_A <- levels(unique(levelA_res$Module_RT))
             module_num <- gsub(levelA_res$Module_RTclust, pattern = "_[0-9]{1,}", replacement = "")
             levelA_res_all <- levelA_res[, c(1:2)]
-            orig_module_labels <- levelA_res$Module_RTclust
             levelA_res_all$Module_RTclust <- module_num
             mzdefect <- 1 * ((levelA_res$mz - floor(levelA_res$mz)))
 
-            d1 <- density(mzdefect, bw = "nrd", from = min(mzdefect), to = (0.01 + max(mzdefect)))
-            t1 <- d1$x
-            gid <- {
-            }
-            gid <- paste0("ISgroup", dim(dataA)[1])
             levelA_res2 <- cbind(mzdefect, levelA_res)
             
             massdefect_cor_groups <- sapply(list(myData1 = levelA_res2), function(x) split(x, cut(levelA_res2$mzdefect, breaks = seq(0, 1, 0.01))))
@@ -683,7 +640,6 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                 diffmatC <- levelA_res2[-which(levelA_res$mz %in% diffmatB$mz), ]
                 
                 if (nrow(diffmatC) > 0) {
-                  t1 <- table(diffmatB[, 1])
                   isop_last <- paste0("ISgroup_", diffmatC$Module_RTclust, "_", 1)
                   
                   diffmatC <- cbind(isop_last, diffmatC)
@@ -757,24 +713,8 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             }
             
             tall <- table(multiresmat$chemical_ID, multiresmat$mz)
-            tall_mznames <- colnames(tall)
-            tall_checkmultichems <- apply(tall, 2, sum)
-            tall_multichems <- tall[, which(tall_checkmultichems > 1)]
-            names_tall_multichems <- colnames(tall_multichems)
             tall_checkmultimz <- apply(tall, 1, sum)
-            tall_multimzperchem <- tall[which(tall_checkmultimz > 1), ]
             tall_unimzperchem <- tall[which(tall_checkmultimz == 1), ]
-            names_tall_multimzperchem <- rownames(tall_multimzperchem)
-            chemids <- names_tall_multimzperchem  #chemids[which(t1chemids>0)]
-            single_mz_chemids <- rownames(tall_unimzperchem)
-            chemids <- chemids
-            chem_score <- new("list")
-            i <- 1
-
-            del_mz <- {
-            }
-            multiresmat_filt <- {
-            }
 
             cnames <- colnames(dataA)
             cnames[2] <- "time"
@@ -787,12 +727,6 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
 
             level_module_isop_annot <- levelA_res1
 
-            chem_ids <- table(multiresmat$chemical_ID)
-            chem_ids_1 <- chem_ids[which(chem_ids >= 1)]
-            chem_ids_1 <- names(chem_ids_1)
-            chem_ids_2 <- chem_ids_1
-            chemids <- chem_ids_2
-            
             cnames <- colnames(multiresmat)
             cnames[2] <- "time"
             colnames(multiresmat) <- cnames
@@ -819,9 +753,6 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             chemids <- unique(mchemdata$chemical_ID)
             chemids <- unique(chemids)
 
-            chemscoremat <- {
-            }
-            
             if (length(chemids) > 10) {
                 num_sets <- length(chemids)/2
             } else {
@@ -835,10 +766,8 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                 g <- seq(1, length(chemids), list_size)
                 g <- factor(g)
                 chemids_split <- split(seq_along(chemids), f = g)
-                split_size <- 1:list_winsize
             } else {
                 chemids_split <- split(seq_along(chemids), f = length(chemids))
-                split_size <- c(1)
             }
 
             num_sets <- length(chemids_split)
@@ -943,8 +872,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             # if(allsteps==TRUE)
             {
                 print("Status 4: Pathway evaluation")
-                # suppressWarnings(annotres<-multilevelannotationstep3(outloc=outloc,adduct_weights=adduct_weights,boostIDs=boostIDs,pathwaycheckmode=pathwaycheckmode))
-                annotres <- multilevelannotationstep3(outloc = outloc, adduct_weights = adduct_weights, boostIDs = boostIDs, pathwaycheckmode = pathwaycheckmode)
+                multilevelannotationstep3(outloc = outloc, adduct_weights = adduct_weights, boostIDs = boostIDs, pathwaycheckmode = pathwaycheckmode)
                 
                 # print('Memory used after step3') print(mem_used())
                 
@@ -961,8 +889,7 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                 # size_objects<-sort(sapply(ls(), function(x) format(object.size(get(x)), unit = 'auto'))) print(size_objects)
                 
                 print("Status 5: Assigning confidence levels")
-                # suppressWarnings(annotresstage4<-multilevelannotationstep4(outloc=outloc,max.rt.diff=max_diff_rt,filter.by=filter.by,adduct_weights=adduct_weights,min_ions_perchem=min_ions_perchem,boostIDs=boostIDs,max_isp=max_isp,max.mz.diff=max.mz.diff))
-                annotresstage4 <- multilevelannotationstep4(outloc = outloc, max.rt.diff = max_diff_rt, filter.by = filter.by, adduct_weights = adduct_weights, min_ions_perchem = min_ions_perchem, boostIDs = boostIDs, max_isp = max_isp, max.mz.diff = max.mz.diff)
+                multilevelannotationstep4(outloc = outloc, max.rt.diff = max_diff_rt, filter.by = filter.by, adduct_weights = adduct_weights, min_ions_perchem = min_ions_perchem, boostIDs = boostIDs, max_isp = max_isp, max.mz.diff = max.mz.diff)
                 # print('Memory used after step4') print(mem_used())
                 
                 rm(list = ls())
@@ -978,17 +905,11 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                   
                   load("tempobjects.Rda")
                   
-                  suppressWarnings(annotresstage5 <- multilevelannotationstep5(outloc = outloc, max.rt.diff = max_diff_rt, filter.by = filter.by, adduct_weights = adduct_weights, min_ions_perchem = min_ions_perchem, boostIDs = boostIDs, max_isp = max_isp, db_name = db_name, max.mz.diff = max.mz.diff))
+                  suppressWarnings(multilevelannotationstep5(outloc = outloc, max.rt.diff = max_diff_rt, filter.by = filter.by, adduct_weights = adduct_weights, min_ions_perchem = min_ions_perchem, boostIDs = boostIDs, max_isp = max_isp, db_name = db_name, max.mz.diff = max.mz.diff))
                   
                   # print('Stage 5 confidence level distribution for unique chemical/metabolite IDs') print(table(annotresstage5$Confidence[-which(duplicated(annotresstage5$chemical_ID)==TRUE)]))
-                } else {
-                  annotresstage5 <- {
-                  }
                 }
             }
-        } else {
-            annotres <- {
-            }  #mchemdata
         }
     }
     
