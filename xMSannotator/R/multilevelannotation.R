@@ -28,6 +28,9 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
     adduct_table <- unique(adduct_table)
     
     suppressWarnings(dir.create(outloc))
+
+    current_dir <- getwd()
+    on.exit(setwd(current_dir))
     setwd(outloc)
     
     if (queryadductlist == "all" & mode == "pos") {
