@@ -1,4 +1,4 @@
-Annotationbychemical_IDs <- function(dataA, queryadductlist = c("M+H"), adduct_type = c("S", "Acetonitrile"), adduct_table, max.mz.diff = 10, outloc, numnodes = 10, otherdbs = FALSE, otherinfo = FALSE, keggCompMZ, syssleep = 0.01) {
+Annotationbychemical_IDs <- function(dataA, queryadductlist = c("M+H"), adduct_type = c("S", "Acetonitrile"), adduct_table, max.mz.diff = 10, outloc, numnodes = parallel::detectCores(), otherdbs = FALSE, otherinfo = FALSE, keggCompMZ, syssleep = 0.01) {
     adduct_names <- as.character(adduct_table[, 1])
     adductlist <- adduct_table[, 4]
     mult_charge <- adduct_table[, 3]

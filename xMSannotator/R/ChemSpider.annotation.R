@@ -1,4 +1,4 @@
-ChemSpider.annotation <- function(dataA, max.mz.diff = 10, queryadductlist = "M+H", xMSannotator.outloc, numnodes = 1, datasources = "KEGG", tokenstr = NA, maxhits = 30, syssleep = 5) {
+ChemSpider.annotation <- function(dataA, max.mz.diff = 10, queryadductlist = "M+H", xMSannotator.outloc, numnodes = parallel::detectCores(), datasources = "KEGG", tokenstr = NA, maxhits = 30, syssleep = 5) {
     data(adduct_table)
     adduct_table <- as.data.frame(adduct_table)
     

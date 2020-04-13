@@ -1,4 +1,4 @@
-simpleAnnotation <- function(dataA, max.mz.diff = 10, num_nodes = 2, queryadductlist = c("M+2H", "M+H+NH4", "M+ACN+2H", "M+2ACN+2H", 
+simpleAnnotation <- function(dataA, max.mz.diff = 10, num_nodes = parallel::detectCores(), queryadductlist = c("M+2H", "M+H+NH4", "M+ACN+2H", "M+2ACN+2H",
     "M+H", "M+NH4", "M+Na", "M+ACN+H", "M+ACN+Na", "M+2ACN+H", "2M+H", "2M+Na", "2M+ACN+H"), gradienttype = "Acetonitrile", mode = "pos", 
     outloc, db_name = "KEGG") {
     if (db_name == "KEGG") {
@@ -74,7 +74,7 @@ simpleAnnotation <- function(dataA, max.mz.diff = 10, num_nodes = 2, queryadduct
     if (length(adduct_names) > 1) {
         l2 <- parallel::parLapply(cl, seq_along(adduct_names), xMSannotator::Annotationbychemical_IDschild, dataA = dataA, queryadductlist = adduct_names, adduct_type = c("S",
             gradienttype), max.mz.diff = max.mz.diff, outloc = outloc, keggCompMZ = chemCompMZ, otherdbs = FALSE, otherinfo = FALSE, 
-            adduct_table = adduct_table, num_nodes = num_nodes)
+            adduct_table = adduct_table, num_nodes = 1)
 
         levelB_res <- {
         }
