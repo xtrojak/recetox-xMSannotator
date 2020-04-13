@@ -8,7 +8,9 @@ Annotationbychemical_IDs <- function(dataA, queryadductlist = c("M+H"), adduct_t
     names(num_mol) <- as.character(adduct_names)
     
     suppressWarnings(dir.create(outloc))
-    
+
+    current_dir <- getwd()
+    on.exit(setwd(current_dir))
     setwd(outloc)
     
     cl <- parallel::makeCluster(numnodes)

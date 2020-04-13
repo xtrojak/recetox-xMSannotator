@@ -10,6 +10,9 @@ ChemSpider.annotation <- function(dataA, max.mz.diff = 10, queryadductlist = "M+
     mzlist <- data_a[, 1]
     
     dir.create(xMSannotator.outloc, showWarnings = FALSE)
+
+    current_dir <- getwd()
+    on.exit(setwd(current_dir))
     setwd(xMSannotator.outloc)
     
     adduct_names <- as.character(adduct_table[, 1])

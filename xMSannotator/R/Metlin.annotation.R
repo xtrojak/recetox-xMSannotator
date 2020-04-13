@@ -7,6 +7,9 @@ Metlin.annotation <- function(dataA, max.mz.diff = 10, queryadductlist = "M+H", 
     mzlist <- data_a[, 1]
     
     dir.create(xMSannotator.outloc, showWarnings = FALSE)
+
+    current_dir <- getwd()
+    on.exit(setwd(current_dir))
     setwd(xMSannotator.outloc)
     
     adductlist = c(1.00727, 22.989171, 38.963171, -35.012729, -17.002729, 0.0227, 7.01597, 18.033871, 33.033471, 42.033871, 44.971171, 64.015771, 1.00727, 11.998247, 22.989171, 1.00727, 8.33459, 15.6618, -19.01839, -1.00727, 18.998371, 20.974671, 34.969371, 36.948571, 44.998171, 
