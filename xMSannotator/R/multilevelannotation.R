@@ -36,16 +36,14 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
     if (queryadductlist == "all" & mode == "pos") {
         adduct_names <- adduct_table$Adduct[(adduct_table$Type == "S" & adduct_table$Mode == "positive") | (adduct_table$Type == gradienttype & adduct_table$Mode == "positive")]
         adduct_table <- adduct_table[which(adduct_table$Adduct %in% adduct_names), ]
+    } else if (queryadductlist == "all" & mode == "neg") {
+        adduct_names <- adduct_table$Adduct[(adduct_table$Type == "S" & adduct_table$Mode == "negative") | (adduct_table$Type == gradienttype & adduct_table$Mode == "negative")]
+        adduct_table <- adduct_table[which(adduct_table$Adduct %in% adduct_names), ]
     } else {
-        if (queryadductlist == "all" & mode == "neg") {
-            adduct_names <- adduct_table$Adduct[(adduct_table$Type == "S" & adduct_table$Mode == "negative") | (adduct_table$Type == gradienttype & adduct_table$Mode == "negative")]
-            adduct_table <- adduct_table[which(adduct_table$Adduct %in% adduct_names), ]
-        } else {
-            adduct_names <- adduct_table$Adduct[which(adduct_table$Adduct %in% queryadductlist)]
-            adduct_table <- adduct_table[which(adduct_table$Adduct %in% adduct_names), ]
-        }
+        adduct_names <- adduct_table$Adduct[which(adduct_table$Adduct %in% queryadductlist)]
+        adduct_table <- adduct_table[which(adduct_table$Adduct %in% adduct_names), ]
     }
-    
+
     outloc_allres <- outloc
     
     l1 <- list.files(outloc_allres)
@@ -106,16 +104,12 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                 setwd(outloc_allres)
                 levelA_res <- levelA_res[, -(1:4)]
                 save(levelA_res, file = "xMSannotator_levelA_modules.Rda")
-            } else {
-                if (clustmethod == "graph") {
-                  levelA_res <- get_peak_blocks_graph(dataA, simmat = global_cor, adjacencyfromsimilarity = TRUE, time_step = 3, max.rt.diff = max_diff_rt, outloc, column.rm.index = NA, cor.thresh = NA, cormethod = cormethod, networktype = networktype, num_nodes = num_nodes)
-                } else {
-                  if (clustmethod == "hclust") {
-                    levelA_res <- get_peak_blocks_hclust(dataA, time_step = time_step, max.rt.diff = max_diff_rt, outloc, column.rm.index = NA, cor.thresh = NA, deepsplit = deepsplit, minclustsize = minclustsize, cutheight = cutheight, cormethod = cormethod)
-                  }
-                }
+            } else if (clustmethod == "graph") {
+                levelA_res <- get_peak_blocks_graph(dataA, simmat = global_cor, adjacencyfromsimilarity = TRUE, time_step = 3, max.rt.diff = max_diff_rt, outloc, column.rm.index = NA, cor.thresh = NA, cormethod = cormethod, networktype = networktype, num_nodes = num_nodes)
+            } else if (clustmethod == "hclust") {
+                levelA_res <- get_peak_blocks_hclust(dataA, time_step = time_step, max.rt.diff = max_diff_rt, outloc, column.rm.index = NA, cor.thresh = NA, deepsplit = deepsplit, minclustsize = minclustsize, cutheight = cutheight, cormethod = cormethod)
             }
-            
+
             setwd(outloc_allres)
             write.csv(levelA_res, file = "Stage1.csv", row.names = FALSE)
         } else {
@@ -162,27 +156,26 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             
             suppressWarnings(if (is.na(customIDs) == TRUE) {
                 if (is.na(biofluid.location) == FALSE & is.na(origin) == TRUE) {
-                  gres <- gregexpr(hmdbAllinfv3.6$BioFluidLocation, pattern = biofluid.location, ignore.case = TRUE)
-                  
-                  if (is.na(status) == FALSE) {
-                    gres3 <- gregexpr(hmdbAllinfv3.6$HMDBStatus, pattern = status, ignore.case = TRUE)
-                    
-                    gres3_good <- which(gres3 == 1)
-                    gres_good <- which(gres == 1)
-                    if (HMDBselect == "intersect") {
-                      gres <- intersect(gres_good, gres3_good)
-                    } else {
-                      gres <- c(gres_good, gres3_good)
-                      gres <- unique(gres)
-                    }
+                    gres <- gregexpr(hmdbAllinfv3.6$BioFluidLocation, pattern = biofluid.location, ignore.case = TRUE)
+
+                    if (is.na(status) == FALSE) {
+                      gres3 <- gregexpr(hmdbAllinfv3.6$HMDBStatus, pattern = status, ignore.case = TRUE)
+
+                      gres3_good <- which(gres3 == 1)
+                      gres_good <- which(gres == 1)
+                      if (HMDBselect == "intersect") {
+                          gres <- intersect(gres_good, gres3_good)
+                      } else {
+                          gres <- c(gres_good, gres3_good)
+                          gres <- unique(gres)
+                      }
                   } else {
                     gres <- which(gres == 1)
                   }
                   
                   customIDs <- hmdbAllinfv3.6[gres, c(1, 20)]
                   rm(hmdbAllinfv3.6)
-                } else {
-                  if (is.na(biofluid.location) == FALSE & is.na(origin) == FALSE) {
+                } else if (is.na(biofluid.location) == FALSE & is.na(origin) == FALSE) {
                     gres <- gregexpr(hmdbAllinfv3.6$BioFluidLocation, pattern = biofluid.location, ignore.case = TRUE)
                     gres2 <- gregexpr(hmdbAllinfv3.6$Origin, pattern = origin, ignore.case = TRUE)
                     
@@ -190,58 +183,53 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
                     gres2_good <- which(gres2 == 1)
                     
                     if (is.na(status) == FALSE) {
-                      gres3 <- gregexpr(hmdbAllinfv3.6$HMDBStatus, pattern = status, ignore.case = TRUE)
-                      gres3_good <- which(gres3 == 1)
-                      
-                      if (HMDBselect == "intersect") {
-                        gres <- intersect(gres_good, gres2_good, gres3_good)
-                      } else {
-                        gres <- c(gres_good, gres2_good, gres3_good)
-                        gres <- unique(gres)
-                      }
+                        gres3 <- gregexpr(hmdbAllinfv3.6$HMDBStatus, pattern = status, ignore.case = TRUE)
+                        gres3_good <- which(gres3 == 1)
+
+                        if (HMDBselect == "intersect") {
+                            gres <- intersect(gres_good, gres2_good, gres3_good)
+                        } else {
+                            gres <- c(gres_good, gres2_good, gres3_good)
+                            gres <- unique(gres)
+                        }
                     } else {
-                      if (HMDBselect == "intersect") {
-                        gres <- intersect(gres_good, gres2_good)
-                      } else {
-                        gres <- c(gres_good, gres2_good)
-                        gres <- unique(gres)
-                      }
+                        if (HMDBselect == "intersect") {
+                            gres <- intersect(gres_good, gres2_good)
+                        } else {
+                            gres <- c(gres_good, gres2_good)
+                            gres <- unique(gres)
+                        }
                     }
                     
                     customIDs <- hmdbAllinfv3.6[gres, c(1, 20)]
-                  } else {
-                    if (is.na(biofluid.location) == TRUE & is.na(origin) == FALSE) {
-                      gres <- gregexpr(hmdbAllinfv3.6$Origin, pattern = origin, ignore.case = TRUE)
-                      
-                      if (is.na(status) == FALSE) {
+                } else if (is.na(biofluid.location) == TRUE & is.na(origin) == FALSE) {
+                    gres <- gregexpr(hmdbAllinfv3.6$Origin, pattern = origin, ignore.case = TRUE)
+
+                    if (is.na(status) == FALSE) {
                         gres3 <- gregexpr(hmdbAllinfv3.6$HMDBStatus, pattern = status, ignore.case = TRUE)
                         gres3_good <- which(gres3 == 1)
                         gres_good <- which(gres == 1)
-                        
+
                         if (HMDBselect == "intersect") {
                           gres <- intersect(gres_good, gres3_good)
                         } else {
                           gres <- c(gres_good, gres3_good)
                           gres <- unique(gres)
                         }
-                      } else {
-                        gres <- which(gres == 1)
-                      }
-                      
-                      customIDs <- hmdbAllinfv3.6[gres, c(1, 20)]
                     } else {
-                      if (is.na(status) == FALSE) {
-                        gres3 <- gregexpr(hmdbAllinfv3.6$HMDBStatus, pattern = status, ignore.case = TRUE)
-                        gres3_good <- which(gres3 == 1)
-                        gres <- gres3_good
-                        
-                        customIDs <- hmdbAllinfv3.6[gres, c(1, 20)]
-                        
-                      } else {
-                        customIDs <- hmdbAllinfv3.6[, c(1, 20)]
-                      }
+                        gres <- which(gres == 1)
                     }
-                  }
+
+                    customIDs <- hmdbAllinfv3.6[gres, c(1, 20)]
+                } else if (is.na(status) == FALSE) {
+                    gres3 <- gregexpr(hmdbAllinfv3.6$HMDBStatus, pattern = status, ignore.case = TRUE)
+                    gres3_good <- which(gres3 == 1)
+                    gres <- gres3_good
+
+                    customIDs <- hmdbAllinfv3.6[gres, c(1, 20)]
+
+                } else {
+                  customIDs <- hmdbAllinfv3.6[, c(1, 20)]
                 }
             })
             
@@ -268,85 +256,77 @@ multilevelannotation <- function(dataA, max.mz.diff = 10, max.rt.diff = 10, corm
             try(rm(hmdbCompMZ), silent = TRUE)
             try(rm(hmdbCompMZ, envir = .GlobalEnv), silent = TRUE)
             try(rm(hmdbAllinf, envir = .GlobalEnv), silent = TRUE)
-        } else {
-            if (db_name == "KEGG") {
-                data(keggCompMZ)
-                
-                keggCompMZ$mz <- round(as.numeric(as.character(keggCompMZ$mz)), 5)
-                keggCompMZ$Name <- gsub(keggCompMZ$Name, pattern = "[\\\"']", replacement = "")
-                
-                suppressWarnings(if (is.na(customIDs) == FALSE) {
-                  customIDs <- unique(customIDs)
-                  keggCompMZ <- keggCompMZ[which(keggCompMZ$KEGGID %in% customIDs[, 1]), ]
-                  keggCompMZ <- keggCompMZ[which(keggCompMZ$Adduct %in% adduct_names), ]
-                })
-                
-                keggCompMZ <- keggCompMZ[which(keggCompMZ$Adduct %in% adduct_names), ]
-                chemCompMZ <- keggCompMZ
-                
-                print("Dimension of precomputed KEGG m/z database")
-                print(dim(chemCompMZ))
-                
-                rm(keggCompMZ)
-                rm(keggCompMZ, envir = .GlobalEnv)
-            } else {
-                if (db_name == "LipidMaps") {
-                  data(lipidmapsCompMZ)
-                  
-                  lipidmapsCompMZ <- lipidmapsCompMZ[which(lipidmapsCompMZ$Adduct %in% adduct_names), ]
-                  lipidmapsCompMZ$mz <- round(as.numeric(as.character(lipidmapsCompMZ$mz)), 5)
-                  lipidmapsCompMZ$Name <- gsub(lipidmapsCompMZ$Name, pattern = "[\\\"']", replacement = "")
-                  chemCompMZ <- lipidmapsCompMZ
-                  
-                  print("Dimension of precomputed LipidMaps m/z database")
-                  print(dim(chemCompMZ))
-                  
-                  rm(lipidmapsCompMZ)
-                  rm(lipidmapsCompMZ, envir = .GlobalEnv)
-                } else {
-                  if (db_name == "T3DB") {
-                    data(t3dbCompMZ)
-                    
-                    t3dbCompMZ <- t3dbCompMZ[which(t3dbCompMZ$Adduct %in% adduct_names), ]
-                    t3dbCompMZ$mz <- round(as.numeric(as.character(t3dbCompMZ$mz)), 5)
-                    t3dbCompMZ$Name <- gsub(t3dbCompMZ$Name, pattern = "[\\\"']", replacement = "")
-                    chemCompMZ <- t3dbCompMZ
-                    
-                    print("Dimension of precomputed T3DB m/z database")
-                    print(dim(chemCompMZ))
-                    
-                    rm(t3dbCompMZ)
-                    rm(t3dbCompMZ, envir = .GlobalEnv)
-                  } else {
-                    if (db_name == "Custom") {
-                      data(adduct_table)
-                      
-                      inputmassmat <- customDB
-                      
-                      if (length(which(duplicated(inputmassmat[, 1]) == TRUE)) > 0) {
-                        inputmassmat <- inputmassmat[-which(duplicated(inputmassmat[, 1]) == TRUE), ]
-                      }
-                      
-                      mz_search_list <- lapply(1:dim(inputmassmat)[1], function(m) {
-                        adduct_names <- as.character(adduct_names)
-                        
-                        mz_search_list <- xMSannotator::get_mz_by_monoisotopicmass(monoisotopicmass = as.numeric(as.character(inputmassmat[m, 4])), dbid = inputmassmat[m, 1], name = as.character(inputmassmat[m, 2]), formula = as.character(inputmassmat[m, 3]), queryadductlist = adduct_names,
-                          adduct_table = adduct_table)
-                        return(mz_search_list)
-                      })
-                      
-                      mz_search_list <- plyr::ldply(mz_search_list, rbind)
-                      save(mz_search_list, file = "mz_search_list.Rda")
-                      chemCompMZ <- mz_search_list
-                      rm(mz_search_list)
-                      rm(customDB)
-                      rm(customDB, envir = .GlobalEnv)
-                    } else {
-                      stop("db_name should be: KEGG, HMDB, T3DB, LipidMaps, or Custom")
-                    }
-                  }
-                }
+        } else if (db_name == "KEGG") {
+            data(keggCompMZ)
+
+            keggCompMZ$mz <- round(as.numeric(as.character(keggCompMZ$mz)), 5)
+            keggCompMZ$Name <- gsub(keggCompMZ$Name, pattern = "[\\\"']", replacement = "")
+
+            suppressWarnings(if (is.na(customIDs) == FALSE) {
+              customIDs <- unique(customIDs)
+              keggCompMZ <- keggCompMZ[which(keggCompMZ$KEGGID %in% customIDs[, 1]), ]
+              keggCompMZ <- keggCompMZ[which(keggCompMZ$Adduct %in% adduct_names), ]
+            })
+
+            keggCompMZ <- keggCompMZ[which(keggCompMZ$Adduct %in% adduct_names), ]
+            chemCompMZ <- keggCompMZ
+
+            print("Dimension of precomputed KEGG m/z database")
+            print(dim(chemCompMZ))
+
+            rm(keggCompMZ)
+            rm(keggCompMZ, envir = .GlobalEnv)
+        } else if (db_name == "LipidMaps") {
+            data(lipidmapsCompMZ)
+
+            lipidmapsCompMZ <- lipidmapsCompMZ[which(lipidmapsCompMZ$Adduct %in% adduct_names), ]
+            lipidmapsCompMZ$mz <- round(as.numeric(as.character(lipidmapsCompMZ$mz)), 5)
+            lipidmapsCompMZ$Name <- gsub(lipidmapsCompMZ$Name, pattern = "[\\\"']", replacement = "")
+            chemCompMZ <- lipidmapsCompMZ
+
+            print("Dimension of precomputed LipidMaps m/z database")
+            print(dim(chemCompMZ))
+
+            rm(lipidmapsCompMZ)
+            rm(lipidmapsCompMZ, envir = .GlobalEnv)
+        } else if (db_name == "T3DB") {
+            data(t3dbCompMZ)
+
+            t3dbCompMZ <- t3dbCompMZ[which(t3dbCompMZ$Adduct %in% adduct_names), ]
+            t3dbCompMZ$mz <- round(as.numeric(as.character(t3dbCompMZ$mz)), 5)
+            t3dbCompMZ$Name <- gsub(t3dbCompMZ$Name, pattern = "[\\\"']", replacement = "")
+            chemCompMZ <- t3dbCompMZ
+
+            print("Dimension of precomputed T3DB m/z database")
+            print(dim(chemCompMZ))
+
+            rm(t3dbCompMZ)
+            rm(t3dbCompMZ, envir = .GlobalEnv)
+        } else if (db_name == "Custom") {
+            data(adduct_table)
+
+            inputmassmat <- customDB
+
+            if (length(which(duplicated(inputmassmat[, 1]) == TRUE)) > 0) {
+              inputmassmat <- inputmassmat[-which(duplicated(inputmassmat[, 1]) == TRUE), ]
             }
+
+            mz_search_list <- lapply(1:dim(inputmassmat)[1], function(m) {
+              adduct_names <- as.character(adduct_names)
+
+              mz_search_list <- xMSannotator::get_mz_by_monoisotopicmass(monoisotopicmass = as.numeric(as.character(inputmassmat[m, 4])), dbid = inputmassmat[m, 1], name = as.character(inputmassmat[m, 2]), formula = as.character(inputmassmat[m, 3]), queryadductlist = adduct_names,
+                adduct_table = adduct_table)
+              return(mz_search_list)
+            })
+
+            mz_search_list <- plyr::ldply(mz_search_list, rbind)
+            save(mz_search_list, file = "mz_search_list.Rda")
+            chemCompMZ <- mz_search_list
+            rm(mz_search_list)
+            rm(customDB)
+            rm(customDB, envir = .GlobalEnv)
+        } else {
+            stop("db_name should be: KEGG, HMDB, T3DB, LipidMaps, or Custom")
         }
         data(adduct_table)
         
