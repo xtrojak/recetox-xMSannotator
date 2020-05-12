@@ -1,14 +1,14 @@
-<tool id="xmsannotator_simple" name="Simple Annotation" version="0.0.0.1">
-    <requirements>
-        <container type="docker">
-            registry.gitlab.ics.muni.cz:443/recetox/mass-spectrometry/xmsannotator:0.0.0.1
-        </container>
-    </requirements>
+<tool id="xmsannotator_simple" name="Simple" version="0.0.0.1">
+    <macros>
+        <import>xmsannotator_macros.xml</import>
+    </macros>
 
-    <command><![CDATA[
+    <expand macro="requirements"/>
+
+    <command detect_errors="aggressive"><![CDATA[
         Rscript
             -e 'result <- xMSannotator::simpleAnnotation(
-                dataA=readRDS($input),
+                dataA=readRDS("$data"),
                 db_name="$db_name",
                 max.mz.diff=$max_mz_diff,
                 queryadductlist=$query_adducts,
@@ -18,39 +18,54 @@
             -e 'saveRDS(data, file=$output)'
     ]]></command>
 
-    <inputs>
-        <param name="input" type="data" format="rdata" label="Peak intensity table"
-               help="The peak intensity table that we want to annotate. The first two columns should be mz and time followed by sample intensities. The missing intensities should be marked by NA value."/>
+    <!--    <inputs>
+            <param name="data" type="data" format="rds" label="Peak intensity table"
+                   help="The peak intensity table that we want to annotate. The first two columns should be mz and time followed by sample intensities. The missing intensities should be marked by NA value."/>
 
-        <param name="db_name" type="select" display="radiobutton" label="Metabolite database"
-               help="Pick a database for metabolite annotation.">
-            <option value="HMDB" selected="true">HMDB</option>
-            <option value="">KEGG</option>
-            <option value="T3DB">T3DB</option>
-            <option value="LipidMaps">LipidMaps</option>
+            <param name="db_name" type="select" display="radiobutton" label="Metabolite database"
+                   help="Pick a database for metabolite annotation.">
+                <option value="HMDB" selected="true">HMDB</option>
+                <option value="">KEGG</option>
+                <option value="T3DB">T3DB</option>
+                <option value="LipidMaps">LipidMaps</option>
+            </param>
+
+            <param name="max_mz_diff" type="integer" value="10" min="0" label="Mass tolerance [ppm]"
+                   help="Mass tolerance in ppm for database matching."/>
+
+            <param name="query_adducts" type="select" multiple="true" label="Adducts" help="">
+                <option value="all">All</option>
+                &lt;!&ndash; TODO &ndash;&gt;
+            </param>
+
+            <param name="ionization_mode" type="select" display="radiobutton" label="Ionization mode"
+                   help="Narrow the selection of the searched adducts by ionization mode.">
+                <option value="pos" selected="true">positive</option>
+                <option value="neg">negative</option>
+            </param>
+
+            <param name="gradient_type" type="select" label="Gradient type"
+                   help="Narrow the selection of the searched adducts by gradient type.">
+                <option value="Acetonitrile" selected="true">Acetonitrile</option>
+            </param>
+        </inputs>-->
+
+    <inputs>
+        <param name="data" type="data" label="Peak intensity table"/>
+
+        <param name="metabolite_db" type="data" label="Metabolite database"/>
+        <param name="adduct_db" type="data" label="Adducts database"/>
+
+        <param name="ionization_mode" type="select">
+            <options>
+                <filter type="data_meta" ref="adduct_db" key="groups"/>
+            </options>
         </param>
 
         <param name="max_mz_diff" type="integer" value="10" min="0" label="Mass tolerance [ppm]"
                help="Mass tolerance in ppm for database matching."/>
-
-        <param name="query_adducts" type="select" multiple="true" label="Adducts" help="">
-            <option value="all">All</option>
-            <!-- TODO -->
-        </param>
-
-        <param name="ionization_mode" type="select" display="radiobutton" label="Ionization mode"
-               help="Narrow the selection of the searched adducts by ionization mode.">
-            <option value="pos" selected="true">positive</option>
-            <option value="neg">negative</option>
-        </param>
-
-        <param name="gradient_type" type="select" label="Gradient type"
-               help="Narrow the selection of the searched adducts by gradient type.">
-            <option value="Acetonitrile" selected="true">Acetonitrile</option>
-        </param>
     </inputs>
 
-    <outputs>
-        <data name="output" format="rdata"/>
-    </outputs>
+    <help><![CDATA[]]></help>
+    <expand macro="citations"/>
 </tool>

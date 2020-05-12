@@ -1,256 +1,82 @@
-<tool id="xmsannotator_multilevel" name="Multilevel Annotation" version="0.0.0.1">
-    <requirements>
-        <container type="docker">recetox/xmsannotator:v0.0.0.1</container>
-    </requirements>
+<tool id="xmsannotator_multilevel" name="Multilevel" version="0.0.0.1">
+    <macros>
+        <import>xmsannotator_macros.xml</import>
+    </macros>
 
-    <command>
-        <!--
-            queryadductlist <- adducts
-            db_name <- db_name
-            mode <- ionization_mode
-            gradienttype <- gradient_type
-            cormethod <- correlation_method
-            corthresh <- correlation_threshold
-            minclustersize <- min_cluster_size
-            deepsplit <- deep_split
-            networktype <- network_type
-            HMDBselect <- HMDB_select
-            status <- HMDB_status
-        -->
-    </command>
+    <!--<expand macro="requirements"/>-->
+
+    <command detect_errors="aggressive"><![CDATA[]]></command>
 
     <inputs>
-        <param name="input" type="data" format="csv,rdata" label="Peak intensity table"
-               help="The first two columns should be mz and time followed by sample intensities. The missing intensities should be marked by NA value.">
-            <!-- TODO add <validate> tag (check that the input data has the required columns) -->
-            <!-- TODO add <conversion> tag to covert to R matrix (or screw this and do the conversion in docker's command when invoking the xMSannotator but with limmited error reporting to the user) -->
-        </param>
+        <param name="peak_intensity_table" type="data" format="peak_list" label="Peak intensity table"/>
 
-        <param name="max_mz_diff" type="integer" value="10" min="0" label="Mass tolerance [ppm]"
-               help="Mass tolerance in ppm for database matching."/>
+        <section name="metabolites" title="Metabolites">
+            <param name="db" type="data" format="metabolite_db" label="Database"
+                   help="The database for metabolite annotation."/>
 
-        <param name="max_rt_diff" type="integer" value="10" min="0" label="Retention time tolerance [s]"
-               help="Retention time tolerance in seconds for finding peaks derived from the same parent metabolite."/>
-
-        <conditional name="db_name_controller">
-            <param name="db_name" type="select" label="Metabolite database" help="Pick a database for metabolite annotation.">
-                <option value="HMDB" selected="true">HMDB</option>
-                <option value="KEGG">KEGG</option>
-                <option value="T3DB">T3DB</option>
-                <option value="LipidMaps">LipidMaps</option>
-                <option value="Custom">Custom</option>
-            </param>
-
-            <when value="KEGG">
-                <param name="custom_IDs" type="data" optional="true" label="Restrict the database search to a subset of metabolites (optional)"/>
-            </when>
-
-            <when value="HMDB">
-                <conditional name="HMDB_select_controller">
-                    <param name="HMDB_select" type="select" display="radiobutton" label="HMDB filtering" help="">
-                        <option value="custom">Custom</option>
-                        <option value="guided" selected="true">Guided</option>
-                    </param>
-
-                    <when value="custom">
-                        <param name="custom_IDs" type="data" optional="true" label="Restrict the database search to a subset of metabolites (optional)"/>
-                    </when>
-
-                    <when value="guided">
-                        <!-- TODO -->
-                    </when>
-                </conditional>
-            </when>
-
-            <when value="Custom">
-                <param name="custom_db" type="data" label="Custom database"
-                       help="Load a custom database to be annotated against. The database must contain these columns in order of appearance: ID, Name, MonoisotopicMass, Formula.">
-                    <!-- TODO add <validate> tag (see xMSannotator/data/adduct_table.Rda for requirements) -->
-                    <!-- TODO add <conversion> tag to covert to R matrix -->
-                </param>
-            </when>
-        </conditional>
-
-<!--        <section name="db" title="Database">
-            <conditional name="db_name_controller">
-                <param name="db_name" type="select" label="Database" help="Database to be used for annotation.">
-                    <option value="HMDB" selected="true">HMDB</option>
-                    <option value="KEGG">KEGG</option>
-                    <option value="T3DB">T3DB</option>
-                    <option value="LipidMaps">LipidMaps</option>
-                    <option value="Custom">Custom</option>
-                </param>
-
-                <when value="KEGG">
-                    <param name="custom_IDs" type="data" optional="true"
-                           label="Restrict search to custom metabolites (optional)"
-                           help="Restrict the database search to a subset of metabolites.">
-                        &lt;!&ndash; TODO add <validate> tag &ndash;&gt;
-                    </param>
-                </when>
-
-                <when value="HMDB">
-                    <conditional name="db_restriction_controller">
-                        <param name="db_restriction" type="select" label="Database search restrictions">
-                            <option value="none" selected="true">None</option>
-                            <option value="custom">Custom</option>
-                            <option value="query">Query</option>
-                        </param>
-
-                        <when value="custom">
-                            <param name="custom_IDs" type="data" optional="true"
-                                   label="Restrict search to custom metabolites (optional)"
-                                   help="Restrict the database search to a subset of metabolites.">
-                                &lt;!&ndash; TODO add <validate> tag &ndash;&gt;
-                            </param>
-                        </when>
-
-                        <when value="query"></when>
-                    </conditional>
-
-
-                    <param name="HMDB_select" type="select" display="radiobutton" label="Selector"
-                           help="How to select metabolites based on HMDB origin, biolfuid and status filters.">
-                        <option value="union" selected="true">union</option>
-                        <option value="intersect">intersect</option>
-                    </param>
-
-                    <param name="HMDB_status" type="select" multiple="true" label="Status"
-                           help="Please see http://www.hmdb.ca/metabolites for more details.">
-                        &lt;!&ndash; TODO dynamically loading values from data(hmdbAllInf)$HMDBStatus &ndash;&gt;
-                        &lt;!&ndash; TODO if nothing is selected, relay the value NA to the R argument (see the Cheetach example for inspiration https://docs.galaxyproject.org/en/latest/dev/schema.html#tool-inputs-conditional and https://docs.galaxyproject.org/en/latest/dev/schema.html#tool-inputs-repeat) &ndash;&gt;
-                        &lt;!&ndash; TODO combine the selected values (note that this is multi-choice select) to form a regex that can be fed to R function gregexpr (the "opt1|opt2" regex should be sufficient)  &ndash;&gt;
-                        &lt;!&ndash; NOTE if not dynamically loaded, the enumeration below is incomplete &ndash;&gt;
-                        <option value="Detected">Detected</option>
-                        <option value="Detected and Quantified">Detected and Quantified</option>
-                        <option value="Detected and Not Quantified">Detected and Not Quantified</option>
-                        <option value="Expected and Not Quantified">Expected and Not Quantified</option>
-                    </param>
-
-                    <param name="HMDB_biofluid_location" type="select" multiple="true" label="Biofluid location"
-                           help="Please see http://www.hmdb.ca/metabolites for more details.">
-                        &lt;!&ndash; TODO dynamically load values from data(hmdbAllInf)$BioFluidLocation (strsplit on ";" and remove duplicate entries) &ndash;&gt;
-                        &lt;!&ndash; TODO if nothing is selected, relay the value NA to the R argument (see the Cheetach example for inspiration https://docs.galaxyproject.org/en/latest/dev/schema.html#tool-inputs-conditional and https://docs.galaxyproject.org/en/latest/dev/schema.html#tool-inputs-repeat) &ndash;&gt;
-                        &lt;!&ndash; TODO combine the selected values (note that this is multi-choice select) to form a regex that can be fed to R function gregexpr (the "opt1|opt2" regex should be sufficient)  &ndash;&gt;
-                        &lt;!&ndash; NOTE if not dynamically loaded, the enumeration below is incomplete &ndash;&gt;
-                        <option value="Blood">Blood</option>
-                        <option value="Urine">Urine</option>
-                        <option value="Saliva">Saliva</option>
-                    </param>
-
-                    <param name="HMDB_origin" type="select" multiple="true" label="Origin"
-                           help="Please see http://www.hmdb.ca/metabolites for more details.">
-                        &lt;!&ndash; TODO dynamically load values from data(hmdbAllInf)$Origin (strsplit on ";" and remove duplicate entries) &ndash;&gt;
-                        &lt;!&ndash; TODO if nothing is selected, relay the value NA to the R argument (see the Cheetach example for inspiration https://docs.galaxyproject.org/en/latest/dev/schema.html#tool-inputs-conditional and https://docs.galaxyproject.org/en/latest/dev/schema.html#tool-inputs-repeat) &ndash;&gt;
-                        &lt;!&ndash; TODO combine the selected values (note that this is multi-choice select) to form a regex that can be fed to R function gregexpr (the "opt1|opt2" regex should be sufficient)  &ndash;&gt;
-                        &lt;!&ndash; NOTE if not dynamically loaded, the enumeration below is incomplete &ndash;&gt;
-                        <option value="Endogenous">Endogenous</option>
-                        <option value="Exogenous">Exogenous</option>
-                    </param>
-                </when>
-
-                <when value="Custom">
-                    <param name="custom_db" type="data" label="Custom database"
-                           help="The table with (ID, Name, MonoisotopicMass, Formula) columns.">
-                        &lt;!&ndash; TODO add <validate> tag (see xMSannotator/data/adduct_table.Rda for requirements) &ndash;&gt;
-                        &lt;!&ndash; TODO add <conversion> tag to covert to R matrix &ndash;&gt;
-                    </param>
-                </when>
-            </conditional>
-        </section>-->
-
-        <section name="clustering" title="Clustering">
-            <param name="correlation_method" type="select" display="radiobutton" label="Correlation method">
-                <option value="pearson" selected="true">Pearson</option>
-                <option value="spearman">Spearman</option>
-            </param>
-
-            <param name="correlation_threshold" type="float" value="0.7" label="Correlation threshold"
-                   help="Minimum correlation threshold between peaks to qualify as adducts or isotopes of the same metabolite."/>
-
-            <param name="min_cluster_size" type="integer" value="10" min="1" label="Minimum cluster size"
-                   help="The minimum number of nodes to be considered as a cluster."/>
-
-            <param name="deep_split" type="integer" value="2" min="0" max="4" label="Deep split"
-                   help="Deep split parameter provides a rough control over sensitivity to cluster splitting on the integer scale from 0 to 4. The higher the value, the more and smaller clusters will be produced (see WGCNA package documentation)."/>
-
-            <param name="network_type" type="select" display="radiobutton" label="Network type"
-                   help="Network type parameter affects how the network's adjacency matrix is created from the correlation matrix (see WGCNA package documentation).">
-                <option value="signed">Signed</option>
-                <option value="unsigned" selected="true">Unsigned</option>
-            </param>
+            <expand macro="filter" ref="db">
+                <option value="status"/>
+                <option value="origin"/>
+                <option value="biofluid"/>
+            </expand>
         </section>
 
         <section name="adducts" title="Adducts">
-            <param name="adducts" type="select" multiple="true" label="Adducts" help="">
-                <!-- TODO select all by default -->
-                <!-- TODO populate options from xMSannotator/data/aduct_table.rda -->
-                <!-- TODO write help -->
+            <param name="db" type="data" format="adduct_db" label="Database" help="Database of adducts."/>
+
+            <param name="weights" type="data" optional="true" label="Weights (optional)"
+                   help="Give weights to some adducts to compute their scores. The data must consist of 2 columns called Adduct abd Weight."/>
+
+            <expand macro="filter" ref="db">
+                <option value="gradient"/>
+                <option value="ionization"/>
+            </expand>
+        </section>
+
+        <section name="tolerance" title="Tolerance">
+            <param name="max_mz_diff" type="integer" value="10" min="0" label="Mass tolerance [ppm]"
+                   help="Mass tolerance in ppm for database matching."/>
+            <param name="max_rt_diff" type="integer" value="10" min="0" label="Retention time tolerance [s]"
+                   help="Retention time tolerance in seconds for finding peaks derived from the same parent metabolite."/>
+        </section>
+
+        <section name="clustering" title="Clustering">
+            <param name="correlation_method" type="select" display="radiobutton" label="Correlation method">
+                <option value="pearson" selected="true"/>
+                <option value="spearman"/>
             </param>
 
-            <param name="adduct_weights" type="data" optional="true" label="Adduct weights (optional)"
-                   help="The data table must have 2 columns called Adduct abd Weight.">
-                <!-- TODO add <validate> tag (check that the data is a data frame with two columns "Adduct" and "Weight") (for more info see xMSannotator/data/adduct_weight.rda) -->
-            </param>
+            <param name="correlation_threshold" type="float" value="0.7" label="Correlation threshold"
+                   help="Correlation threshold between peaks to qualify as adducts/isotopes of the same metabolite."/>
+            <param name="min_cluster_size" type="integer" value="10" min="1" label="Minimum cluster size"
+                   help="The minimum number of nodes to be considered as a cluster."/>
+            <param name="deep_split" type="integer" value="2" min="0" max="4" label="Deep split"
+                   help="Deep split provides a rough control over sensitivity to cluster splitting. The higher the value, the more and smaller clusters will be produced (see WGCNA package documentation)."/>
 
-            <param name="ionization_mode" type="select" display="radiobutton" label="Ionization mode" help="Restrict queried adducts by ionization mode.">
-                <option value="pos" selected="true">positive</option>
-                <option value="neg">negative</option>
-            </param>
-
-            <param name="gradient_type" type="select" label="Gradient type" help="">
-                <!-- TODO select Acetonitrile by default -->
-                <!-- TODO populate options from aduct_table.rda column Type -->
-                <!-- TODO Kaja, please write help string for Gradient type, I dont know what it is and the author haven't included any documentation (maybe something chemical?) -->
-                <options>
-                    <column name="value" index="5"/>
-                    <filter type="unique_value" column="5"/>
-                    <filter type="sort_by" column="5"/>
-                </options>
+            <param name="network_type" type="select" display="radiobutton" label="Network type"
+                   help="Network type parameter affects how the network's adjacency matrix is created from the correlation matrix (see WGCNA package documentation).">
+                <option value="signed"/>
+                <option value="unsigned" selected="true"/>
             </param>
         </section>
 
-        <section name="matching" title="Matching">
-            <param name="boost_IDs" type="data" format="csv" optional="true" label="Validated metabolites score boosting (optional)"
-                   help="Table of IDs of previously validated metabolites to boost their confidence scores. The 1st column of the table must contain IDs of metabolites. The optional 2nd and 3rd columns may contain mz values and retention times.">
-                <!-- TODO Add <validate> tag to check the number of columns (1 or 3 columns are valid). If 3 columns are present then the 2nd and 3rd columns must be named "mz" and "time". -->
-            </param>
-
-            <param name="pathway_check_mode" type="select" display="radiobutton" label="Pathway score boosting"
-                   help="Boost the scores of metabolites that belongs to the same pathway and to the same cluster. Otherwise boost the scores of the metabolites that belongs to the same pathway but without accounting for cluster membership.">
-                <option value="pm" selected="true">Consider cluster ownership</option>
-                <option value="p">Ignore cluster ownership</option>
-            </param>
-
+        <section name="annotation" title="Annotation">
+            <param name="boost_metabolites" type="data" format="csv" optional="true"
+                   label="Validated metabolites score boosting (optional)"
+                   help="Table of previously validated metabolites to boost their confidence scores. The 1st column of the table must contain IDs of metabolites. The optional 2nd and 3rd columns may contain mz values and retention times."/>
+            <param name="expected_adducts" type="select" multiple="true" label="Expected adducts"
+                   help="Require the presence of certain adducts for a high confidence match."/>
             <param name="min_isp" type="integer" min="0" value="1" label="Minimum number of expected isotopes"
-                   help="Minimum number of adducts (isotopes) to be present for a match to be considered high confidence."/>
-
-            <param name="max_isp" type="integer" min="0" value="5" label="Maximum number of expected isotopes"/>
-
-            <param name="expected_adducts" type="text" area="true" value="M+H" label="Expected adducts"
-                   help="Require the presence of certain adducts for a high confidence match. Please separate multiple adducts by a space or new line.">
-                <!-- TODO add <validate> tag (each adduct should be separated by whitespace) -->
-                <!-- TODO convert the text to a standard R vector when passing the parameter to R -->
-            </param>
-
-            <param name="redundancy_check" type="boolean" checked="true" truevalue="TRUE" falsevalue="FALSE"
-                   label="Redundancy check" help="Whether to perform redundancy filtering or not."/>
+                   help="Minimum number of adducts/isotopes to be present for a match to be considered as a high confidence match."/>
+            <param name="max_isp" type="integer" min="0" value="5" label="Maximum number of expected isotopes"
+                   help="Maximum number of adducts/isotopes to be present for a match to be considered as a high confidence match."/>
+            <param name="strict_boosting" type="boolean" checked="true" label="Strict boosting"
+                   help="Boost the scores of metabolites that not only belongs to the same pathway but also to the same cluster. Otherwise, do not account for cluster membership."/>
+            <param name="redundancy_filtering" type="boolean" checked="true" label="Redundancy filtering"
+                   help="Whether to perform final redundancy filtering or not."/>
         </section>
-
-        <!--
-        <param name="num_sets" type="integer" value="3000" label="" help="How many subsets should the total number of metabolites in a database should be divided into to facilitate parallel processing or prevent memory overload?"/>
-
-        <param name="NOPS_check" type="boolean" value="true" label="" help="Should elemental ratio checks be performed as outlined in Fiehn 2007?"/>
-        -->
     </inputs>
 
-    <outputs>
-    </outputs>
-
-    <help>
-    </help>
-
-    <citations>
-        <citation type="doi">https://doi.org/10.1021/acs.analchem.6b01214</citation>
-    </citations>
+    <help><![CDATA[]]></help>
+    <expand macro="citations"/>
 </tool>
