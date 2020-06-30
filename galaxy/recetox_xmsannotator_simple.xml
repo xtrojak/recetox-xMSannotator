@@ -1,0 +1,29 @@
+<tool id="recetox_xmsannotator_simple" name="xmsannotator: simple" version="0.0.1">
+    <macros>
+        <import>recetox_xmsannotator_macros.xml</import>
+    </macros>
+
+    <expand macro="requirements"/>
+
+    <command detect_errors="aggressive"><![CDATA[
+        Rscript -e 'annotation <- xMSannotator::simple_annotation(
+                        data = arrow::read_feather("$peak_intensity_table"),
+                        metabolite_db = arrow::read_feather("$metabolites"),
+                        max_mz_diff = as.double($max_mz_diff)
+                   )'
+                -e 'arrow::write_feather(annotation, "$annotation")'
+    ]]></command>
+
+    <inputs>
+        <expand macro="peak_intensity_table"/>
+        <expand macro="metabolites"/>
+        <expand macro="max_mz_diff"/>
+    </inputs>
+
+    <outputs>
+        <expand macro="annotation_output"/>
+    </outputs>
+
+    <help><![CDATA[]]></help>
+    <expand macro="citations"/>
+</tool>

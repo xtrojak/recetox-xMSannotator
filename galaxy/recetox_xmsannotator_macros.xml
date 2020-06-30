@@ -1,0 +1,57 @@
+<macros>
+    <xml nam="requirements">
+        <requirements>
+            <requirement type="package">recetox_datatypes</requirement>
+            <container type="docker">registry.gitlab.ics.muni.cz:443/recetox/mass-spectrometry/xmsannotator:0.0.1</container>
+        </requirements>
+    </xml>
+
+    <xml name="peak_intensity_table">
+        <param name="peak_intensity_table" type="data" format="peak_list.feather" label="Peak intensity table"/>
+    </xml>
+
+    <xml name="metabolites">
+        <param name="metabolites" type="data" format="metabolites.feather" label="Metabolite database"/>
+    </xml>
+
+    <xml name="max_mz_diff">
+        <param name="max_mz_diff" type="float" value="10" min="0" label="Mass tolerance [ppm]" help="Mass tolerance in ppm for database matching."/>
+    </xml>
+
+    <xml nam="annotation_output">
+        <data format="annotated_peak_list.feather" name="annotation"/>
+    </xml>
+
+    <xml name="citations">
+        <citations>
+            <citation type="doi">10.1021/acs.analchem.6b01214</citation>
+        </citations>
+    </xml>
+
+    <!-- <xml name="adducts">
+            <section name="adducts" title="Adducts" expanded="true">
+                <param name="adduct_db" type="data" format="adduct_db" label="Adduct database"/>
+                <param name="adduct_weights" type="data" format="csv" optional="true" label="Adduct weights (optional)" help="Give weights to some adducts to compute their scores."/>
+                    <expand macro="filter" ref="db">
+                        <option value="gradient"/>
+                        <option value="ionization"/>
+                    </expand>
+              </section>
+          </xml>-->
+
+    <!--    <xml name="filter" token_ref="" token_multiple="true">
+            <repeat name="filter" title="Filter">
+                <param name="attribute" type="select" label="Attribute">
+                    <yield/>
+                </param>
+                <param name="value" type="select" multiple="@MULTIPLE@" label="Value">
+                    <options from_dataset="@REF@">
+                        &lt;!&ndash; TODO <column name="value" ref="attribute"/> &ndash;&gt;
+                        <column name="value" index="0"/>
+                        <filter type="unique_value" column="value"/>
+                        <filter type="sort_by" column="value"/>
+                    </options>
+                </param>
+            </repeat>
+        </xml>-->
+</macros>
