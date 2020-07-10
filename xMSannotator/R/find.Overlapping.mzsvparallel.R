@@ -1,121 +1,73 @@
 find.Overlapping.mzsvparallel <-
-function(dataA, dataB, mz.thresh=10, time.thresh=NA, alignment.tool=NA,num_nodes=2)
-{
+  function(dataA, dataB, mz.thresh = 10, time.thresh = NA, alignment.tool = NA, num_nodes = 2) {
+    data_a <- as.data.frame(dataA)
+    data_b <- as.data.frame(dataB)
+    rm(dataA)
+    rm(dataB)
 
-        data_a<-as.data.frame(dataA)
-        data_b<-as.data.frame(dataB)
-	#data_a<-unique(data_a)
-	rm(dataA)
-	rm(dataB)
-    
+    col.names.dataA = colnames(data_a)
+    col.names.dataB = colnames(data_b)
 
-        com_mz_num=1
-        unique_mz={}
-        ppm_v={}
-        rt_v={}
+    if (alignment.tool == "apLCMS") {
+      sample.col.start = 5
+    } else if (alignment.tool == "XCMS") {
+      sample.col.start = 9
+      col.names.dataA[1] = "mz"
+      col.names.dataA[2] = "time"
+      col.names.dataB[1] = "mz"
+      col.names.dataB[2] = "time"
+      colnames(data_a) = col.names.dataA
+      colnames(data_b) = col.names.dataB
+    } else if (is.na(alignment.tool)) {
+      col.names.dataA[1] = "mz"
+      col.names.dataB[1] = "mz"
 
-        commat={}
+      if (is.na(time.thresh) == FALSE) {
+        col.names.dataA[2] = "time"
+        col.names.dataB[2] = "time"
+      }
 
-	col.names.dataA=colnames(data_a)
-	col.names.dataB=colnames(data_b)
-
-	if(is.na(alignment.tool)==FALSE){
-	 if(alignment.tool=="apLCMS")
-        {
-              sample.col.start=5
-        }
-        else
-        {
-              if(alignment.tool=="XCMS")
-              {
-                    sample.col.start=9
-                    col.names.dataA[1]="mz"
-                    col.names.dataA[2]="time"
-		    col.names.dataB[1]="mz"
-                    col.names.dataB[2]="time"
-                    colnames(data_a)=col.names.dataA
-                    colnames(data_b)=col.names.dataB
-              }
-	      
-	}}else{
-                    #stop(paste("Invalid value for alignment.tool. Please use either \"apLCMS\" or \"XCMS\"", sep=""))
-		   
-		    col.names.dataA[1]="mz"
-		   
-		    col.names.dataB[1]="mz"
-		    if(is.na(time.thresh)==FALSE){
-		     col.names.dataA[2]="time"
-		     col.names.dataB[2]="time"
-		      #print("Using the 1st columns as \"mz\" and 2nd columsn as \"retention time\"")
-		     }else{
-		      #print("Using the 1st columns as \"mz\"")
-		     }
-		    colnames(data_a)=col.names.dataA
-                    colnames(data_b)=col.names.dataB
-	}
-
-       #data_a<-data_a[order(data_a$mz),]
-       #data_b<-data_b[order(data_b$mz),]
-       data_a<-as.data.frame(data_a)
-	data_b<-as.data.frame(data_b)
-	colnames(data_a)=col.names.dataA
-	colnames(data_b)=col.names.dataB
-        #create header for the matrix with common features
-	if(is.na(time.thresh)==FALSE){
-	mznames=c("index.A","mz.data.A", "time.data.A", "index.B","mz.data.B","time.data.B", "time.difference") 
-        }else{
-	mznames=c("index.A","mz.data.A", "index.B","mz.data.B") 
-	}
-
-
-
-#if(FALSE)
-{
-   #Step 1 Group features by m/zdim(data_a)[1]
-        #mz_groups<-lapply(1:dim(data_a)[1],function(j)
-	parallel_list_vec<-1:dim(data_a)[1]
-	
-	cl<-makeSOCKcluster(num_nodes)
-    clusterExport(cl, "ldply")
-    
-    
-      
-      # envir=environment()
-      # clusterExport(cl, "overlapmzchild",envir=environment())
-
-    
-    mz_groups<-{}
-    mz_groups<-parLapply(cl,parallel_list_vec,overlapmzchild,mz.thresh=mz.thresh,time.thresh=time.thresh,data_a=data_a,data_b=data_b)
-    
-		stopCluster(cl)
-	#Step 2 Sub-group features from Step 1 by Retention time
-        #find the features with RT values within the defined range as compared to the query feature
-}
-        uniqueinA={}
-        uniqueinB={}
-        commat=data.frame()
-        
-        #save(mz_groups,file="mz_groups.Rda")
-
-	if(length(mz_groups)>0){
-	commat<-ldply(mz_groups,rbind)
-    }else{
-        
-        stop("No mz_groups defined.")
+      colnames(data_a) = col.names.dataA
+      colnames(data_b) = col.names.dataB
     }
-	
 
-	
-	
-        if(is.null(dim(commat))==FALSE)
-        {
-                commat=as.data.frame(commat)
-                #colnames(commat)<-mznames
-        }
-rm(data_a)
-rm(data_b)
+    data_a <- as.data.frame(data_a)
+    data_b <- as.data.frame(data_b)
+    colnames(data_a) = col.names.dataA
+    colnames(data_b) = col.names.dataB
 
-#save(commat,file="commat.Rda")
-	
-        return(commat)
-}
+    #create header for the matrix with common features
+    if (is.na(time.thresh) == FALSE) {
+      mznames <- c("index.A", "mz.data.A", "time.data.A", "index.B", "mz.data.B", "time.data.B", "time.difference")
+    } else {
+      mznames <- c("index.A", "mz.data.A", "index.B", "mz.data.B")
+    }
+
+    #Step 1 Group features by m/zdim(data_a)[1]
+    parallel_list_vec <- 1:dim(data_a)[1]
+
+    cl <- parallel::makeSOCKcluster(num_nodes)
+    parallel::clusterExport(cl, "ldply")
+
+    mz_groups <- parallel::parLapply(cl, parallel_list_vec, overlapmzchild, mz.thresh = mz.thresh, time.thresh = time.thresh, data_a = data_a, data_b = data_b)
+
+    parallel::stopCluster(cl)
+    #Step 2 Sub-group features from Step 1 by Retention time
+    #find the features with RT values within the defined range as compared to the query feature
+
+    commat <- data.frame()
+
+    if (length(mz_groups) > 0) {
+      commat <- plyr::ldply(mz_groups, rbind)
+    }else {
+      stop("No mz_groups defined.")
+    }
+
+    if (is.null(dim(commat)) == FALSE) {
+      commat <- as.data.frame(commat)
+    }
+    rm(data_a)
+    rm(data_b)
+
+    return(commat)
+  }

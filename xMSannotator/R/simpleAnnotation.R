@@ -112,7 +112,7 @@ simpleAnnotation <- function(dataA, max.mz.diff = 10, num_nodes = parallel::dete
     on.exit(parallel::stopCluster(cl))
 
     levelB_res_check <- parallel::parLapply(cl, uniq_formula, function(formula) {
-        xMSannotator::check_golden_rules(curformula = as.character(formula), NOPS_check = TRUE)
+        check_golden_rules(curformula = as.character(formula), NOPS_check = TRUE)
     })
     
     levelB_res_check2 <- plyr::ldply(levelB_res_check, rbind)
@@ -130,7 +130,7 @@ simpleAnnotation <- function(dataA, max.mz.diff = 10, num_nodes = parallel::dete
         
         levelB_res_check3 <- parallel::parLapply(cl, sind1, function(j) {
             curformula <- as.character(levelB_res2$Formula[j])
-            numoxygens <- xMSannotator::check_element(curformula, "O")
+            numoxygens <- check_element(curformula, "O")
 
             res <- cbind(curformula, numoxygens > 0)
             res <- as.data.frame(res)
