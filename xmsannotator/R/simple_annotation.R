@@ -8,9 +8,12 @@
 
   indices <- tidyr::expand_grid(i=seq_len(nrow(peak)), j=seq_len(nrow(meta)))
   indices <- dplyr::filter(indices, abs(peak$mz[i] - meta$mz[j]) <= peak$mz[i] * threshold)
-  annotation <- dplyr::summarize(indices, peak=peak[i, ], metabolite=meta[j, ])
 
-  # call garbage collector after heavy memmory load
+  colnames(peak) <- paste0("peak.", colnames(peak))
+  colnames(meta) <- paste0("metabolite.", colnames(meta))
+  annotation <- purrr::pmap_dfr(indices, function(i, j) cbind(peak[i,], meta[j,]))
+
+  # call garbage collector after heavy memory load
   rm(indices)
   gc()
 
@@ -30,7 +33,7 @@ simple_annotation <- function(data, metabolites, mz_tolerance_ppm = 10, adduct_s
   }
 
   annotation <- .annotate_by_ovelapping_mz(data, metabolites, mz_tolerance_ppm)
-  annotation <- dplyr::distinct(annotation, .keep_all = TRUE)
+  #annotation <- dplyr::distinct(annotation, .keep_all = TRUE)
 
   if (!nrow(annotation)) {
     print("no matches found")
