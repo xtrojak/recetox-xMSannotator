@@ -1,4 +1,4 @@
-<tool id="recetox_xmsannotator_advanced" name="xmsannotator: advanced" version="0.0.1">
+<tool id="recetox_xmsannotator_advanced" name="xmsannotator: advanced" version="{{tool_version}}">
     <macros>
         <import>recetox_xmsannotator_macros.xml</import>
     </macros>
@@ -9,9 +9,9 @@
         #set expected_adducts = [f'"{$i.adduct}"' for $i in $annotation.expected_adducts]
         #set expected_adducts = "c(" + ', '.join($annotation.expected_adducts) + ",)"
 
-        Rscript -e 'annotation <- xMSannotator::advanced_annotation(
+        Rscript -e 'annotation <- xmsannotator::advanced_annotation(
                         data = arrow::read_feather("$peak_intensity_table"),
-                        metabolite_db = arrow::read_feather("$metabolites"),
+                        metabolite = rhdf5::h5read("$metabolites", "metabolites"),
                         max_mz_diff = as.double($tolerances.max_mz_diff),
                         max_rt_diff = as.double($tolerances.max_rt_diff),
                         correlation_method = "$clustering.correlation_method",

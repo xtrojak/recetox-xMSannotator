@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="d30c6a99-c2ef-4fe4-b2cc-a2a86939f761" name="pyke">
+        <fileTransfer rootFolder="/home/xtracko/devel" accessType="SFTP" host="78.128.251.73" port="22" sshConfigId="b7423dfb-3498-4e51-b1ab-41e0e3a3a4c6" sshConfig="pyke" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="15b2d397-fff6-47c6-af9b-6b3521746efe" name="galaxy">
+        <fileTransfer rootFolder="/home/xtracko/galaxy/tools" accessType="SFTP" host="78.128.251.73" port="22" sshConfigId="b7423dfb-3498-4e51-b1ab-41e0e3a3a4c6" sshConfig="pyke" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

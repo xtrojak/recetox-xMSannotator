@@ -2,20 +2,20 @@
     <xml nam="requirements">
         <requirements>
             <requirement type="package">recetox_datatypes</requirement>
-            <container type="docker">registry.gitlab.ics.muni.cz:443/recetox/mass-spectrometry/xmsannotator:0.0.1</container>
+            <container type="docker">{{container_registry}}:{{tool_version}}</container>
         </requirements>
     </xml>
 
-    <xml name="peak_intensity_table">
-        <param name="peak_intensity_table" type="data" format="peak_list.feather" label="Peak intensity table"/>
+    <xml name="peak_list">
+        <param name="peak_list" type="data" format="peak_list.feather" label="Peak intensity table"/>
     </xml>
 
     <xml name="metabolites">
-        <param name="metabolites" type="data" format="metabolites.feather" label="Metabolite database"/>
+        <param name="metabolites" type="data" format="metabolites.h5" label="Metabolite database"/>
     </xml>
 
-    <xml name="max_mz_diff">
-        <param name="max_mz_diff" type="float" value="10" min="0" label="Mass tolerance [ppm]" help="Mass tolerance in ppm for database matching."/>
+    <xml name="mz_tolerance">
+        <param name="mz_tolerance" type="float" value="10" min="0" label="Mass tolerance [ppm]" help="Mass tolerance in ppm for database matching."/>
     </xml>
 
     <xml nam="annotation_output">

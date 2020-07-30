@@ -1,0 +1,18 @@
+Package: xmsannotator
+Type: Package
+Title: Network-Based Annotation of Metabolomics Data
+Version: 2.0.0
+Author: Karan Uppal
+Maintainer: Karan Uppal <kuppal2@emory.edu>
+Description: The package contains functions for metabolite annotation using
+    HMDB, KEGG, LipidMaps, T3DB, and ChemSpider.
+License: GPL2.0
+Encoding: UTF-8
+LazyData: true
+Imports:
+    dplyr,
+    flashClust,
+    WGCNA,
+    tidyr,
+    purr,
+    tibble
