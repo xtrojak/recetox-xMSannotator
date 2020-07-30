@@ -1,5 +1,5 @@
 <macros>
-    <xml nam="requirements">
+    <xml nam="tool_requirements">
         <requirements>
             <requirement type="package">recetox_datatypes</requirement>
             <container type="docker">{{container_registry}}:{{tool_version}}</container>
