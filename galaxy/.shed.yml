@@ -2,12 +2,12 @@ owner: recetox
 categories:
   - Test
 repositories:
-  recetox_xmsannotator_simple:
+  rcx_xmsannotator_simple:
     description: "Annotate peak table with metabolites"
     include:
       - recetox_xmsannotator_simple.xml
       - recetox_xmsannotator_macros.xml
-  recetox_xmsannotator_advanced:
+  rcx_xmsannotator_advanced:
     description: "Annotate peak table with metabolites"
     include:
       - recetox_xmsannotator_advanced.xml
