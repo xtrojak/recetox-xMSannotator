@@ -1,9 +1,9 @@
-<tool id="recetox_xmsannotator_advanced" name="xmsannotator: advanced" version="{{tool_version}}">
+<tool id="recetox_xmsannotator_advanced" name="xmsannotator - advanced" version="{{tool_version}}">
     <macros>
         <import>recetox_xmsannotator_macros.xml</import>
     </macros>
 
-    <expand macro="tool_requirements"/>
+    <expand macro="requirements"/>
 
     <command detect_errors="aggressive"><![CDATA[
         #set expected_adducts = [f'"{$i.adduct}"' for $i in $annotation.expected_adducts]

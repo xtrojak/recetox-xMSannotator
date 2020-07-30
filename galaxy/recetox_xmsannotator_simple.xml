@@ -1,7 +1,9 @@
 <tool id="recetox_xmsannotator_simple" name="xmsannotator - simple" version="1.0.0">
-    <requirements>
-        <container type="docker">registry.gitlab.ics.muni.cz:443/recetox/mass-spectrometry/xmsannotator:deployment</container>
-    </requirements>
+    <macros>
+        <import>recetox_xmsannotator_macros.xml</import>
+    </macros>
+
+    <expand macro="requirements"/>
 
     <command detect_errors="aggressive"><![CDATA[
         Rscript -e 'annotation <- xmsannotator::simple_annotation(
@@ -13,22 +15,15 @@
     ]]></command>
 
     <inputs>
-        <param name="peak_list" type="data" format="peak_list.feather" label="Peak intensity table"/>
-        <param name="metabolites" type="data" format="metabolites.h5" label="Metabolite database"/>
-        <param name="mz_tolerance" type="float" value="10" min="0" label="Mass tolerance [ppm]" help="Mass tolerance in ppm for database matching."/>
-        <!-- <expand macro="peak_list"/>
+        <expand macro="peak_list"/>
         <expand macro="metabolites"/>
-        <expand macro="mz_tolerance"/> -->
+        <expand macro="mz_tolerance"/>
     </inputs>
 
     <outputs>
-        <data format="annotated_peak_list.feather" name="annotation"/>
-        <!-- <expand macro="annotation_output"/> -->
+        <expand macro="annotation_output"/>
     </outputs>
 
-    <help>TODO</help>
-
-    <citations>
-        <citation type="doi">10.1021/acs.analchem.6b01214</citation>
-    </citations>
+    <help><![CDATA[]]></help>
+    <expand macro="citations"/>
 </tool>

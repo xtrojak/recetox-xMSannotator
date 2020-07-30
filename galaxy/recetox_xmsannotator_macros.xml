@@ -1,5 +1,5 @@
 <macros>
-    <xml nam="tool_requirements">
+    <xml name="requirements">
         <requirements>
             <requirement type="package">recetox_datatypes</requirement>
             <container type="docker">{{container_registry}}:{{tool_version}}</container>
@@ -18,7 +18,7 @@
         <param name="mz_tolerance" type="float" value="10" min="0" label="Mass tolerance [ppm]" help="Mass tolerance in ppm for database matching."/>
     </xml>
 
-    <xml nam="annotation_output">
+    <xml name="annotation_output">
         <data format="annotated_peak_list.feather" name="annotation"/>
     </xml>
 
