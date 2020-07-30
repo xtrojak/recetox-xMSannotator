@@ -39,7 +39,7 @@ simple_annotation <- function(data, metabolites, mz_tolerance_ppm = 10, adduct_s
 
   #annotation <- .remove_invalid_formulas(annotation)
   #annotation <- .remove_invalid_water_adducts(annotation)
-  annotation$multiple_match <- .is_nonunique(annotation$mz)
+  #annotation$multiple_match <- .is_nonunique(annotation$mz)
 
-  return(annotation)
+  return(as.data.frame(annotation))
 }
