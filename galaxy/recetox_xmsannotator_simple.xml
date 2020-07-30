@@ -1,4 +1,4 @@
-<tool id="recetox_xmsannotator_simple" name="xmsannotator - simple" version="{{tool_version}}">
+<tool id="recetox_xmsannotator_simple" name="xmsannotator - simple" version="1.0">
     <macros>
         <import>recetox_xmsannotator_macros.xml</import>
     </macros>
