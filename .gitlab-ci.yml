@@ -1,7 +1,5 @@
 include:
   - project: 'Recetox/mass-spectrometry/galaxy-tools-deployment'
-    file: '/pipeline_templates/.gitlab-ci-docker.yml'
-  - project: 'Recetox/mass-spectrometry/galaxy-tools-deployment'
     file: '/pipeline_templates/.gitlab-ci-toolshed.yml'
   - project: 'Recetox/mass-spectrometry/galaxy-tools-deployment'
     file: '/pipeline_templates/.gitlab-ci-galaxy.yml'
@@ -13,12 +11,6 @@ stages:
 
 variables:
   TOOL_PANEL_SECTION_LABEL: "Annotation"
-
-docker-build-test:
-  extends: .docker-build-test
-
-docker-build-release:
-  extends: .docker-build-release
 
 testing-toolshed-instance-upload:
   extends: .testing-toolshed-instance-upload
