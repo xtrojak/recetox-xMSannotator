@@ -30,7 +30,7 @@
     ]]></command>
 
     <inputs>
-        <expand macro="peak_intensity_table"/>
+        <expand macro="peak_list"/>
         <expand macro="metabolites"/>
 
         <section name="tolerances" title="Tolerances" expanded="true">
