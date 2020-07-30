@@ -46,6 +46,9 @@ RUN Rscript \
     -e 'install.packages("BiocManager")' \
     -e 'BiocManager::install("rhdf5 ")'
 
+RUN Rscript \
+    -e 'BiocManager::install("WGCNA ")'
+
 ADD xmsannotator /xmsannotator
 RUN R CMD INSTALL /xmsannotator \
  && rm -rf /xmsannotator
