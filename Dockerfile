@@ -40,7 +40,7 @@ RUN Rscript \
     -e 'install.packages("flashClust")' \
     -e 'install.packages("WGCNA")' \
     -e 'install.packages("tidyr")' \
-    -e 'install.packages("purr")' \
+    -e 'install.packages("purrr")' \
     -e 'install.packages("tibble")' \
     -e 'install.packages("arrow")' \
     -e 'install.packages("BiocManager")'

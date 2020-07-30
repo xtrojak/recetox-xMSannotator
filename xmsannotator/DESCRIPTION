@@ -14,5 +14,5 @@ Imports:
     flashClust,
     WGCNA,
     tidyr,
-    purr,
+    purrr,
     tibble
