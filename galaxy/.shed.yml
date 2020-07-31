@@ -7,8 +7,10 @@ repositories:
     include:
       - recetox_xmsannotator_simple.xml
       - recetox_xmsannotator_macros.xml
+      - tool_data_table_conf.xml.sample
   recetox_xmsannotator_advanced:
     description: "Annotate peak table with metabolites"
     include:
       - recetox_xmsannotator_advanced.xml
       - recetox_xmsannotator_macros.xml
+      - tool_data_table_conf.xml.sample
