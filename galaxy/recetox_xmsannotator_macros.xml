@@ -6,12 +6,18 @@
         </requirements>
     </xml>
 
-    <xml name="peak_list">
-        <param name="peak_list" type="data" format="peak_list.feather" label="Peak intensity table"/>
+    <xml name="peaks">
+        <param name="peaks" type="data" format="peak_table.feather" label="Peak intensity table"/>
     </xml>
 
     <xml name="metabolites">
-        <param name="metabolites" type="data" format="metabolites.h5" label="Metabolite database"/>
+        <param name="metabolites" type="select" label="Metabolite database">
+            <options from_data_table="recetox_metabolite_databases">
+                <column name="name" index="0"/>
+                <column name="value" index="2"/>
+            </options>
+        </param>
+        <!-- <param name="metabolites" type="data" format="metabolites.h5" label="Metabolite database"/> -->
     </xml>
 
     <xml name="mz_tolerance">

@@ -10,7 +10,7 @@
         #set expected_adducts = "c(" + ', '.join($annotation.expected_adducts) + ",)"
 
         Rscript -e 'annotation <- xmsannotator::advanced_annotation(
-                        data = arrow::read_feather("$peak_intensity_table"),
+                        data = arrow::read_feather("$peaks"),
                         metabolite = rhdf5::h5read("$metabolites", "metabolites"),
                         max_mz_diff = as.double($tolerances.max_mz_diff),
                         max_rt_diff = as.double($tolerances.max_rt_diff),
@@ -30,7 +30,7 @@
     ]]></command>
 
     <inputs>
-        <expand macro="peak_list"/>
+        <expand macro="peaks"/>
         <expand macro="metabolites"/>
 
         <section name="tolerances" title="Tolerances" expanded="true">

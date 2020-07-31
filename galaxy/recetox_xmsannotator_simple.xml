@@ -7,7 +7,7 @@
 
     <command detect_errors="aggressive"><![CDATA[
         Rscript -e 'annotation <- xmsannotator::simple_annotation(
-                        data = arrow::read_feather("$peak_list"),
+                        data = arrow::read_feather("$peaks"),
                         metabolites = rhdf5::h5read("$metabolites", "metabolites"),
                         mz_tolerance_ppm = as.double(mz_tolerance)
                    )'
@@ -15,7 +15,7 @@
     ]]></command>
 
     <inputs>
-        <expand macro="peak_list"/>
+        <expand macro="peaks"/>
         <expand macro="metabolites"/>
         <expand macro="mz_tolerance"/>
     </inputs>
