@@ -1,4 +1,4 @@
-.check_element <- function(formula, element) {
+check_element <- function(formula, element) {
   stopifnot(length(element) == 1)
 
   pattern <- paste0(element, '(?![a-z]+)([0-9]*)')
@@ -10,14 +10,14 @@
   })
 }
 
-.check_golden_rules <- function(formula) {
-  c <- .check_element(formula, "C")
-  h <- .check_element(formula, "H")
-  f <- .check_element(formula, "F")
-  n <- .check_element(formula, "N")
-  o <- .check_element(formula, "O")
-  p <- .check_element(formula, "P")
-  s <- .check_element(formula, "S")
+check_golden_rules <- function(formula) {
+  c <- check_element(formula, "C")
+  h <- check_element(formula, "H")
+  f <- check_element(formula, "F")
+  n <- check_element(formula, "N")
+  o <- check_element(formula, "O")
+  p <- check_element(formula, "P")
+  s <- check_element(formula, "S")
 
   ratio_check <- (0.1 <= h / c) &
     (h / c <= 6) &
@@ -37,13 +37,9 @@
   return(ratio_check & nops & nop & ops & psn & nos)
 }
 
-.remove_invalid_formulas <- function(data) {
-  valid <- .check_golden_rules(data$formula)
-  data[valid,]
-}
 
-.remove_invalid_water_adducts <- function(data, water_adducts = c("M+H-H2O", "M+H-2H2O", "M-H2O-H")) {
-  is_water_adduct <- data$adduct %in% water_adducts
-  has_oxygen <- .check_element(data$formula, 'O') > 0
-  data[!is_water_adduct | has_oxygen, ]
+is_valid_adduct <- function(adduct, formula) {
+  has_oxygen <- check_element(formula, "O") > 0
+  is_water_adducts <- adduct %in% c("M+H-H2O", "M+H-2H2O", "M-H2O-H")
+  !is_water_adducts | has_oxygen
 }
