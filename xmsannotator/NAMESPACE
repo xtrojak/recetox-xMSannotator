@@ -1,2 +1,6 @@
+import(dplyr)
+import(tibble)
+import(tidyr)
+
 export(simple_annotation)
 export(advanced_annotation)
