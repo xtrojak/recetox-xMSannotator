@@ -175,7 +175,7 @@ compute_scores <- function(annotation, adduct_weights) {
   mutate(annotation, score = 0)
 }
 
-advanced_annotation <- function(peaks, metabolites, adducts, mz_tolerance_ppm, rt_tolerance, correlation_threshold, deep_split, min_cluster_size, network_type, adduct_weights, boost_metabolites, expected_adducts, workers = parallel::detectCores()) {
+advanced_annotation <- function(peaks, metabolites, adducts, mz_tolerance_ppm = 10, rt_tolerance = 10, correlation_threshold = 0.7, deep_split = 2, min_cluster_size = 10, network_type = "unsigned", adduct_weights, boost_metabolites, expected_adducts, workers = parallel::detectCores()) {
   WGCNA::allowWGCNAThreads(workers)
 
   peaks <- distinct(peaks, mz, rt, .keep_all = TRUE)
