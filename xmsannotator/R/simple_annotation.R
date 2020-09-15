@@ -35,7 +35,7 @@ validate_metabolite_table <- function(metabolites) {
 compile_metabolites <- function(adducts, metabolites) {
   expand_grid(metabolites, adducts) %>%
     mutate(expected_mass = (molecules * monoisotopic_mass + mass) / charge) %>%
-    select(all_of(union(colnames(metabolites), "adduct")))
+    select(all_of(union(colnames(metabolites), c("adduct", "expected_mass"))))
 }
 
 
@@ -44,7 +44,7 @@ merge_by_mz <- function(a, b, mz_tolerance) {
   b_indices <- seq_len(nrow(b))
 
   indices <- expand_grid(i = a_indices, j = b_indices) %>%
-    filter(abs(a$mz[[i]] - b$expected_mass[[j]]) <= a$mz[[i]] * mz_tolerance)
+    filter(abs(a$mz[i] - b$expected_mass[j]) <= a$mz[i] * mz_tolerance)
   gc() # call garbage collector after heavy memory load
 
   a <- slice(a, indices$i)
@@ -63,7 +63,7 @@ is_nonuinque_mz <- function(mz) {
 simple_annotation <- function(peaks, metabolites, adducts, mz_tolerance_ppm = 10) {
   peaks <- validate_peak_table(peaks)
   adducts <- validate_adduct_table(adducts)
-  metabolites <- validate_adduct_table(metabolites)
+  metabolites <- validate_metabolite_table(metabolites)
   metabolites <- compile_metabolites(adducts, metabolites)
 
   merge_by_mz(peaks, metabolites, mz_tolerance_ppm / 10^6) %>%
