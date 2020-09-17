@@ -13,22 +13,24 @@ compute_confidence_scores <- function(annotation, expected_adducts) {
     ungroup()
 }
 
-boost_scores <- function (annotation, boost, mz_tolerance, rt_tolerance) {
+boost_scores <- function (annotation, boost_metabolites, mz_tolerance, rt_tolerance) {
   any_near <- function (x, y, tol) any(near(x, y, tol = tol))
   any_rel_near <- function (x, y, tol) any(near(x, y, tol = x * tol))
 
-  boost_by_id <- "metabolite" %in% colnames(boost)
-  boost_by_mz <- "mz" %in% colnames(boost)
-  boost_by_rt <- "rt" %in% colnames(boost)
+  boost_by_id <- "metabolite" %in% colnames(boost_metabolites)
+  boost_by_mz <- "mz" %in% colnames(boost_metabolites)
+  boost_by_rt <- "rt" %in% colnames(boost_metabolites)
 
   mask <- logical(nrow(annotation))
 
   if (boost_by_id)
-    mask <- annotation$metabolite %in% boost$metabolite
+    mask <- annotation$metabolite %in% boost_metabolites$metabolite
   if (boost_by_rt)
-     mask <- mask & sapply(annotation$rt, any_near, boost$rt, rt_tolerance)
+     mask <- mask &
+       sapply(annotation$rt, any_near, boost_metabolites$rt, rt_tolerance)
   if (boost_by_mz)
-    mask <- mask & sapply(annotation$mz, any_rel_near, boost$mz, mz_tolerance)
+    mask <- mask &
+      sapply(annotation$mz, any_rel_near, boost_metabolites$mz, mz_tolerance)
 
   annotation$confidence[mask] <- 4
   annotation$score[mask] <- 100 * annotation$score[mask]

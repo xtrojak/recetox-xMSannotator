@@ -9,8 +9,8 @@ print_confidence_distribution <- function(df) {
 }
 
 redundancy_filtering <- function(annotation, score_threshold) {
-  is_redundant <- function (adduct_weight, score) {
-    score <- ifelse(is.na(adduct_weight), score, 100 * score)
+  is_redundant <- function (weight, score) {
+    score <- ifelse(is.na(weight), score, 100 * score)
     score != max(score)
   }
 
@@ -20,7 +20,7 @@ redundancy_filtering <- function(annotation, score_threshold) {
 
   annotation %>%
     group_by(mz) %>%
-    mutate(redundant = is_redundant(adduct_weight, score)) %>%
+    mutate(redundant = is_redundant(weight, score)) %>%
     group_by(metabolite) %>%
     mutate(score = recompute_score(redundant, score)) %>%
     ungroup() %>%

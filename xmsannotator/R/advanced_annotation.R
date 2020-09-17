@@ -11,13 +11,9 @@
 #   score
 
 # metabolites
-#   mz
-#   chemical_id
-#   name
-#   formula
+#   metabolite
 #   monoisotopic_mass
-#   adduct
-#   adduct_mass
+#   formula
 
 # adduct_weights
 #   adduct
@@ -118,25 +114,29 @@ peak_intensity_clustering <- function(peaks, peak_intensity_matrix, peak_correla
     )$colors
   }
 
-  tibble::add_column(peaks, peak_cluster = modules)
+  mutate(peaks, cluster = {{ modules }})
 }
 
 retention_time_clustering <- function(df, rt_tolerance) {
   as_tibble(df) %>%
-    group_by(peak_cluster) %>%
+    group_by(cluster) %>%
     mutate(
       rt_cluster = cluster_by_density(mz, {{ rt_tolerance }}),
-      rt_cluster = nest_clusters(peak_cluster, rt_cluster)
+      rt_cluster = nest_clusters(cluster, rt_cluster)
     ) %>%
-    ungroup(peak_cluster)
+    ungroup(cluster)
 }
 
-mass_defect_clustering <- function(df, precision) {
-  mutate(df,
-    mass_defect = cut(mz %% 1, seq(0, 1, {{ precision }}), labels = FALSE),
-    mass_defect_cluster = nest_clusters(rt_cluster, mass_defect),
-  )
+mass_defect <- function (x, precision = 0.01) {
+  cut(x %% 1, seq(0, 1, precision), labels = FALSE)
 }
+
+#mass_defect_clustering <- function(df, precision) {
+#  mutate(df,
+#    mass_defect = cut(mz %% 1, seq(0, 1, {{ precision }}), labels = FALSE),
+#    mass_defect_cluster = nest_clusters(rt_cluster, mass_defect),
+#  )
+#}
 
 compute_delta_mz <- function(df) {
   # NOTE: I changed the computation of delta_ppm becaouse I think the previos
@@ -144,13 +144,116 @@ compute_delta_mz <- function(df) {
   mutate(df, delta_ppm = round(10^6 * abs(expected_mass - mz) / expected_mass, 2))
 }
 
-#compute_scores <- function(df, corelation_threshold, correlation_matrix, adduct_weights, expected_adducts, max_isp, rt_tolerance) {
+validate_adduct_weights_table <- function(adduct_weights) {
+  columns <- c("adduct", "weight")
+
+  if (!all(columns %in% colnames(adduct_weights)))
+    stop("Provided adduct weight table must contain these columns: ", toString(columns))
+  if (anyDuplicated(adduct_weights$adduct))
+    stop("Provided adduct weight table contains duplicated adducts!")
+
+  select(adduct_weights, all_of(columns))
+}
+
+validate_pathway_table <- function(pathways) {
+  columns <- c("pathway", "metabolite")
+
+  if (!all(columns %in% colnames(pathways)))
+    stop("Provided pathway table must contain these columns: ", toString(columns))
+
+  distinct(pathways, pathway, metabolite)
+}
+
+#compute_scores <- function(annotation, adduct_weights) {
+#  adduct_weights <- rename(adduct_weights, adduct_weight = weight)
+#  annotation <- as_tibble(annotation) %>%
+#    filter(is_valid_adduct(adduct, formula)) %>%
+#    left_join(adduct_weights, by = "adduct")
+#  mutate(annotation, score = 0)
+#}
+
+compute_average_intensity <- function(peaks) {
+  rowwise(peaks) %>%
+    mutate(
+      average_intensity = mean(c_across(starts_with("intensity")), na.rm = TRUE)
+    ) %>%
+    ungroup()
+}
+
+advanced_annotation <- function(
+  peaks,
+  adducts,
+  metabolites,
+  pathways = tibble(pathway = character(), metabolite = character()),
+  mz_tolerance_ppm = 10,
+  rt_tolerance = 10,
+  correlation_threshold = 0.7,
+  deep_split = 2,
+  min_cluster_size = 10,
+  network_type = "unsigned",
+  adduct_weights = tibble(adduct = c("M+H", "M-H"), weight = c(5, 5)),
+  boost_metabolites = tibble(metabolite = character(), mz = numeric(), rt = numeric()),
+  expected_adducts = character(),
+  workers = parallel::detectCores())
+{
+  WGCNA::allowWGCNAThreads(workers)
+
+  pathways <- validate_pathway_table(pathways)
+  adduct_weights <- validate_adduct_weights_table(adduct_weights)
+
+  peaks <- distinct(peaks, mz, rt, .keep_all = TRUE)
+  metabolites <- distinct(metabolites)
+
+  peak_intensity_matrix <- t(select(peaks, starts_with("intensity")))
+  peak_correlation_matrix <- WGCNA::cor(peak_intensity_matrix, use = "p", method = "p")
+
+  clustering <- peaks %>%
+    compute_average_intensity() %>%
+    select(-starts_with("intensity")) %>%
+    peak_intensity_clustering(
+      peak_intensity_matrix = peak_intensity_matrix,
+      peak_correlation_matrix = peak_correlation_matrix,
+      correlation_threshold = correlation_threshold,
+      min_cluster_size = min_cluster_size,
+      network_type = network_type,
+      deep_split = deep_split
+    ) %>%
+    mutate(mass_defect = mass_defect(mz))
+
+  clustering %>%
+    simple_annotation(
+      adducts = adducts,
+      metabolites = metabolites,
+      mz_tolerance_ppm = mz_tolerance_ppm
+    ) %>%
+    compute_scores(
+      adduct_weights = adduct_weights,
+      rt_tolerance = rt_tolerance,
+      mass_defect_tolerance = 0
+    ) %>%
+    evaluate_pathways(
+      pathways = pathways,
+      score_threshold = 0.1
+    ) %>%
+    compute_confidence_scores(expected_adducts = expected_adducts) %>%
+    boost_scores(
+      boost_metabolites = boost_metabolites,
+      mz_tolerance = 10^6 * mz_tolerance_ppm,
+      rt_tolerance = rt_tolerance
+    ) %>%
+    mutate(multiple_match = is_nonuinque_mz(mz)) %>%
+    print_confidence_distribution() %>%
+    redundancy_filtering(score_threshold = 0) %>%
+    as.data.frame()
+}
+
+#compute_scores <- function(df, correlation_threshold, correlation_matrix, adduct_weights, expected_adducts, max_isp, rt_tolerance) {
 #  data.frame(
 #    mz = mz,
 #    time = rt,
 #    MatchCategory = ifelse(multiple_match, "Multiple", "Unique"),
-#    theoretical.mz =,
-#    chemical_ID = chemical_id,
+#    theoretical.mz = expected_mass,
+#    chemical_ID = metabolite,
 #    Name = name,
 #    Formula = formula,
 #    MonoisotopicMass = monoisotopic_mass,
@@ -163,58 +266,23 @@ compute_delta_mz <- function(df) {
 #  )
 #
 #  as_tibble(df) %>%
-#    group_by(chemical_id) %>%
-#    mutate(score = 0) %>%
+#    group_by(metabolite) %>%
+#    summarise(
+#      data = get_chemscorev1.6.71(
+#        chemicalid = metabolite[[1]],
+#        mchemicaldata = ,
+#        corthresh = {{ correlation_threshold }},
+#        global_cor = {{ correlation_matrix }},
+#        mzid = paste(mz, rt, sep = "_"),
+#        max_diff_rt = rt_tolerance,
+#        level_module_isop_annot = ,
+#        adduct_weights = as.data.frame({{ adduct_weights }}),
+#        filter.by = as.character({{ expected_adducts }}),
+#        max_isp = max_isp,
+#        MplusH.abundance.ratio.check = ,
+#        mass_defect_window = ,
+#        mass_defect_mode = "pos",
+#      )
+#    ) %>%
 #    ungroup()
 #}
-
-compute_scores <- function(annotation, adduct_weights) {
-  annotation <- as_tibble(annotation) %>%
-    filter(is_valid_adduct(adduct, formula)) %>%
-    left_join(adduct_weights, by = "adduct")
-  mutate(annotation, score = 0)
-}
-
-advanced_annotation <- function(peaks, metabolites, adducts, mz_tolerance_ppm = 10, rt_tolerance = 10, correlation_threshold = 0.7, deep_split = 2, min_cluster_size = 10, network_type = "unsigned", adduct_weights, boost_metabolites, expected_adducts, workers = parallel::detectCores()) {
-  WGCNA::allowWGCNAThreads(workers)
-
-  peaks <- distinct(peaks, mz, rt, .keep_all = TRUE)
-  metabolites <- distinct(metabolites)
-
-  peak_intensity_matrix <- t(select(peaks, starts_with("intensity")))
-  peak_correlation_matrix <- WGCNA::cor(peak_intensity_matrix, use = "p", method = "p")
-
-  peaks %>%
-    peak_intensity_clustering(
-      peak_intensity_matrix = peak_intensity_matrix,
-      peak_correlation_matrix = peak_correlation_matrix,
-      correlation_threshold = correlation_threshold,
-      min_cluster_size = min_cluster_size,
-      network_type = network_type,
-      deep_split = deep_split
-    ) %>%
-    retention_time_clustering(rt_tolerance = rt_tolerance) %>%
-    mass_defect_clustering(precision = 0.01) %>%
-    xmsannotator::simple_annotation(
-      adducts = adducts,
-      metabolites = metabolites,
-      mz_tolerance_ppm = mz_tolerance_ppm
-    ) %>%
-    compute_scores(adduct_weights = adduct_weights) %>%
-    #compute_scores(
-    #  correlation_threshold = correlation_threshold,
-    #  correlation_matrix = correlation_matrix,
-    #  adduct_weights = adduct_weights,
-    #  expected_adducts = as.character(expected_adducts),
-    #  max_isp = as.integer(max_isp),
-    #  rt_tolerance = rt_tolerance,
-    #)
-    evaluate_pathways(pathways = , score_threshold = 0.1) %>%
-    step4(
-      expected_adducts = expected_adducts,
-      boost_metabolites = boost_metabolites,
-      mz_tolerance = 10^6 * mz_tolerance_ppm,
-      rt_tolerance = rt_tolerance
-    ) %>%
-    redundancy_filtering(score_threshold = 0)
-}

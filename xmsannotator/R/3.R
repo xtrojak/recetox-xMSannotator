@@ -1,43 +1,53 @@
-# annotation
-#   metabolite
-#   adduct
-#   score
-#   peak_cluster
-#
-# pathways
-#   pathway
-#   metabolite
-
-
-selection_independence_on_pathway_association <- function(df, score_threshold) {
-  df %>%
-    mutate(
-      selection = replace_na(score, 0) >= {{ score_threshold }} & !is.na(adduct_weight),
-      total_selection = n_distinct(metabolite[selection]),
-      total_nselection = n_distinct(metabolite[!selection])) %>%
-    group_by(pathway) %>%
-    mutate(selection_independence_on_pathway_association = {
-      a <- n_distinct(metabolite[selection])
-      b <- total_selection - a
-      c <- n_distinct(metabolite[!selection])
-      d <- total_nselection - c
-      fisher.test(matrix(a, b, c, d, nrow = 2))$p.value <= 0.05
-    }) %>%
-    ungroup()
-}
-
 evaluate_pathways <- function(annotation, pathways, score_threshold) {
-  exluded_pathways <- "map01100"
-  exluded_metabolites <- c("HMDB29244", "HMDB29245", "HMDB29246")
+  # TODO: exluded_pathways <- "map01100"
+  # TODO: exluded_metabolites <- c("HMDB29244", "HMDB29245", "HMDB29246")
 
-  annotation %>% select(metabolite, score, adduct_weight)
+  pathways <- distinct(pathways, pathway, metabolite)
+  annotation <- left_join(annotation, pathways, by = "metabolite")
 
-  pathways %>%
-    distinct(pathway, metabolite) %>%
-    left_join(, by=metabolite)%>%
-    selection_independence_on_pathway_association(score_threshold) %>%
-    filter(selection_independence_on_pathway_association & selection)
+  # TODO: filter metabolites
+  selection <- NULL
 
-  filter(pathways, {})
-  mutate(annotation, score = ifelse())
+  max_cardinality <- annotation %>%
+    select(metabolite, cluster) %>%
+    add_count(cluster) %>%
+    group_by(metabolite) %>%
+    transmute(n = max(n)) %>%
+    pull()
+
+  mutate(
+    annotation,
+    score = ifelse(metabolite %in% {{ selection }}, score + {{ max_cardinality }}, score)
+  )
 }
+
+#function (df, cluster, pathway) {
+#  g <- df$pathway %in% pathway
+#  f <- df$cluster %in% cluster
+#
+#  a <- n_distinct(df$metabolite[f & g])
+#  b <- n_distinct(df$metabolite[f & !g])
+#  c <- n_distinct(df$metabolite[!f & g])
+#  d <- n_distinct(df$metabolite[!f & !g])
+#
+#  fisher.test(matrix(a, c, b, d, nrow = 2))$p.value
+#}
+
+
+#selection <- annotation %>%
+#  filter(score > {{ score_threshold }} & !is.na(adduct_weight)) %>%
+#  pull(metabolite)
+#distinct(pathways, pathway, metabolite) %>%
+#  mutate(
+#    selected = metabolite %in% {{ selection }},
+#    b = n_distinct(metabolite[selected]),
+#    d = n_distinct(metabolite[!selected]),
+#  ) %>%
+#  group_by(pathway) %>%
+#  summarise(
+#    a = n_distinct(metabolite[selected]),
+#    c = n_distinct(metabolite[!selected]),
+#    b = b - a,
+#    d = d - c,
+#  ) %>% left_join()
+#  filter(fisher.test(matrix(a, c, b, d, nrow = 2))$.p.value <= 0.05)
