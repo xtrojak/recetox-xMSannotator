@@ -9,16 +9,13 @@ RUN apt-get update && apt-get install -yq \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-RUN Rscript -e 'install.packages("dplyr")'
+RUN Rscript -e 'install.packages("tidyverse")'
 RUN Rscript -e 'install.packages("flashClust")'
-RUN Rscript -e 'install.packages("tidyr")'
-RUN Rscript -e 'install.packages("purrr")'
-RUN Rscript -e 'install.packages("tibble")'
-RUN Rscript -e 'install.packages("arrow")'
-RUN Rscript -e 'install.packages("data.table", dependencies=TRUE)'
 RUN Rscript -e 'install.packages("BiocManager")'
 RUN Rscript -e 'BiocManager::install("rhdf5")'
+RUN Rscript -e 'install.packages("data.table")'
 RUN Rscript -e 'BiocManager::install("WGCNA")'
+RUN Rscript -e 'install.packages("arrow")'
 
 ADD xmsannotator /xmsannotator
 RUN R CMD INSTALL /xmsannotator \
