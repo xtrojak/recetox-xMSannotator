@@ -2,9 +2,9 @@ validate_peak_table <- function(peaks) {
   columns <- c("mz", "rt")
 
   if (!all(columns %in% colnames(peaks)))
-    stop("Provided peak table must contain these columns: ", columns)
+    stop("Provided peak table must contain these columns: ", toString(columns))
 
-  peaks %>% select(all_of(columns)) %>% distinct()
+  distinct(peaks, mz, rt, .keep_all = TRUE)
 }
 
 
@@ -12,7 +12,7 @@ validate_adduct_table <- function(adducts) {
   columns <- c("adduct", "charge", "mass", "molecules")
 
   if (!all(columns %in% colnames(adducts)))
-    stop("Provided adduct table must contain these columns: ", columns)
+    stop("Provided adduct table must contain these columns: ", toString(columns))
   if (anyDuplicated(adducts$adduct))
     stop("Provided adduct table contains duplicated adducts!")
 
@@ -24,7 +24,7 @@ validate_metabolite_table <- function(metabolites) {
   columns <- c("metabolite", "monoisotopic_mass", "formula")
 
   if (!all(columns %in% colnames(metabolites)))
-    stop("Provided metabolite table must contain these columns: ", columns)
+    stop("Provided metabolite table must contain these columns: ", toString(columns))
   if (anyDuplicated(metabolites$metabolite))
     stop("Provided metabolite table contains duplicated metabolites!")
 
