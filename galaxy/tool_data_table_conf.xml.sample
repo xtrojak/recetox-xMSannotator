@@ -1,6 +1,0 @@
-<tables>
-    <table name="recetox_metabolite_databases" comment_char="#">
-        <columns>value, date, name, path</columns>
-        <file path="tool-data/recetox_metabolite_databases.loc" />
-    </table>
-</tables>
