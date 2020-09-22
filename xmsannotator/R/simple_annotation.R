@@ -7,7 +7,6 @@ validate_peak_table <- function(peaks) {
   distinct(peaks, mz, rt, .keep_all = TRUE)
 }
 
-
 validate_adduct_table <- function(adducts) {
   columns <- c("adduct", "charge", "mass", "molecules")
 
@@ -18,7 +17,6 @@ validate_adduct_table <- function(adducts) {
 
   select(adducts, all_of(columns))
 }
-
 
 validate_metabolite_table <- function(metabolites) {
   columns <- c("metabolite", "monoisotopic_mass", "formula")
@@ -34,22 +32,22 @@ validate_metabolite_table <- function(metabolites) {
 
 compile_metabolites <- function(adducts, metabolites) {
   expand_grid(metabolites, adducts) %>%
+    filter(check_golden_rules(formula)) %>%
+    filter(is_valid_adduct(adduct, formula)) %>%
     mutate(expected_mass = (molecules * monoisotopic_mass + mass) / charge) %>%
     select(all_of(union(colnames(metabolites), c("adduct", "expected_mass"))))
 }
 
-
 merge_by_mz <- function(a, b, mz_tolerance) {
-  a_indices <- seq_len(nrow(a))
-  b_indices <- seq_len(nrow(b))
+  aind <- seq_len(nrow(a))
+  bind <- seq_len(nrow(b))
 
-  indices <- expand_grid(i = a_indices, j = b_indices) %>%
-    filter(abs(a$mz[i] - b$expected_mass[j]) <= a$mz[i] * mz_tolerance)
+  indices <- expand_grid(i = aind, j = bind) %>%
+    filter(near(a$mz[i], b$expected_mass[j], mz_tolerance))
   gc() # call garbage collector after heavy memory load
 
   a <- slice(a, indices$i)
   b <- slice(b, indices$j)
-
   bind_cols(a, b)
 }
 
@@ -60,15 +58,12 @@ is_nonuinque_mz <- function(mz) {
 }
 
 
-simple_annotation <- function(peaks, metabolites, adducts, mz_tolerance_ppm = 10) {
+simple_annotation <- function(peaks, metabolites, adducts, mz_tolerance_ppm = 5) {
   peaks <- validate_peak_table(peaks)
   adducts <- validate_adduct_table(adducts)
   metabolites <- validate_metabolite_table(metabolites)
   metabolites <- compile_metabolites(adducts, metabolites)
 
-  merge_by_mz(peaks, metabolites, mz_tolerance_ppm / 10^6) %>%
-    filter(check_golden_rules(formula)) %>%
-    filter(is_valid_adduct(adduct, formula)) %>%
-    mutate(multiple_match = is_nonuinque_mz(mz)) %>%
-    as.data.frame()
+  merge_by_mz(peaks, metabolites, 10^-6 * mz_tolerance_ppm) %>%
+    mutate(multiple_match = is_nonuinque_mz(mz))
 }
