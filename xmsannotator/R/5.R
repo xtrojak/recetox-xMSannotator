@@ -1,8 +1,8 @@
 print_confidence_distribution <- function(df) {
-  print("Stage 4 confidence level distribution for unique metabolites")
+  print("Confidence level distribution for unique metabolites")
   print(df %>% filter(!duplicated(metabolite)) %>% count(confidence))
 
-  print("Stage 4 confidence level distribution for unique formulas")
+  print("Confidence level distribution for unique formulas")
   print(df %>% filter(!duplicated(formula)) %>% count(confidence))
 
   invisible(df)
