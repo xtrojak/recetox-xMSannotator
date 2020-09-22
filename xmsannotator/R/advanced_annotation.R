@@ -74,7 +74,8 @@ peak_intensity_clustering <- function(peaks, peak_intensity_matrix, peak_correla
     pamRespectsDendro = FALSE
   )
 
-  modules <- try(WGCNA::blockwiseModules(
+  modules <- try(
+    WGCNA::blockwiseModules(
       datExpr = peak_intensity_matrix,
       checkMissingData = FALSE,
       blocks = dendrogram,
@@ -85,7 +86,8 @@ peak_intensity_clustering <- function(peaks, peak_intensity_matrix, peak_correla
       minModuleSize = min_cluster_size,
       pamRespectsDendro = FALSE,
       mergeCutHeight = 1 - correlation_threshold
-    )$colors)
+    )$colors
+  )
 
   if (inherits(modules, "try-error")) {
     adjacency_matrix <- WGCNA::adjacency(
@@ -96,9 +98,7 @@ peak_intensity_clustering <- function(peaks, peak_intensity_matrix, peak_correla
     )
     distance_matrix <- WGCNA::TOMdist(adjacency_matrix)
 
-    dendrogram <- flashClust::flashClust(
-      as.dist(distance_matrix)
-    )
+    dendrogram <- flashClust::flashClust(as.dist(distance_matrix))
     dendrogram <- dynamicTreeCut::cutreeDynamic(
       dendro = dendrogram,
       distM = distance_matrix,
@@ -130,13 +130,6 @@ retention_time_clustering <- function(df, rt_tolerance) {
 mass_defect <- function (x, precision = 0.01) {
   cut(x %% 1, seq(0, 1, precision), labels = FALSE)
 }
-
-#mass_defect_clustering <- function(df, precision) {
-#  mutate(df,
-#    mass_defect = cut(mz %% 1, seq(0, 1, {{ precision }}), labels = FALSE),
-#    mass_defect_cluster = nest_clusters(rt_cluster, mass_defect),
-#  )
-#}
 
 compute_delta_mz <- function(df) {
   # NOTE: I changed the computation of delta_ppm becaouse I think the previos
@@ -185,7 +178,7 @@ advanced_annotation <- function(
   adducts,
   metabolites,
   pathways = tibble(pathway = character(), metabolite = character()),
-  mz_tolerance_ppm = 10,
+  mz_tolerance_ppm = 5,
   rt_tolerance = 10,
   correlation_threshold = 0.7,
   deep_split = 2,
@@ -221,7 +214,7 @@ advanced_annotation <- function(
     mutate(mass_defect = mass_defect(mz))
 
   clustering %>%
-    simple_annotation(
+    xmsannotator::simple_annotation(
       adducts = adducts,
       metabolites = metabolites,
       mz_tolerance_ppm = mz_tolerance_ppm
@@ -238,51 +231,10 @@ advanced_annotation <- function(
     compute_confidence_scores(expected_adducts = expected_adducts) %>%
     boost_scores(
       boost_metabolites = boost_metabolites,
-      mz_tolerance = 10^6 * mz_tolerance_ppm,
+      mz_tolerance = 10^-6 * mz_tolerance_ppm,
       rt_tolerance = rt_tolerance
     ) %>%
     mutate(multiple_match = is_nonuinque_mz(mz)) %>%
     print_confidence_distribution() %>%
-    redundancy_filtering(score_threshold = 0) %>%
-    as.data.frame()
+    redundancy_filtering(score_threshold = 0)
 }
-
-#compute_scores <- function(df, correlation_threshold, correlation_matrix, adduct_weights, expected_adducts, max_isp, rt_tolerance) {
-#  data.frame(
-#    mz = mz,
-#    time = rt,
-#    MatchCategory = ifelse(multiple_match, "Multiple", "Unique"),
-#    theoretical.mz = expected_mass,
-#    chemical_ID = metabolite,
-#    Name = name,
-#    Formula = formula,
-#    MonoisotopicMass = monoisotopic_mass,
-#    Adduct = adduct,
-#    ISgroup =,
-#    Module_RTclust =,
-#    time.y =,
-#    mean_int_vec =,
-#    MD =
-#  )
-#
-#  as_tibble(df) %>%
-#    group_by(metabolite) %>%
-#    summarise(
-#      data = get_chemscorev1.6.71(
-#        chemicalid = metabolite[[1]],
-#        mchemicaldata = ,
-#        corthresh = {{ correlation_threshold }},
-#        global_cor = {{ correlation_matrix }},
-#        mzid = paste(mz, rt, sep = "_"),
-#        max_diff_rt = rt_tolerance,
-#        level_module_isop_annot = ,
-#        adduct_weights = as.data.frame({{ adduct_weights }}),
-#        filter.by = as.character({{ expected_adducts }}),
-#        max_isp = max_isp,
-#        MplusH.abundance.ratio.check = ,
-#        mass_defect_window = ,
-#        mass_defect_mode = "pos",
-#      )
-#    ) %>%
-#    ungroup()
-#}
