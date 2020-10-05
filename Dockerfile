@@ -4,8 +4,8 @@ RUN apt-get update && apt-get install -yq \
     libcurl4-openssl-dev \
     libssl-dev \
     zlib1g-dev \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN Rscript -e 'install.packages("remotes")'
 RUN Rscript -e 'install.packages("tibble")'
@@ -21,4 +21,4 @@ RUN Rscript -e 'BiocManager::install("rhdf5")'
 
 ADD xmsannotator /xmsannotator
 RUN R CMD INSTALL /xmsannotator \
- && rm -rf /xmsannotator
+    && rm -rf /xmsannotator
