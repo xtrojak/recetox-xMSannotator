@@ -4,5 +4,7 @@ import(tidyr)
 import(purrr)
 import(WGCNA)
 
+export(load_hdf)
+export(save_hdf)
 export(simple_annotation)
 export(advanced_annotation)
