@@ -2,6 +2,7 @@ import(dplyr)
 import(tibble)
 import(tidyr)
 import(purrr)
+import(WGCNA)
 
 export(simple_annotation)
 export(advanced_annotation)
