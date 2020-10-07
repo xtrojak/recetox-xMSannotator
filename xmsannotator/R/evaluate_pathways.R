@@ -2,23 +2,19 @@ evaluate_pathways <- function(annotation, pathways, score_threshold) {
   # TODO: exluded_pathways <- "map01100"
   # TODO: exluded_metabolites <- c("HMDB29244", "HMDB29245", "HMDB29246")
 
-  pathways <- distinct(pathways, pathway, metabolite)
-  annotation <- left_join(annotation, pathways, by = "metabolite")
+  pathways <- dplyr::distinct(pathways, pathway, compound)
+  annotation <- dplyr::left_join(annotation, pathways, by = "compound")
 
   # TODO: filter metabolites
   selection <- NULL
 
-  max_cardinality <- annotation %>%
-    select(metabolite, cluster) %>%
-    add_count(cluster) %>%
-    group_by(metabolite) %>%
-    transmute(n = max(n)) %>%
-    pull()
-
-  mutate(
-    annotation,
-    score = ifelse(metabolite %in% {{ selection }}, score + {{ max_cardinality }}, score)
-  )
+  annotation <- annotation %>%
+    dplyr::select(compound, cluster) %>%
+    dplyr::add_count(cluster) %>%
+    dplyr::group_by(compound) %>%
+    dplyr::mutate(score = ifelse(compound %in% selection, score + max(n), score)) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(-n)
 }
 
 #function (df, cluster, pathway) {
