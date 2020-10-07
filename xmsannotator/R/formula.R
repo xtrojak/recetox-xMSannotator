@@ -37,7 +37,6 @@ check_golden_rules <- function(formula) {
   return(ratio_check & nops & nop & ops & psn & nos)
 }
 
-
 is_valid_adduct <- function(adduct, formula) {
   has_oxygen <- check_element(formula, "O") > 0
   is_water_adducts <- adduct %in% c("M+H-H2O", "M+H-2H2O", "M-H2O-H")
