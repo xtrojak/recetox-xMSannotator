@@ -16,3 +16,7 @@ Imports:
     tidyr,
     purrr,
     tibble
+Depends: 
+    R (>= 2.10)
+Suggests:
+    hdf5r
