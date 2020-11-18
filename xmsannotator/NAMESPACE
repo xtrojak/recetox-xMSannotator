@@ -1,3 +1,5 @@
+useDynLib(xmsannotator)
+
 import(dplyr)
 import(tibble)
 import(tidyr)

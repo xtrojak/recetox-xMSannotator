@@ -9,14 +9,18 @@ Description: The package contains functions for metabolite annotation using
 License: GPL2.0
 Encoding: UTF-8
 LazyData: true
+SystemRequirements: C++11
 Imports:
-    dplyr,
+    Rcpp (>= 0.11.0),
+    dplyr (>= 1.0.0),
     flashClust,
-    WGCNA,
-    tidyr,
     purrr,
-    tibble
+    tidyr,
+    tibble,
+    WGCNA
 Depends: 
-    R (>= 2.10)
+    R (>= 3.0)
 Suggests:
     hdf5r
+LinkingTo:
+    Rcpp
