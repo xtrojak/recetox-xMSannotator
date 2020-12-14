@@ -21,6 +21,7 @@ Imports:
 Depends: 
     R (>= 3.0)
 Suggests:
-    hdf5r
+    arrow
+    rhdf5
 LinkingTo:
     Rcpp
