@@ -24,38 +24,38 @@ static NumericVector unpack(const std::vector<Pack>& packed) {
 
 
 // [[Rcpp::export]]
-DataFrame annotate_by_mass(DataFrame peaks, DataFrame adducts, DataFrame compounds, double tolerance) {
-    const auto peak_mass = as<NumericVector>(peaks["mz"]);
-    const auto adduct_mass = as<NumericVector>(adducts["mass"]);
-    const auto adduct_mode = as<NumericVector>(adducts["mode"]);
-    const auto adduct_multiplicity = as<NumericVector>(adducts["multiplicity"]);
-    const auto compound_mass = as<NumericVector>(compounds["monoisotopic_mass"]);
+DataFrame annotate_by_mass(DataFrame peak_table, DataFrame adduct_table, DataFrame compound_table, double tolerance) {
+    const auto peak_mz = as<NumericVector>(peak_table["mz"]);
+    const auto adduct_mass = as<NumericVector>(adduct_table["mass"]);
+    const auto adduct_charge = as<NumericVector>(adduct_table["charge"]);
+    const auto adduct_molecules = as<NumericVector>(adduct_table["n_molecules"]);
+    const auto compound_mass = as<NumericVector>(compound_table["monoisotopic_mass"]);
 
-    const auto n_peaks = peak_mass.size();
-    const auto n_adducts = adduct_mass.size();
-    const auto n_compounds = compound_mass.size();
+    const auto n_peaks = peak_table.nrows();
+    const auto n_adducts = adduct_table.nrows();
+    const auto n_compounds = compound_table.nrows();
 
     std::vector<std::tuple<R_xlen_t, R_xlen_t, R_xlen_t, double>> annotations;
 
     for (R_xlen_t adduct = 0; adduct < n_adducts; ++adduct) {
         for (R_xlen_t compound = 0; compound < n_compounds; ++compound) {
-            const auto expected_mass = (adduct_multiplicity[adduct] * compound_mass[compound] + adduct_mass[adduct]) / adduct_mode[adduct];
+            const auto expected_mass = (adduct_molecules[adduct] * compound_mass[compound] + adduct_mass[adduct]) / adduct_charge[adduct];
 
             for (R_xlen_t peak = 0; peak < n_peaks; ++peak) {
-                if (almost_equal(peak_mass[peak], expected_mass, tolerance))
+                if (almost_equal(peak_mz[peak], expected_mass, tolerance))
                     annotations.emplace_back(peak, adduct, compound, expected_mass);
             }
         }
     }
 
-    const auto peak_name = as<NumericVector>(peaks["peak"]);
-    const auto adduct_name = as<CharacterVector>(adducts["adduct"]);
-    const auto compound_name = as<NumericVector>(compounds["compound"]);
+    const auto peak = as<NumericVector>(peak_table["peak"]);
+    const auto adduct = as<CharacterVector>(adduct_table["adduct"]);
+    const auto compound = as<NumericVector>(compound_table["compound"]);
 
     return DataFrame::create(
-        Named("peak") = peak_name[unpack<0>(annotations)],
-        Named("adduct") = adduct_name[unpack<1>(annotations)],
-        Named("compound") = compound_name[unpack<2>(annotations)],
+        Named("peak") = peak[unpack<0>(annotations)],
+        Named("adduct") = adduct[unpack<1>(annotations)],
+        Named("compound") = compound[unpack<2>(annotations)],
         Named("expected_mass") = unpack<3>(annotations)
     );
 }
