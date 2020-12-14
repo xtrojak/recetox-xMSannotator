@@ -1,20 +1,13 @@
-lexicographic_rank <- function (...) {
-  .o <- order(...)
-  .x <- cbind(...)[.o, ]
-  cumsum(!duplicated(.x))[order(.o)]
-}
-
 mass_defect <- function (x, precision) {
   cut(x %% 1, seq(0, 1, precision), labels = FALSE)
 }
 
 print_confidence_distribution <- function(annotation) {
-  confidence_distribution_across_compounds <- annotation %>%
-    filter(!duplicated(compound)) %>%
-    count(confidence)
-  confidence_distribution_across_formulas <- annotation %>%
-    filter(!duplicated(formula)) %>%
-    count(confidence)
+  confidence_distribution_across_compounds <- dplyr::filter(annotation, !duplicated(compound))
+  confidence_distribution_across_compounds <- dplyr::count(confidence_distribution_across_compounds, confidence)
+
+  confidence_distribution_across_formulas <- dplyr::filter(annotation, !duplicated(molecular_formula))
+  confidence_distribution_across_formulas <- dplyr::count(confidence_distribution_across_formulas, confidence)
 
   print("Confidence level distribution for unique compounds")
   print(confidence_distribution_across_compounds)
@@ -24,7 +17,7 @@ print_confidence_distribution <- function(annotation) {
   invisible(annotation)
 }
 
-advanced_annotation <- function(peaks, compounds, adducts,
+advanced_annotation <- function(peak_table, compound_table, adduct_table,
   adduct_weights = tibble::tibble(adduct = c("M+H", "M-H"), adduct_weight = c(5, 5)),
   mass_tolerance = 5e-6,
   time_tolerance = 10,
@@ -33,18 +26,18 @@ advanced_annotation <- function(peaks, compounds, adducts,
   min_cluster_size = 10,
   network_type = "unsigned",
   expected_adducts = character(),
-  boost = tibble::tibble(compound = character(), mz = numeric(), rt = numeric()),
-  redundancy_filtering = TRUE
+  boost_compounds = tibble::tibble(compound = character(), mz = numeric(), rt = numeric()),
+  redundancy_filtering = TRUE,
+  n_workers = parallel::detectCores()
 ) {
-  WGCNA::allowWGCNAThreads(parallel::detectCores())
+  WGCNA::allowWGCNAThreads(n_workers)
 
-  peaks <- peaks %>%
-    dplyr::select(mz, rt, dplyr::starts_with("intensity")) %>%
-    dplyr::mutate(peak = lexicographic_rank(mz, rt)) %>%
-    dplyr::distinct(peak, .keep_all = TRUE) %>%
-    tidyr::pack(intensity = dplyr::starts_with("intensity"))
-  intensity_matrix <- t(dplyr::pull(peaks, intensity)) %>%
-    magrittr::set_colnames(dplyr::pull(peaks, peak))
+  peak_table <- dplyr::select(peak_table, peak, mz, rt, dplyr::starts_with("intensity"))
+  peak_table <- dplyr::distinct(peak_table, peak, .keep_all = TRUE)
+  peak_table <- tidyr::pack(peak_table, intensity = dplyr::starts_with("intensity"))
+
+  intensity_matrix <- t(dplyr::pull(peak_table, intensity))
+  intensity_matrix <- magrittr::set_colnames(intensity_matrix, dplyr::pull(peak_table, peak))
   correlation_matrix <- WGCNA::cor(intensity_matrix, use = "p", method = "p")
 
   clustering <- peak_clustering(
@@ -56,24 +49,27 @@ advanced_annotation <- function(peaks, compounds, adducts,
     deep_split = deep_split
   )
 
-  peaks <- peaks %>%
-    tibble::add_column(cluster = clustering) %>%
-    dplyr::mutate(intensity = rowMeans(intensity, na.rm = TRUE)) %>%
-    dplyr::mutate(mass_defect = mass_defect(mz, precision = 0.01))
+  peak_info <- dplyr::transmute(
+    peak_table,
+    peak,
+    cluster = clustering,
+    intensity = rowMeans(intensity, na.rm = TRUE),
+    mass_defect = mass_defect(mz, precision = 0.01)
+  )
 
-  annotation <- simple_annotation(peaks, compounds, adducts, mass_tolerance) %>%
-    dplyr::inner_join(peaks, by = c("mz", "rt"))
+  annotation <- simple_annotation(peak_table, adduct_table, compound_table, mass_tolerance)
+  annotation <- dplyr::inner_join(annotation, peak_info, by = "peak")
 
   annotation <- compute_scores(annotation, adduct_weights, time_tolerance)
   # annotation <- evaluate_pathways(annotation, pathways, score_threshold = 0.1)
-  annotation <- compute_confidence_levels(annotation, expected_adducts) %>%
-    boost_scores(boost, mass_tolerance, time_tolerance) %>%
-    print_confidence_distribution()
+  annotation <- compute_confidence_levels(annotation, expected_adducts)
+  annotation <- boost_scores(annotation, boost_compounds, mass_tolerance, time_tolerance)
+  print_confidence_distribution(annotation)
 
-  if (!redundancy_filtering)
-    return(annotation)
+  if (redundancy_filtering) {
+    annotation <- remove_duplicates(annotation, score_threshold = 0)
+    print_confidence_distribution(annotation)
+  }
 
-  annotation <- annotation %>%
-    remove_duplicates(score_threshold = 0) %>%
-    print_confidence_distribution()
+  return(annotation)
 }
