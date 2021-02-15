@@ -25,7 +25,6 @@ simple_annotation <- function(peak_table, adduct_table, compound_table, mass_tol
   annotation <- dplyr::left_join(annotation, peak_table, by = "peak")
   annotation <- dplyr::left_join(annotation, compound_table, by = "compound")
 
-  # NOTE: the following line is commented out because it only checks compound's formula instead of compound-adduct combination
   annotation <- dplyr::filter(annotation, check_golden_rules(molecular_formula))
   annotation <- dplyr::filter(annotation, forms_valid_adduct_pair(molecular_formula, adduct))
   annotation <- dplyr::mutate(annotation, multiple_match = is_nonuinque_mass(mz))
