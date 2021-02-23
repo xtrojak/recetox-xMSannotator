@@ -30,7 +30,9 @@ advanced_annotation <- function(peak_table, compound_table, adduct_table,
   redundancy_filtering = TRUE,
   n_workers = parallel::detectCores()
 ) {
-  WGCNA::allowWGCNAThreads(n_workers)
+  if (is.numeric(n_workers) && n_workers > 1) {
+    WGCNA::allowWGCNAThreads(n_workers)
+  }
 
   peak_table <- dplyr::select(peak_table, peak, mz, rt, dplyr::starts_with("intensity"))
   peak_table <- dplyr::distinct(peak_table, peak, .keep_all = TRUE)
