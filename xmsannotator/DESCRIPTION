@@ -14,7 +14,6 @@ Imports:
     Rcpp (>= 0.11.0),
     dplyr (>= 1.0.0),
     flashClust,
-    purrr,
     tidyr,
     tibble,
     WGCNA
