@@ -11,7 +11,7 @@ forms_valid_adduct_pair <- function(molecular_formula, adduct_formula) {
   !is_water_adducts | has_oxygen
 }
 
-simple_annotation <- function(peak_table, adduct_table, compound_table, mass_tolerance = 5e-6) {
+simple_annotation <- function(peak_table, compound_table, adduct_table, mass_tolerance = 5e-6) {
   peak_table <- dplyr::select(peak_table, peak, mz, rt)
   peak_table <- dplyr::distinct(peak_table, peak, .keep_all = TRUE)
 

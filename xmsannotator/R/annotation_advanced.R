@@ -59,7 +59,7 @@ advanced_annotation <- function(peak_table, compound_table, adduct_table,
     mass_defect = mass_defect(mz, precision = 0.01)
   )
 
-  annotation <- simple_annotation(peak_table, adduct_table, compound_table, mass_tolerance)
+  annotation <- simple_annotation(peak_table, compound_table, adduct_table, mass_tolerance)
   annotation <- dplyr::inner_join(annotation, peak_info, by = "peak")
 
   annotation <- compute_scores(annotation, adduct_weights, time_tolerance)
