@@ -5,23 +5,23 @@
 
 using namespace Rcpp;
 
-// annotate_by_mass
-DataFrame annotate_by_mass(DataFrame peak_table, DataFrame adduct_table, DataFrame compound_table, double tolerance);
-RcppExport SEXP _xmsannotator_annotate_by_mass(SEXP peak_tableSEXP, SEXP adduct_tableSEXP, SEXP compound_tableSEXP, SEXP toleranceSEXP) {
+// match_by_mass
+DataFrame match_by_mass(DataFrame peaks, DataFrame adducts, DataFrame compounds, double tolerance);
+RcppExport SEXP _xmsannotator_match_by_mass(SEXP peaksSEXP, SEXP adductsSEXP, SEXP compoundsSEXP, SEXP toleranceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< DataFrame >::type peak_table(peak_tableSEXP);
-    Rcpp::traits::input_parameter< DataFrame >::type adduct_table(adduct_tableSEXP);
-    Rcpp::traits::input_parameter< DataFrame >::type compound_table(compound_tableSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type peaks(peaksSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type adducts(adductsSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type compounds(compoundsSEXP);
     Rcpp::traits::input_parameter< double >::type tolerance(toleranceSEXP);
-    rcpp_result_gen = Rcpp::wrap(annotate_by_mass(peak_table, adduct_table, compound_table, tolerance));
+    rcpp_result_gen = Rcpp::wrap(match_by_mass(peaks, adducts, compounds, tolerance));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_xmsannotator_annotate_by_mass", (DL_FUNC) &_xmsannotator_annotate_by_mass, 4},
+    {"_xmsannotator_match_by_mass", (DL_FUNC) &_xmsannotator_match_by_mass, 4},
     {NULL, NULL, 0}
 };
 
