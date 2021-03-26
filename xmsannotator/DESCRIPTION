@@ -1,28 +1,26 @@
 Package: xmsannotator
-Type: Package
-Title: Network-Based Annotation of Metabolomics Data
-Version: 2.0.0
-Author: Karan Uppal
+Title: Network-Based Annotation of LC-MS Data
+Version: 2.0.1
+Author: Karan Uppal <kuppal2@emory.edu>
 Maintainer: Karan Uppal <kuppal2@emory.edu>
-Description: The package contains functions for metabolite annotation using
-    HMDB, KEGG, LipidMaps, T3DB, and ChemSpider.
-License: GPL2.0
+Description: The package contains various functions for LC-MS data annotation, filtering and quality assessment.
+License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
-SystemRequirements: C++11
-Imports:
-    Rcpp (>= 0.11.0),
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports: 
     dplyr (>= 1.0.0),
-    flashClust,
-    tidyr,
-    tibble,
-    WGCNA
-Depends: 
-    R (>= 3.0)
+    rlang
 Suggests:
-    arrow,
-    rhdf5,
-    testthat (>= 3.0.0)
-LinkingTo:
-    Rcpp
+    testthat (>= 3.0.0),
+    arrow (>= 3.0.0),
+    readr,
+    rhdf5
 Config/testthat/edition: 3
+SystemRequirements: C++11
+LinkingTo: 
+    Rcpp
+Depends: 
+    R (>= 3.0.0),
+    Rcpp (>= 0.11.0)
