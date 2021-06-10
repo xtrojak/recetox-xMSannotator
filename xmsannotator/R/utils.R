@@ -54,7 +54,7 @@ as_compound_table <- function(data) {
 }
 
 #' @import dplyr
-as_ecpected_adducts_table <- function (data) {
+as_expected_adducts_table <- function (data) {
   data <- select(data, 'adduct')
   return(data)
 }
@@ -103,7 +103,7 @@ load_compound_table_parquet <- function(file) {
 #' @export
 load_expected_adducts_csv <- function (file) {
   data <- load_csv(file, columns = "adduct")
-  as_ecpected_adducts_table(data)
+  as_expected_adducts_table(data)
 }
 
 #' @export
