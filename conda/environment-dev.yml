@@ -1,10 +1,10 @@
 name: xmsannotator-conda-dev
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
   - defaults
 dependencies:
-  - r-base == 4.1.0
+  - r-base
   - boost-cpp
   - r-biocmanager
   - r-rsqlite
@@ -21,3 +21,4 @@ dependencies:
   - r-rjson
   - r-plyr
   - r-wgcna
+  - r-ssoap
