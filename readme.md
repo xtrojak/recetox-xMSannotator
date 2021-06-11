@@ -1,7 +1,11 @@
 # xMSannotator
 
-Built images are available at https://hub.docker.com/repository/docker/recetox/xmsannotator
 
+Built Docker images are available at [recetox/xmsannotator](https://hub.docker.com/repository/docker/recetox/xmsannotator).
+
+Use as a Galaxy Tool: https://github.com/RECETOX/galaxytools/tree/master/tools/xmsannotator
+
+When using this tool, please cite the original [publication](https://pubs.acs.org/doi/abs/10.1021/acs.analchem.6b01214?src=recsys&).
 ### Research reproducibility
 Follows the list of information that is retrieved from online sources, therefore, they may cause issues regarding research reproducibility.
 
@@ -29,3 +33,6 @@ Follows the list of information that is retrieved from online sources, therefore
   - all data is retrieved from various online sources: `Adduct`, `Query.m/z`, `Search mass tolerance range (+/-)`, `ChemspiderID`, `CommonName`, `Molecular.Formula`, `SMILES`, `InChI`, `InChIKey`, `AverageMass`, `MolecularWeight`, `MonoisotopicMass`, `NominalMass`, `ALogP`, `XLogP`, `Structure`, `KEGG.Compound.ID`, `HMDB`, `LipidMAPS`, `PubChem`, `MassBank`, `BioCyc`, `SMPDB`, `EPA.DSSTox`, `EPA.Toxcast`, `Pesticide.Common.Names`, `ChEMBL`, `ChEBI`, `NIST.Chem.WebBook`, `WikiPathways`, `DrugBank`, `Comparative Toxicogenomics Database`, `ACToR: Aggregated Computational Toxicology Resource`
   - primary affected functions:`chspider.batch.annotation.child`
   - transitively affected functions: `ChemSpider.annotation`
+
+## Reference
+Uppal, Karan, et al. “XMSannotator: An R Package for Network-Based Annotation of High-Resolution Metabolomics Data.” Analytical Chemistry, vol. 89, no. 2, Jan. 2017, pp. 1063–67, doi:10.1021/acs.analchem.6b01214.
