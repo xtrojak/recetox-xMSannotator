@@ -4,7 +4,7 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - r-base
+  - r-base >= 3.5
   - boost-cpp
   - r-biocmanager
   - r-flashclust
@@ -13,9 +13,10 @@ dependencies:
   - r-tidyr
   - r-purrr
   - r-tibble
-  - r-dplyr
-  - r-rcpp
-  - r-arrow
-  - r-hdf5r
+  - r-dplyr >= 1.0.0
+  - r-rcpp >= 0.11.0
+  - r-arrow >= 3.0.0
+  - bioconductor-rhdf5
   - r-data.table
-  - r-testthat
+  - r-testthat >= 3.0.0
+  - r-readr
