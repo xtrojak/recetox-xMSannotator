@@ -1,0 +1,56 @@
+{% set name = "recetox-xMSannotator" %}
+{% set version = "2.0.1" %}
+{% set github = "https://github.com/recetox/recetox-xMSannotator" %}
+
+package:
+  name: "r-{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  path: ../xmsannotator
+
+build:
+  number: 0
+  noarch: generic
+  rpaths:
+    - lib/
+    - lib/R/lib/
+  script: R CMD INSTALL --build .
+
+
+requirements:
+  host:
+    - r-base >=3.5
+    - r-dplyr >=1.0.0
+    - r-flashclust
+    - r-wgcna
+    - r-tidyr
+    - r-purrr
+    - r-tibble
+  run:
+    - r-base >=3.5
+    - r-dplyr
+    - r-flashclust
+    - r-wgcna
+    - r-tidyr
+    - r-purrr
+    - r-tibble
+    - r-data.table
+    - bioconductor-rhdf5
+    - r-rcpp >=0.11.0
+    - r-arrow >=3.0.0
+
+test:
+  commands:
+    - $R CMD check .
+
+about:
+  home: "{{ github }}"
+  license: GPL2.0
+  summary: Annotate peak intensity table with compounds from the compounds database. A heavily modified fork of the original xMSannotator by Karan Uppal.
+
+extra:
+  maintainers:
+    - RECETOX/conda
+  identifiers:
+    - doi:10.1021/acs.analchem.6b01214
