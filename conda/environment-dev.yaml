@@ -1,0 +1,21 @@
+name: recetox-xmsannotator-dev
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - r-base
+  - boost-cpp
+  - r-biocmanager
+  - r-flashclust
+  - r-plyr
+  - r-wgcna
+  - r-tidyr
+  - r-purrr
+  - r-tibble
+  - r-dplyr
+  - r-rcpp
+  - r-arrow
+  - r-hdf5r
+  - r-data.table
+  - r-testthat
