@@ -42,7 +42,7 @@ requirements:
 
 test:
   commands:
-    - $R CMD check .
+    - $R -e "library(xmsannotator)"
 
 about:
   home: "{{ github }}"
