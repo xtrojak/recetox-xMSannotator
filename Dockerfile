@@ -5,12 +5,16 @@ RUN apt-get update && apt-get install -yq \
     libhdf5-dev \
     libssl-dev \
     zlib1g-dev \
+    texlive-latex-base \
+    texlive-latex-extra \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+RUN Rscript -e 'install.packages("devtools")'
 RUN Rscript -e 'install.packages("tibble")'
 RUN Rscript -e 'install.packages("tidyr")'
 RUN Rscript -e 'install.packages("dplyr")'
+RUN Rscript -e 'install.packages("readr")'
 RUN Rscript -e 'install.packages("purr")'
 RUN Rscript -e 'install.packages("flashClust")'
 RUN Rscript -e 'install.packages("data.table")'
@@ -19,8 +23,8 @@ RUN Rscript -e 'BiocManager::install(version = "3.11", ask = FALSE)'
 RUN Rscript -e 'BiocManager::install("WGCNA")'
 RUN Rscript -e 'BiocManager::install("rhdf5")'
 RUN Rscript -e 'install.packages("Rcpp")'
-RUN Rscript -e 'install.packages("arrow")'
+RUN Rscript -e 'devtools::install_version("arrow", version = "4.0.0", repos = "http://cran.us.r-project.org")'
+RUN Rscript -e 'devtools::install_version("testthat", version = "3.0.3", repos = "http://cran.us.r-project.org")'
 
 ADD xmsannotator /xmsannotator
-RUN R CMD INSTALL /xmsannotator \
-    && rm -rf /xmsannotator
+RUN R CMD INSTALL /xmsannotator
