@@ -1,0 +1,10 @@
+name: recetox-xmsannotator-build
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - anaconda-client
+  - conda-build
+  - conda-verify
+  - r-base
