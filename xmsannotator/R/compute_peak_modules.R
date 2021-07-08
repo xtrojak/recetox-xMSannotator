@@ -32,6 +32,7 @@ compute_peak_modules <- function(
 
   # NOTE: When WGCNA is loaded incorectly then WGCNA::blockwiseModules may fail
   # due to conflicting functions WGCNA::cor and stats::cor.
+  # if fails when debugging run cor <- WGCNA::cor before the call to the function
   modules <- WGCNA::blockwiseModules(
     datExpr = peak_intensity_matrix,
     checkMissingData = FALSE,
