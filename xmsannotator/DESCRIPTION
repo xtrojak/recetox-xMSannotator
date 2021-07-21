@@ -1,9 +1,11 @@
 Package: xmsannotator
 Title: Network-Based Annotation of LC-MS Data
-Version: 2.0.1
-Author: Karan Uppal <kuppal2@emory.edu>
-Maintainer: Karan Uppal <kuppal2@emory.edu>
-Description: The package contains various functions for LC-MS data annotation, filtering and quality assessment.
+Version: 0.9.1
+Authors@R: c(
+    person("Karan", "Uppal", email = "kuppal2@emory.edu", role = "aut"),
+    person("Jiri", "Novotny", email = "409963@muni.cz", role = "cre"))
+Description: This is a customized fork of the original work from Karan Uppal.
+             The package contains various functions for LC-MS data annotation, filtering and quality assessment.
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
