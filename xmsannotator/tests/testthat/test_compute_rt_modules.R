@@ -33,7 +33,7 @@ test_that("Integration test: RT based clustering works", {
 
 #' @import gplots
 #' @import entropy
-test_that("scores are comaparble", {
+test_that("scores are comparable", {
     peaks <- readRDS("test-data/xmsannotator_qc_matrix_stage1.rda")
     peaks$peak <- as.integer(rownames(peaks))
     peaks <- dplyr::rename(
