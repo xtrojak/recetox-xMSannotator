@@ -9,11 +9,12 @@
 #' @export
 #'
 #' @examples
-plot_clustering <- function(pdf, data, peak_indices) {
+plot_clustering <- function(pdf, data, peak_indices, plot_lines = FALSE) {
     plot(pdf, type = "l", xaxt = "n")
     axis(1, at = data, las = 2)
     points(pdf$x[peak_indices], pdf$y[peak_indices], col = "red")
-    abline(v = pdf$x[peak_indices], col = "red")
+
+    if (plot_lines) abline(v = pdf$x[peak_indices], col = "red")
 }
 
 
@@ -104,7 +105,7 @@ compute_cluster_positions <- function(data, width = 1, kernel = "gaussian", do_p
 #' @export
 #'
 #' @examples
-assign_clusters <- function(clusters, data) {
+compute_cluster_assignments <- function(clusters, data) {
     nn2(clusters, data, k = 1)$nn.idx[, 1]
 }
 
@@ -124,12 +125,8 @@ compute_rt_modules <- function(peak_table, peak_width = 1) {
 
     for (id in modules) {
         subdata <- peak_table %>% filter(module == id)
-        cluster_positions <- compute_cluster_positions(
-            subdata$rt,
-            width = peak_width,
-            do_plot = TRUE
-        )
-        subdata$RTclust <- assign_clusters(cluster_positions, subdata$rt)
+        cluster_positions <- compute_cluster_positions(subdata$rt, width = peak_width, do_plot = TRUE)
+        subdata$RTclust <- compute_cluster_assignments(cluster_positions, subdata$rt)
 
         rt_cluster <- bind_rows(rt_cluster, subdata %>% select(peak, RTclust))
     }
