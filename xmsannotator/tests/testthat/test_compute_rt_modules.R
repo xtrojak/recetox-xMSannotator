@@ -31,13 +31,10 @@ test_that("Integration test: RT based clustering works", {
     expect_equal(nrow(peaks), nrow(rt_modules))
 })
 
+#' @import gplots
+#' @import entropy
 test_that("scores are comaparble", {
     peaks <- readRDS("test-data/xmsannotator_qc_matrix_stage1.rda")
-    peaks <- dplyr::rename_with(
-        peaks,
-        ~ paste0("intensity_", .x),
-        starts_with("Tribrid")
-    )
     peaks$peak <- as.integer(rownames(peaks))
     peaks <- dplyr::rename(
         peaks,
@@ -48,7 +45,7 @@ test_that("scores are comaparble", {
 
     matrix_with_clust <- compute_rt_modules(peaks, peak_width = 1)
     y2d <- gplots::hist2d(
-        matrix_with_clust$RTClust_old,
+        matrix_with_clust$RTclust_old,
         matrix_with_clust$RTclust
     )
     mutual_information <- entropy::mi.empirical(y2d$counts)

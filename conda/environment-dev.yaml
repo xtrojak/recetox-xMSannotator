@@ -24,3 +24,5 @@ dependencies:
   - r-rlist
   - r-rann
   - r-gplots
+  - r-devtools
+  - r-entropy
