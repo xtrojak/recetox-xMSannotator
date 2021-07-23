@@ -6,9 +6,6 @@
 #' Red circles & lines.
 #'
 #' @return
-#' @export
-#'
-#' @examples
 plot_clustering <- function(pdf, data, peak_indices, plot_lines = FALSE) {
     plot(pdf, type = "l", xaxt = "n")
     axis(1, at = data, las = 2)
@@ -23,11 +20,8 @@ plot_clustering <- function(pdf, data, peak_indices, plot_lines = FALSE) {
 #' @param density Kernel density estimates (stats::density$y).
 #'
 #' @return Indices at which kernel density estimate position is a cluster.
-#' @export
-#' @import pastecs
-#' @import rlist
-#'
-#' @examples
+#' @importFrom pastecs turnpoints
+#' @importFrom rlist list.filter
 compute_peak_indices <- function(density) {
     turning_points <- turnpoints(ts(density), calc.proba = FALSE)
     peak_indices <- turning_points$pos[turning_points$peaks]
@@ -41,9 +35,6 @@ compute_peak_indices <- function(density) {
 #' @param data Data for which to estimate the number of kernel points.
 #'
 #' @return Nearest power of 2 to length(data), but at least 2048.
-#' @export
-#'
-#' @examples
 compute_num_kernel_points <- function(data) {
     num_points <- length(data)
     nearest_power_of_two <- 2**ceiling(log2(num_points))
@@ -59,9 +50,6 @@ compute_num_kernel_points <- function(data) {
 #' Recommended ["gaussian","biweight","cosine","epanechnikov"].
 #'
 #' @return Kernel density estimate (stats::density).
-#' @export
-#'
-#' @examples
 estimate_kernel_density <- function(data, width = 1, kernel = "gaussian") {
     start <- max(min(data) - 1, 0)
     end <- max(data) + 1
@@ -83,9 +71,6 @@ estimate_kernel_density <- function(data, width = 1, kernel = "gaussian") {
 #' Scan rate should be consulted to optimize clustering. [0.5;2.0]
 #'
 #' @return Positions of dense clusters.
-#' @export
-#'
-#' @examples
 compute_cluster_positions <- function(data, width = 1, kernel = "gaussian", do_plot = FALSE) {
     pdf <- estimate_kernel_density(data, width = width, kernel = kernel)
     peak_indices <- compute_peak_indices(pdf$y)
@@ -101,10 +86,7 @@ compute_cluster_positions <- function(data, width = 1, kernel = "gaussian", do_p
 #' @param data Data to assign to clusters
 #'
 #' @return Indices of closest cluster for each query point
-#' @import RANN
-#' @export
-#'
-#' @examples
+#' @importFrom RANN nn2
 compute_cluster_assignments <- function(clusters, data) {
     nn2(clusters, data, k = 1)$nn.idx[, 1]
 }
@@ -117,8 +99,6 @@ compute_cluster_assignments <- function(clusters, data) {
 #' @return
 #' @export
 #' @import dplyr
-#'
-#' @examples
 compute_rt_modules <- function(peak_table, peak_width = 1) {
     modules <- unique(peak_table$module)
     rt_cluster <- {}
