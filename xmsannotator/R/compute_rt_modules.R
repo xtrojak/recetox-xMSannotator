@@ -93,3 +93,46 @@ compute_cluster_positions <- function(data, width = 1, kernel = "gaussian", do_p
     peak_positions <- pdf$x[peak_indices]
     return(peak_positions)
 }
+
+#' Compute the assignment of cluster ID based on nn-algorithm.
+#'
+#' @param clusters Position of cluster centers.
+#' @param data Data to assign to clusters
+#'
+#' @return Indices of closest cluster for each query point
+#' @import RANN
+#' @export
+#'
+#' @examples
+assign_clusters <- function(clusters, data) {
+    nn2(clusters, data, k = 1)$nn.idx[, 1]
+}
+
+#' Compute RT modules based on intensity modules and chromatographic peak width.
+#'
+#' @param peak_table Feature table with columns ['rt', 'module','peak'].
+#' @param peak_width Estimated chromatographic peak width.
+#'
+#' @return
+#' @export
+#' @import dplyr
+#'
+#' @examples
+compute_rt_modules <- function(peak_table, peak_width = 1) {
+    modules <- unique(peak_table$module)
+    rt_cluster <- {}
+
+    for (id in modules) {
+        subdata <- peak_table %>% filter(module == id)
+        cluster_positions <- compute_cluster_positions(
+            subdata$rt,
+            width = peak_width,
+            do_plot = TRUE
+        )
+        subdata$RTclust <- assign_clusters(cluster_positions, subdata$rt)
+
+        rt_cluster <- bind_rows(rt_cluster, subdata %>% select(peak, RTclust))
+    }
+
+    return(left_join(peak_table, rt_cluster, by = "peak"))
+}
