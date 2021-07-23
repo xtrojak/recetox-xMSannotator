@@ -1,4 +1,4 @@
-test_that("Integration test: RT based clustering works", {
+test_that("Integration test: RT based clustering works.", {
     peaks <- readRDS("test-data/qc_solvent.rda")
     peaks <- dplyr::rename(peaks, peak = feature)
     peaks <- dplyr::rename_with(
@@ -33,7 +33,7 @@ test_that("Integration test: RT based clustering works", {
 
 #' @import gplots
 #' @import entropy
-test_that("scores are comparable", {
+test_that("Cluster assignments are comparable.", {
     peaks <- readRDS("test-data/xmsannotator_qc_matrix_stage1.rda")
     peaks$peak <- as.integer(rownames(peaks))
     peaks <- dplyr::rename(
@@ -48,6 +48,6 @@ test_that("scores are comparable", {
         matrix_with_clust$RTclust_old,
         matrix_with_clust$RTclust
     )
-    mutual_information <- entropy::mi.empirical(y2d$counts)
+    mutual_information <- entropy::mi.empirical(y2d$counts) # maximum similarity is 5.1
     expect_true(mutual_information > 2.5)
 })
