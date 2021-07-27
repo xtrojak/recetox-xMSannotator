@@ -5,34 +5,72 @@ test_that("advanced annotation Stage1 works", {
 
   load("testdata/expected_stage_1.rda")
 
+  comparison_columns <- c("mz", "time", "rep1", "rep2", "rep3")
+
+  annotation <- multilevelannotation(
+    peaks,
+    num_nodes = 16,
+    outloc = tmpdir,
+    db_name = "HMDB"
+  )
+
+  actual <- read.csv("Stage1.csv")
+
+  actual <- subset(actual, select = -Module_RTclust)
+  expected <- subset(expected_stage_1, select = -Module_RTclust)
+
+  actual <- dplyr::arrange(
+    actual, mz, time, rep1, rep2, rep3
+  )
+  expected <- dplyr::arrange(
+    expected, mz, time, rep1, rep2, rep3
+  )
+
+  expect_equal(actual, expected)
+})
+
+test_that("advanced annotation Stage2 works", {
+  tmpdir <- tempdir()
+  peaks <- readRDS("testdata/qc_solvent.rda")
+  peaks <- unique(peaks)
+  peaks <- dplyr::rename(subset(peaks, select = -feature), time = rt)
+
+  load("testdata/expected_stage_2.rda")
+
   queryadductlist <- c(
     "M+H", "M+2H", "M+H+NH4", "M+ACN+2H",
     "M+2ACN+2H", "M+NH4", "M+Na", "M+ACN+H",
     "M+ACN+Na", "M+2ACN+H", "2M+H", "2M+Na",
     "2M+ACN+H", "M+2Na-H", "M+H-H2O", "M+H-2H2O"
   )
-  comparison_columns <- c("mz", "time", "rep1", "rep2", "rep3")
+
+  data(adduct_table)
+  load("testdata/adduct_weights.rda")
+  adduct_weights <- as.data.frame(adduct_weights)
+  data(adduct_table)
 
   annotation <- multilevelannotation(
     peaks,
     num_nodes = 8,
     outloc = tmpdir,
-    allsteps = FALSE,
     db_name = "HMDB",
-    queryadductlist = queryadductlist
+    queryadductlist = queryadductlist,
+    adduct_weights = adduct_weights,
+    max.rt.diff = 0.5,
+    allsteps = TRUE
   )
 
-  actual_stage_1 <- read.csv("Stage1.csv")
+  actual <- read.csv(file.path(tmpdir, "Stage2.csv"))
 
-  actual_stage_1 <- subset(actual_stage_1, select = -Module_RTclust)
-  expected_stage_1 <- subset(expected_stage_1, select = -Module_RTclust)
+  actual <- subset(actual, select = c(mz, time))
+  expected <- subset(expected_stage_2, select = c(mz, time))
 
-  actual_stage_1 <- dplyr::arrange(
-    actual_stage_1, mz, time, rep1, rep2, rep3
+  actual <- dplyr::arrange(
+    actual, mz, time,
   )
-  expected_stage_1 <- dplyr::arrange(
-    expected_stage_1, mz, time, rep1, rep2, rep3
+  expected <- dplyr::arrange(
+    expected, mz, time
   )
 
-  expect_equal(actual_stage_1, expected_stage_1)
+  expect_equal(actual, expected)
 })
