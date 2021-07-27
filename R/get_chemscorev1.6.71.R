@@ -1330,6 +1330,7 @@ get_chemscorev1.6.71 <- function(chemicalid,
   #
   # print(best_chemical_score)
   rm("mzid", "global_cor", "temp_global_cor")
+  setwd("..")
 
   return(list("chemical_score" = chemical_score, "filtdata" = mchemicaldata))
 }
