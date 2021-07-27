@@ -1,7 +1,8 @@
 test_that("multilevelannotationstep2", {
+    #skip("Currently excluded!")
     # Arrange
     setwd("testdata/multilevelannotationstep2")
-    load(file = "chem_score1.rda")
+    load(file = "chem_score1.Rda")
     expected <- curchemscoremat
     curchemscoremat <- NA
 
@@ -14,5 +15,5 @@ test_that("multilevelannotationstep2", {
 
     # Annihilate
     setwd("../../..")
-    unlink("stage2", recursive = TRUE)
+    #unlink("stage2", recursive = TRUE)
 })

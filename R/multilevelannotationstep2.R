@@ -91,8 +91,7 @@ compute_chemscore <- function(j,
         chemscoremat <- cbind(cur_chem_score, chem_score$filtdata)
       }
       rm(chem_score)
-      chemscoremat <- na.omit(chemscoremat)
-      chemscoremat <- as.data.frame(chemscoremat)
+      chemscoremat <- as.data.frame(na.omit(chemscoremat))
     }
   } else {
     rm(chem_score)
@@ -111,27 +110,18 @@ multilevelannotationstep2 <- function(outloc1, list_number) {
   load("step1_results.Rda")
   load("global_cor.Rda")
   unlink("allmatches_with_isotopes.txt")
+  ls()
 
   outloc <- outloc1
   if (is.na(max.rt.diff) == FALSE) {
     max_diff_rt <- max.rt.diff
   }
 
-  if (list_number > length(chemids_split)) {
+  if (list_number > length(chemids_split) | list_number > num_sets) {
     list_number <- length(chemids_split)
     return(0)
   }
 
-
-  if (list_number > num_sets) {
-    list_number <- length(chemids_split)
-    return(0)
-  }
-
-
-  outloc1 <- paste(outloc, "/stage2/", sep = "")
-  suppressWarnings(dir.create(outloc1))
-  setwd(outloc1)
   if (is.na(adduct_weights) == TRUE) {
     data(adduct_weights)
 
@@ -142,6 +132,11 @@ multilevelannotationstep2 <- function(outloc1, list_number) {
     colnames(adduct_weights) <- c("Adduct", "Weight")
   }
 
+  outloc1 <- paste(outloc, "/stage2/", sep = "")
+  suppressWarnings(dir.create(outloc1))
+  setwd(outloc1)
+
+
   cnames <- colnames(mchemdata)
   cnames[2] <- "time"
   colnames(mchemdata) <- as.character(cnames)
@@ -150,7 +145,8 @@ multilevelannotationstep2 <- function(outloc1, list_number) {
 
   chem_score <- lapply(
     chemids_split[[list_number]],
-    compute_chemscore, chemids,
+    compute_chemscore,
+    chemids,
     mchemdata,
     isop_res_md,
     mass_defect_window,
@@ -169,7 +165,6 @@ multilevelannotationstep2 <- function(outloc1, list_number) {
     hmdbAllinf
   )
 
-  cur_fname <- paste("chem_score", list_number, "_a.Rda", sep = "")
   chem_score2 <- chem_score[which(chem_score != "NULL")]
 
   rm(chem_score)
