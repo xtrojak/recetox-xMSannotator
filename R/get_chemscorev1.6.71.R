@@ -119,6 +119,25 @@ do_something <- function(
   return(final_isp_annot_res)
 }
 
+do_something_2 <- function(
+  i,
+  mod_names,
+  mchemicaldata
+) {
+    groupA_num <- mod_names[i]
+
+    subdata <- mchemicaldata[which(mchemicaldata$Module_RTclust == groupA_num), ]
+    subdata <- subdata[order(subdata$time), ]
+
+    if (nrow(subdata) > 0) {
+      groupB <- group_by_rt_histv2(subdata, time_step = 1, max_diff_rt = 10, groupnum = groupA_num)
+    } else {
+      groupB <- subdata
+    }
+    rownames(groupB) <- NULL
+    return(groupB)
+}
+
 get_chemscorev1.6.71 <- function(chemicalid,
                                  mchemicaldata,
                                  corthresh,
@@ -184,12 +203,10 @@ get_chemscorev1.6.71 <- function(chemicalid,
   mchemicaldata$Adduct <- as.character(mchemicaldata$Adduct)
 
   uniq_adducts <- unique(mchemicaldata$Adduct)
-
   good_adducts <- uniq_adducts[which(uniq_adducts %in% as.character(adduct_weights[, 1]))]
 
 
   table_mod <- table(mchemicaldata$Module_RTclust)
-
   table_iso <- table(mchemicaldata$ISgroup)
 
   table_mod <- table_mod[table_mod > 0]
@@ -225,101 +242,43 @@ get_chemscorev1.6.71 <- function(chemicalid,
       abund_ratio_vec
     )
 
-
-
     rm(level_module_isop_annot)
+
     final_isp_annot_res2 <- ldply(final_isp_annot_res_isp, rbind)
-
-
     isp_group_check <- table(final_isp_annot_res2[, 1])
     good_groups <- which(isp_group_check == max(isp_group_check))
 
     group_name <- names(isp_group_check)[good_groups]
     final_isp_annot_res2 <- as.data.frame(final_isp_annot_res2)
 
-    final_isp_annot_res2 <- final_isp_annot_res2 # [which(final_isp_annot_res2[,1]%in%group_name),]
-
+    final_isp_annot_res2 <- final_isp_annot_res2
     final_isp_annot_res2 <- final_isp_annot_res2[, -c(1)]
     final_isp_annot_res2 <- as.data.frame(final_isp_annot_res2)
 
     rm(final_isp_annot_res_isp)
-
-
-    # write.table(temp_var,file="finaltempvar.txt",sep="\t",row.names=FALSE)
-
     mchemicaldata <- rbind(final_isp_annot_res_all, final_isp_annot_res2) # [,-c(12)]
   }
-  mchemicaldata <- unique(mchemicaldata)
 
+  # filter for na and sort in ascending mz
+  mchemicaldata <- unique(mchemicaldata) %>% drop_na(mz) %>% arrange(mz)
+  mod_names <- unique(mchemicaldata$Module_RTclust)
 
+  mzid_cur <- paste(mchemicaldata$mz, mchemicaldata$time, sep = "_")
 
-  bad_rows <- which(is.na(mchemicaldata$mz) == TRUE)
-  if (length(bad_rows) > 0) {
-    mchemicaldata <- mchemicaldata[-c(bad_rows), ]
-  }
+  diffmatB <- {}
+  diffmatB <- lapply(1:length(mod_names), do_something_2, mod_names, mchemicaldata)
 
-  mchemicaldata <- mchemicaldata[order(mchemicaldata$mz), ]
-
-
-  mod_names <- mchemicaldata$Module_RTclust
-  mod_names <- unique(mod_names)
-
-
-
-  mzid_cur <- paste(mchemicaldata$mz, mchemicaldata$time, sep = "_") # mzid_cur<-paste(curmchemdata$mz,curmchemdata$time,sep="_") #mzid_cur<-paste(chem_score$filtdata$mz,chem_score$filtdata$time,sep="_")
-
-
-
-  temp_global_cor <- global_cor[which(mzid %in% mzid_cur), which(mzid %in% mzid_cur)]
-
-  # save(temp_global_cor,file="temp_global_cor.Rda")
-  # rm(global_cor)
-
-  # rm(mzid)
-
-  # mzid<-paste(mchemicaldata$mz,mchemicaldata$time,sep="_")
-
-  # if(FALSE)
-  {
-    diffmatB <- {}
-    diffmatB <- lapply(1:length(mod_names), function(i) {
-      groupA_num <- mod_names[i]
-
-      subdata <- mchemicaldata[which(mchemicaldata$Module_RTclust == groupA_num), ]
-      subdata <- subdata[order(subdata$time), ]
-
-
-
-      if (nrow(subdata) > 0) {
-
-        # print(subdata)
-        # print(length(subdata))
-        groupB <- group_by_rt_histv2(subdata, time_step = 1, max_diff_rt = 10, groupnum = groupA_num)
-      } else {
-        groupB <- subdata
-      }
-      rownames(groupB) <- NULL
-
-
-      # print(groupB)
-      return(groupB)
-    })
-
-
-
-    mchemicaldata <- ldply(diffmatB, rbind)
-  }
+  mchemicaldata <- ldply(diffmatB, rbind)
   mchemicaldata <- unique(mchemicaldata)
 
   rm(diffmatB)
-  dupmz <- {} # which(duplicated(mchemicaldata$mz)==TRUE)
+  dupmz <- {}
 
   if (length(dupmz) > 0) {
     mchemicaldata <- mchemicaldata[-c(dupmz), ]
   }
 
   rm(final_isp_annot_res)
-
 
 
   write.table(mchemicaldata, file = "../Stage2_withisotopes.txt", append = TRUE, sep = "\t", col.names = FALSE)
