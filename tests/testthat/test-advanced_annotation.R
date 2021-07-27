@@ -11,7 +11,8 @@ test_that("advanced annotation Stage1 works", {
     peaks,
     num_nodes = 16,
     outloc = tmpdir,
-    db_name = "HMDB"
+    db_name = "HMDB",
+    allsteps = FALSE
   )
 
   actual <- read.csv("Stage1.csv")
