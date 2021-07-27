@@ -1,4 +1,5 @@
 test_that("advanced annotation Stage1 works", {
+  skip("Currently excluded!")
   tmpdir <- tempdir()
   load("testdata/sample_peaks.rda")
   peaks <- unique(peaks)
@@ -31,6 +32,7 @@ test_that("advanced annotation Stage1 works", {
 })
 
 test_that("advanced annotation Stage2 works", {
+  skip("Currently excluded!")
   tmpdir <- tempdir()
   peaks <- readRDS("testdata/qc_solvent.rda")
   peaks <- unique(peaks)
@@ -58,7 +60,7 @@ test_that("advanced annotation Stage2 works", {
     queryadductlist = queryadductlist,
     adduct_weights = adduct_weights,
     max.rt.diff = 0.5,
-    allsteps = TRUE
+    allsteps = FALSE
   )
 
   actual <- read.csv(file.path(tmpdir, "Stage2.csv"))
