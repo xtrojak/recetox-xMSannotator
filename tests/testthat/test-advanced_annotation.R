@@ -32,7 +32,7 @@ test_that("advanced annotation Stage1 works", {
 })
 
 test_that("advanced annotation Stage2 works", {
-  #skip("Currently excluded!")
+  # skip("Currently excluded!")
   here <- getwd()
   tmpdir <- tempdir()
   peaks <- readRDS("testdata/qc_solvent.rda")
@@ -64,15 +64,18 @@ test_that("advanced annotation Stage2 works", {
     allsteps = TRUE
   )
 
-  actual <- read.csv(file.path(tmpdir, "Stage5.csv"))
-  expected <- read.csv(file.path(here, "testdata/advanced/Stage5.csv"))
+  for (i in seq(from = 1, to = 5, by = 1)) {
+    filename <- paste0("Stage", i, ".csv")
+    actual <- read.csv(file.path(tmpdir, filename))
+    expected <- read.csv(file.path(here, "testdata/advanced", filename))
 
-  actual <- dplyr::arrange(
-    actual, mz, time,
-  )
-  expected <- dplyr::arrange(
-    expected, mz, time
-  )
+    actual <- dplyr::arrange(
+      actual, mz, time,
+    )
+    expected <- dplyr::arrange(
+      expected, mz, time
+    )
 
-  expect_equal(actual, expected)
+    expect_equal(actual, expected)
+  }
 })
