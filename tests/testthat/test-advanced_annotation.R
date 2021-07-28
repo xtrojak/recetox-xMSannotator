@@ -32,7 +32,8 @@ test_that("advanced annotation Stage1 works", {
 })
 
 test_that("advanced annotation Stage2 works", {
-  skip("Currently excluded!")
+  #skip("Currently excluded!")
+  here <- getwd()
   tmpdir <- tempdir()
   peaks <- readRDS("testdata/qc_solvent.rda")
   peaks <- unique(peaks)
@@ -60,13 +61,11 @@ test_that("advanced annotation Stage2 works", {
     queryadductlist = queryadductlist,
     adduct_weights = adduct_weights,
     max.rt.diff = 0.5,
-    allsteps = FALSE
+    allsteps = TRUE
   )
 
-  actual <- read.csv(file.path(tmpdir, "Stage2.csv"))
-
-  actual <- subset(actual, select = c(mz, time))
-  expected <- subset(expected_stage_2, select = c(mz, time))
+  actual <- read.csv(file.path(tmpdir, "Stage5.csv"))
+  expected <- read.csv(file.path(here, "testdata/advanced/Stage5.csv"))
 
   actual <- dplyr::arrange(
     actual, mz, time,

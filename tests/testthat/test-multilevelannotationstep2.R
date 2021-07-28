@@ -15,5 +15,5 @@ test_that("multilevelannotationstep2", {
 
     # Annihilate
     setwd("../../..")
-    #unlink("stage2", recursive = TRUE)
+    unlink("stage2", recursive = TRUE)
 })
