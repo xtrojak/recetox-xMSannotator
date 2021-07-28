@@ -51,11 +51,15 @@ test_that("advanced annotation Stage2 works", {
   data(adduct_table)
   load("testdata/adduct_weights.rda")
   adduct_weights <- as.data.frame(adduct_weights)
+  ls(adduct_weights)
   data(adduct_table)
+  data(adduct_weights)
+
+  num_nodes <- 8
 
   annotation <- multilevelannotation(
     peaks,
-    num_nodes = 8,
+    num_nodes = num_nodes,
     outloc = tmpdir,
     db_name = "HMDB",
     queryadductlist = queryadductlist,

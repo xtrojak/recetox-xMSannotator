@@ -1,6 +1,7 @@
 test_that("multilevelannotationstep2", {
     #skip("Currently excluded!")
     # Arrange
+    here <- getwd()
     setwd("testdata/multilevelannotationstep2")
     load(file = "chem_score1.Rda")
     expected <- curchemscoremat
@@ -14,6 +15,6 @@ test_that("multilevelannotationstep2", {
     expect_equal(curchemscoremat, expected)
 
     # Annihilate
-    setwd("../../..")
+    setwd(file.path(here, "testdata/multilevelannotationstep2"))
     unlink("stage2", recursive = TRUE)
 })
