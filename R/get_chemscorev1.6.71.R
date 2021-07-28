@@ -234,7 +234,6 @@ get_chemscorev1.6.71 <- function(chemicalid,
 
     final_isp_annot_res2 <- ldply(final_isp_annot_res_isp, rbind)
     isp_group_check <- table(final_isp_annot_res2[, 1])
-    good_groups <- which(isp_group_check == max(isp_group_check))
 
     final_isp_annot_res2 <- as.data.frame(final_isp_annot_res2)
 
