@@ -144,7 +144,8 @@ get_chemscorev1.6.71 <- function(chemicalid,
                                  global_cor,
                                  mzid, max_diff_rt = 10,
                                  level_module_isop_annot,
-                                 adduct_table, adduct_weights,
+                                 adduct_table,
+                                 adduct_weights,
                                  filter.by = c("M+H"),
                                  max_isp = 100,
                                  MplusH.abundance.ratio.check = TRUE,
@@ -232,14 +233,7 @@ get_chemscorev1.6.71 <- function(chemicalid,
 
     rm(level_module_isop_annot)
 
-    final_isp_annot_res2 <- ldply(final_isp_annot_res_isp, rbind)
-    isp_group_check <- table(final_isp_annot_res2[, 1])
-
-    final_isp_annot_res2 <- as.data.frame(final_isp_annot_res2)
-
-    final_isp_annot_res2 <- final_isp_annot_res2
-    final_isp_annot_res2 <- final_isp_annot_res2[, -c(1)]
-    final_isp_annot_res2 <- as.data.frame(final_isp_annot_res2)
+    final_isp_annot_res2 <- ldply(final_isp_annot_res_isp, rbind)[, -c(1)]
 
     rm(final_isp_annot_res_isp)
     mchemicaldata <- rbind(final_isp_annot_res_all, final_isp_annot_res2) # [,-c(12)]
@@ -256,16 +250,9 @@ get_chemscorev1.6.71 <- function(chemicalid,
   diffmatB <- {}
   diffmatB <- lapply(1:length(mod_names), do_something_2, mod_names, mchemicaldata)
 
-  mchemicaldata <- ldply(diffmatB, rbind)
-  mchemicaldata <- unique(mchemicaldata)
+  mchemicaldata <- unique(ldply(diffmatB, rbind))
 
   rm(diffmatB)
-  dupmz <- {}
-
-  if (length(dupmz) > 0) {
-    mchemicaldata <- mchemicaldata[-c(dupmz), ]
-  }
-
   rm(final_isp_annot_res)
 
   write.table(mchemicaldata, file = "../Stage2_withisotopes.txt", append = TRUE, sep = "\t", col.names = FALSE)
@@ -273,6 +260,7 @@ get_chemscorev1.6.71 <- function(chemicalid,
   table_mod <- table(mchemicaldata$Module_RTclust)
   table_mod <- table_mod[table_mod > 0]
   table_mod <- table_mod[order(table_mod, decreasing = TRUE)]
+
   top_mod <- names(table_mod)
 
   mchemicaldata_orig <- mchemicaldata
@@ -287,8 +275,7 @@ get_chemscorev1.6.71 <- function(chemicalid,
 
       chemical_score <- (-99999)
       conf_level <- 0
-      mchemicaldata <- mchemicaldata_orig[which(mchemicaldata_orig$Module_RTclust == top_mod[i]), ]
-      mchemicaldata <- mchemicaldata[order(mchemicaldata$mz), ]
+      mchemicaldata <- mchemicaldata_orig %>% filter(Module_RTclust == top_mod[i]) %>% arrange(mz)
 
       cur_adducts_with_isotopes <- mchemicaldata$Adduct
       cur_adducts <- gsub(cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[0-9]*\\])", replacement = "")
