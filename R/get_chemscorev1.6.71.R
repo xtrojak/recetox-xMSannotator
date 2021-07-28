@@ -138,6 +138,11 @@ do_something_2 <- function(i,
   return(groupB)
 }
 
+compute_score <- function(adduct_weights, cur_adducts_with_isotopes) {
+  score <- 1 * (10^max(as.numeric(as.character(adduct_weights[which(adduct_weights[, 1] %in% cur_adducts_with_isotopes), 2]))))
+  return(score[1])
+}
+
 get_chemscorev1.6.71 <- function(chemicalid,
                                  mchemicaldata,
                                  corthresh,
@@ -283,8 +288,7 @@ get_chemscorev1.6.71 <- function(chemicalid,
       if (nrow(mchemicaldata) < 2) {
         good_adducts_len <- length(which(cur_adducts_with_isotopes %in% adduct_weights[, 1]))
         if (good_adducts_len > 0) {
-          chemical_score <- (1 * (10^max(as.numeric(as.character(adduct_weights[which(adduct_weights[, 1] %in% cur_adducts_with_isotopes), 2])))))
-          chemical_score <- chemical_score[1]
+          chemical_score <- compute_score(adduct_weights, cur_adducts_with_isotopes)
           if (chemical_score > best_chemical_score) {
             best_chemical_score <- chemical_score
 
