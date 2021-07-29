@@ -1,3 +1,7 @@
+num_nodes <<- 8
+load("testdata/adduct_weights.rda")
+adduct_weights <<- adduct_weights
+
 test_that("advanced annotation Stage1 works", {
   skip("Currently excluded!")
   tmpdir <- tempdir()
@@ -10,7 +14,7 @@ test_that("advanced annotation Stage1 works", {
 
   annotation <- multilevelannotation(
     peaks,
-    num_nodes = 16,
+    num_nodes = num_nodes,
     outloc = tmpdir,
     db_name = "HMDB",
     allsteps = FALSE
@@ -31,15 +35,20 @@ test_that("advanced annotation Stage1 works", {
   expect_equal(actual, expected)
 })
 
-test_that("advanced annotation Stage2 works", {
+test_that("advanced annotation Stage2 works on 12qc samples across batches", {
+
+  testname <<- "qc_matrix"
+
+  peaks_filename <- paste0(testname, ".rda")
+  peaks_filepath <- file.path("testdata", peaks_filename)
+
   # skip("Currently excluded!")
   here <- getwd()
   tmpdir <- tempdir()
-  peaks <- readRDS("testdata/qc_solvent.rda")
+
+  peaks <- readRDS(peaks_filepath)
   peaks <- unique(peaks)
   peaks <- dplyr::rename(subset(peaks, select = -feature), time = rt)
-
-  load("testdata/expected_stage_2.rda")
 
   queryadductlist <- c(
     "M+H", "M+2H", "M+H+NH4", "M+ACN+2H",
@@ -47,15 +56,6 @@ test_that("advanced annotation Stage2 works", {
     "M+ACN+Na", "M+2ACN+H", "2M+H", "2M+Na",
     "2M+ACN+H", "M+2Na-H", "M+H-H2O", "M+H-2H2O"
   )
-
-  data(adduct_table)
-  load("testdata/adduct_weights.rda")
-  adduct_weights <- as.data.frame(adduct_weights)
-  ls(adduct_weights)
-  data(adduct_table)
-  data(adduct_weights)
-
-  num_nodes <- 8
 
   annotation <- multilevelannotation(
     peaks,
@@ -71,7 +71,7 @@ test_that("advanced annotation Stage2 works", {
   for (i in seq(from = 1, to = 5, by = 1)) {
     filename <- paste0("Stage", i, ".csv")
     actual <- read.csv(file.path(tmpdir, filename))
-    expected <- read.csv(file.path(here, "testdata/advanced", filename))
+    expected <- read.csv(file.path(here, "testdata/advanced", testname, filename))
 
     actual <- dplyr::arrange(
       actual, mz, time,
