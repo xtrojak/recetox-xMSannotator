@@ -105,7 +105,7 @@ compute_rt_modules <- function(peak_table, peak_width = 1) {
 
     for (id in modules) {
         subdata <- peak_table %>% filter(module == id)
-        cluster_positions <- compute_cluster_positions(subdata$rt, width = peak_width, do_plot = FALSE)
+        cluster_positions <- compute_cluster_positions(subdata$rt, width = peak_width)
         subdata$RTclust <- compute_cluster_assignments(cluster_positions, subdata$rt)
 
         rt_cluster <- bind_rows(rt_cluster, subdata %>% select(peak, RTclust))

@@ -1,5 +1,5 @@
 test_that("Integration test: RT based clustering works.", {
-    peaks <- readRDS("test-data/qc_solvent.rda")
+    peaks <- readRDS("test-data/rt_modules/qc_solvent.rda")
     peaks <- dplyr::rename(peaks, peak = feature)
     peaks <- dplyr::rename_with(
         peaks,
@@ -34,7 +34,7 @@ test_that("Integration test: RT based clustering works.", {
 #' @import gplots
 #' @import entropy
 test_that("Cluster assignments are comparable.", {
-    peaks <- readRDS("test-data/xmsannotator_qc_matrix_stage1.rda")
+    peaks <- readRDS("test-data/rt_modules/xmsannotator_qc_matrix_stage1.rda")
     peaks$peak <- as.integer(rownames(peaks))
     peaks <- dplyr::rename(
         peaks,
@@ -43,11 +43,28 @@ test_that("Cluster assignments are comparable.", {
         RTclust_old = RTclust
     )
 
-    matrix_with_clust <- compute_rt_modules(peaks, peak_width = 1)
+    actual <- compute_rt_modules(peaks, peak_width = 1)
     y2d <- gplots::hist2d(
-        matrix_with_clust$RTclust_old,
-        matrix_with_clust$RTclust
+        actual$RTclust_old,
+        actual$RTclust
     )
+
     mutual_information <- entropy::mi.empirical(y2d$counts) # maximum similarity is 5.1
     expect_true(mutual_information > 2.5)
+})
+
+test_that("Cluster assignments are comparable.", {
+    peaks <- readRDS("test-data/rt_modules/xmsannotator_qc_matrix_stage1.rda")
+    peaks$peak <- as.integer(rownames(peaks))
+    peaks <- dplyr::rename(
+        peaks,
+        rt = time,
+        module = Module,
+        RTclust_old = RTclust
+    )
+
+    actual <- compute_rt_modules(peaks, peak_width = 1) %>% select(RTclust)
+
+    expected <- readRDS("test-data/rt_modules/expected.rda")
+    expect_equal(actual, expected)
 })
