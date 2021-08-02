@@ -7,4 +7,13 @@ dependencies:
   - anaconda-client
   - conda-build
   - conda-verify
-  - r-base
+  - r-base >=3.5
+  - r-dplyr >=1.0.0
+  - r-flashclust
+  - r-wgcna
+  - r-tidyr
+  - r-purrr
+  - r-tibble
+  - r-pastecs
+  - r-rlist
+  - r-rann

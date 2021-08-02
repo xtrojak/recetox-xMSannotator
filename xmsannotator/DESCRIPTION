@@ -1,4 +1,4 @@
-Package: xmsannotator
+Package: recetox.xmsannotator
 Title: Network-Based Annotation of LC-MS Data
 Version: 0.9.1
 Authors@R: c(
@@ -17,7 +17,10 @@ Imports:
     WGCNA,
     flashClust,
     dynamicTreeCut,
-    tidyr
+    tidyr,
+    RANN,
+    pastecs,
+    rlist
 Suggests:
     testthat (>= 3.0.0),
     arrow (>= 3.0.0),
