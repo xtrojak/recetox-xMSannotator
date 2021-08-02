@@ -1,4 +1,4 @@
-num_nodes <<- 8
+num_nodes <<- 16
 load("testdata/adduct_weights.rda")
 adduct_weights <<- adduct_weights
 
@@ -35,15 +35,14 @@ test_that("advanced annotation Stage1 works", {
   expect_equal(actual, expected)
 })
 
-test_that("advanced annotation Stage2 works on 12qc samples across batches", {
+patrick::with_parameters_test_that("Advanced annotation works:", {
 
-  testname <<- "qc_matrix"
+  testname <<- test_identifier
 
   peaks_filename <- paste0(testname, ".rda")
   peaks_filepath <- file.path("testdata", peaks_filename)
 
-  # skip("Currently excluded!")
-  here <- getwd()
+  wd <- getwd()
   tmpdir <- tempdir()
 
   peaks <- readRDS(peaks_filepath)
@@ -68,10 +67,10 @@ test_that("advanced annotation Stage2 works on 12qc samples across batches", {
     allsteps = TRUE
   )
 
-  for (i in seq(from = 1, to = 5, by = 1)) {
+  for (i in seq.int(from = 1, to = 5, by = 1)) {
     filename <- paste0("Stage", i, ".csv")
     actual <- read.csv(file.path(tmpdir, filename))
-    expected <- read.csv(file.path(here, "testdata/advanced", testname, filename))
+    expected <- read.csv(file.path(wd, "testdata", "advanced", testname, filename))
 
     actual <- dplyr::arrange(
       actual, mz, time,
@@ -82,4 +81,11 @@ test_that("advanced annotation Stage2 works on 12qc samples across batches", {
 
     expect_equal(actual, expected)
   }
-})
+  setwd(wd)
+  testname <<- NA
+},
+cases(
+    qc_solvent = list(test_identifier = "qc_solvent"),
+    qc_matrix = list(test_identifier = "qc_matrix")
+  )
+)
