@@ -1,6 +1,6 @@
 #' @import dplyr
 #' @importFrom rlang .data
-compute_isotopes <- function(peaks, query, rt_tolerance, mass_defect_tolerance = 0, abudance_ratio, max_isp) {
+compute_isotopes <- function(peaks, query, rt_tolerance, mass_defect_tolerance = 0, abundance_ratio, max_isp) {
   isotopes <- mutate(
     peaks,
     compound = query$compound,
@@ -11,7 +11,7 @@ compute_isotopes <- function(peaks, query, rt_tolerance, mass_defect_tolerance =
   isotopes <- filter(
     isotopes,
     cluster == query$cluster,
-    avg_intensity / query$avg_intensity <= abudance_ratio,
+    avg_intensity / query$avg_intensity <= abundance_ratio,
     near(rt, query$rt, rt_tolerance),
     near(mass_defect, query$mass_defect, mass_defect_tolerance),
     between(abs(isotope_number), 1, max_isp)
