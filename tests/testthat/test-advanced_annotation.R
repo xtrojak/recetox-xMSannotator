@@ -1,4 +1,4 @@
-num_nodes <<- 16
+num_nodes <<- 8
 load("testdata/adduct_weights.rda")
 adduct_weights <<- adduct_weights
 
@@ -40,14 +40,14 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
   testname <<- test_identifier
   max.rt.diff <<- max_rt_diff
 
-  peaks_filename <- paste0(testname, ".rda")
-  peaks_filepath <- file.path("testdata", peaks_filename)
-
   wd <- getwd()
-  tmpdir <- tempdir()
 
-  peaks <- readRDS(peaks_filepath)
-  peaks <- unique(peaks)
+  peaks_filename <- paste0(testname, ".rda")
+  peaks_filepath <- file.path(wd, "testdata", peaks_filename)
+
+  outloc <- file.path(tempdir(), testname)
+
+  peaks <- unique(readRDS(peaks_filepath))
 
   queryadductlist <- c(
     "M+H", "M+2H", "M+H+NH4", "M+ACN+2H",
@@ -59,7 +59,7 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
   annotation <- multilevelannotation(
     peaks,
     num_nodes = num_nodes,
-    outloc = tmpdir,
+    outloc = outloc,
     db_name = "HMDB",
     queryadductlist = queryadductlist,
     adduct_weights = adduct_weights,
@@ -69,7 +69,7 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
 
   for (i in seq.int(from = 1, to = 5, by = 1)) {
     filename <- paste0("Stage", i, ".csv")
-    actual <- read.csv(file.path(tmpdir, filename))
+    actual <- read.csv(file.path(outloc, filename))
     expected <- read.csv(file.path(wd, "testdata", "advanced", testname, filename))
 
     actual <- dplyr::arrange(
@@ -81,8 +81,8 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
 
     expect_equal(actual, expected)
   }
+
   setwd(wd)
-  testname <<- NA
 },
 cases(
     qc_solvent = list(test_identifier = "qc_solvent", max_rt_diff = 0.5),
