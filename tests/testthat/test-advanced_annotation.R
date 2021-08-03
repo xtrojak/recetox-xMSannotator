@@ -38,6 +38,7 @@ test_that("advanced annotation Stage1 works", {
 patrick::with_parameters_test_that("Advanced annotation works:", {
 
   testname <<- test_identifier
+  max.rt.diff <<- max_rt_diff
 
   peaks_filename <- paste0(testname, ".rda")
   peaks_filepath <- file.path("testdata", peaks_filename)
@@ -47,7 +48,6 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
 
   peaks <- readRDS(peaks_filepath)
   peaks <- unique(peaks)
-  peaks <- dplyr::rename(subset(peaks, select = -feature), time = rt)
 
   queryadductlist <- c(
     "M+H", "M+2H", "M+H+NH4", "M+ACN+2H",
@@ -63,7 +63,7 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
     db_name = "HMDB",
     queryadductlist = queryadductlist,
     adduct_weights = adduct_weights,
-    max.rt.diff = 0.5,
+    max.rt.diff = max.rt.diff,
     allsteps = TRUE
   )
 
@@ -85,7 +85,8 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
   testname <<- NA
 },
 cases(
-    qc_solvent = list(test_identifier = "qc_solvent"),
-    qc_matrix = list(test_identifier = "qc_matrix")
+    qc_solvent = list(test_identifier = "qc_solvent", max_rt_diff = 0.5),
+    qc_matrix = list(test_identifier = "qc_matrix", max_rt_diff = 0.5),
+    sample_peaks = list(test_identifier = "sample_data_custom", max_rt_diff = 10)
   )
 )
