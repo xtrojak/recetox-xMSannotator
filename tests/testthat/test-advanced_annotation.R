@@ -1,4 +1,4 @@
-num_nodes <<- 12
+num_nodes <<- 8
 load("testdata/adduct_weights.rda")
 adduct_weights <<- adduct_weights
 
@@ -75,10 +75,10 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
     expected <- read.csv(file.path(wd, "testdata", "advanced", testname, filename))
 
     actual <- dplyr::arrange(
-      actual, Module_RTclust, mz, time,
+      actual, mz, time,
     )
     expected <- dplyr::arrange(
-      expected, Module_RTclust, mz, time
+      expected, mz, time
     )
 
     expect_equal(actual, expected)
@@ -86,6 +86,8 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
 
   setwd(wd)
   Sys.sleep(10)
+
+  showConnections()
 },
 cases(
     qc_solvent = list(test_identifier = "qc_solvent", max_rt_diff = 0.5),
