@@ -42,14 +42,12 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
 
   wd <- getwd()
 
-  peaks_filename <- paste0(testname, ".rda")
+  peaks_filename <- paste0(testname, ".rds")
   peaks_filepath <- file.path(wd, "testdata", peaks_filename)
 
   outloc <- file.path(tempdir(), testname)
 
   peaks <- unique(readRDS(peaks_filepath))
-
-  Sys.sleep(2)
 
   queryadductlist <- c(
     "M+H", "M+2H", "M+H+NH4", "M+ACN+2H",
@@ -85,7 +83,6 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
   }
 
   setwd(wd)
-  Sys.sleep(10)
 
   showConnections()
 },

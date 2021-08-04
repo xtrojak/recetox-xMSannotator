@@ -4,11 +4,12 @@ test_that("simple annotation works", {
   load("testdata/sample_peaks.rda")
   load("testdata/expected_simple_annotation.rda")
 
+  outloc <- file.path(tmpdir, "simple_annotation")
   annotation <- simpleAnnotation(
     peaks,
-    num_nodes = 16,
+    num_nodes = 8,
     db_name = "HMDB",
-    outloc = tmpdir
+    outloc = outloc
   )
 
   annotation$Adduct <- as.character(annotation$Adduct)
