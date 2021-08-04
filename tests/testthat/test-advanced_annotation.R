@@ -2,38 +2,38 @@ num_nodes <<- 8
 load("testdata/adduct_weights.rda")
 adduct_weights <<- adduct_weights
 
-test_that("advanced annotation Stage1 works", {
-  #skip("Currently excluded!")
-  tmpdir <- tempdir()
-  load("testdata/sample_peaks.rda")
-  peaks <- unique(peaks)
+# test_that("advanced annotation Stage1 works", {
+#   skip("Currently excluded!")
+#   tmpdir <- tempdir()
+#   load("testdata/sample_peaks.rda")
+#   peaks <- unique(peaks)
 
-  load("testdata/expected_stage_1.rda")
+#   load("testdata/expected_stage_1.rda")
 
-  comparison_columns <- c("mz", "time", "rep1", "rep2", "rep3")
+#   comparison_columns <- c("mz", "time", "rep1", "rep2", "rep3")
 
-  annotation <- multilevelannotation(
-    peaks,
-    num_nodes = num_nodes,
-    outloc = tmpdir,
-    db_name = "HMDB",
-    allsteps = FALSE
-  )
+#   annotation <- multilevelannotation(
+#     peaks,
+#     num_nodes = num_nodes,
+#     outloc = tmpdir,
+#     db_name = "HMDB",
+#     allsteps = FALSE
+#   )
 
-  actual <- read.csv("Stage1.csv")
+#   actual <- read.csv("Stage1.csv")
 
-  actual <- subset(actual, select = -Module_RTclust)
-  expected <- subset(expected_stage_1, select = -Module_RTclust)
+#   actual <- subset(actual, select = -Module_RTclust)
+#   expected <- subset(expected_stage_1, select = -Module_RTclust)
 
-  actual <- dplyr::arrange(
-    actual, mz, time, rep1, rep2, rep3
-  )
-  expected <- dplyr::arrange(
-    expected, mz, time, rep1, rep2, rep3
-  )
+#   actual <- dplyr::arrange(
+#     actual, mz, time, rep1, rep2, rep3
+#   )
+#   expected <- dplyr::arrange(
+#     expected, mz, time, rep1, rep2, rep3
+#   )
 
-  expect_equal(actual, expected)
-})
+#   expect_equal(actual, expected)
+# })
 
 patrick::with_parameters_test_that("Advanced annotation works:", {
 
@@ -49,18 +49,18 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
 
   peaks <- unique(readRDS(peaks_filepath))
 
-  queryadductlist <- c(
-    "M+H", "M+2H", "M+H+NH4", "M+ACN+2H",
-    "M+2ACN+2H", "M+NH4", "M+Na", "M+ACN+H",
-    "M+ACN+Na", "M+2ACN+H", "2M+H", "2M+Na",
-    "2M+ACN+H", "M+2Na-H", "M+H-H2O", "M+H-2H2O"
-  )
+  # queryadductlist <- c(
+  #   "M+H", "M+2H", "M+H+NH4", "M+ACN+2H",
+  #   "M+2ACN+2H", "M+NH4", "M+Na", "M+ACN+H",
+  #   "M+ACN+Na", "M+2ACN+H", "2M+H", "2M+Na",
+  #   "2M+ACN+H", "M+2Na-H", "M+H-H2O", "M+H-2H2O"
+  # )
 
   annotation <- multilevelannotation(
     peaks,
     num_nodes = num_nodes,
     outloc = outloc,
-    db_name = "HMDB",
+    db_name = database,
     queryadductlist = queryadductlist,
     adduct_weights = adduct_weights,
     max.rt.diff = max.rt.diff,
@@ -87,8 +87,13 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
   showConnections()
 },
 cases(
-    qc_solvent = list(test_identifier = "qc_solvent", max_rt_diff = 0.5),
-    qc_matrix = list(test_identifier = "qc_matrix", max_rt_diff = 0.5)
+    qc_solvent = list(
+      test_identifier = "qc_solvent",
+      max_rt_diff = 0.5,
+      queryadductlist = c("M+H", "M+2H", "M+H+NH4", "M+ACN+2H"),
+      database = "HMDB"
+    )
+    #qc_matrix = list(test_identifier = "qc_matrix", max_rt_diff = 0.5)
     #sample_peaks = list(test_identifier = "sample_data_custom", max_rt_diff = 10)
   )
 )
