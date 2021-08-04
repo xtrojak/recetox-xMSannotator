@@ -3,10 +3,10 @@
 compute_isotopes <- function(peaks, query, rt_tolerance, mass_defect_tolerance = 0, abundance_ratio, max_isp) {
   isotopes <- mutate(
     peaks,
+    isotopic_deviation = round(mz - query$expected_mass),
     compound = query$compound,
-    isotope_number = round(mz - query$monoisotopic_mass),
-    adduct = sprintf("%s_[%+d]", query$adduct, isotope_number),
-    formula = sprintf("%s_[%+d]", query$formula, isotope_number),
+    adduct = query$adduct,
+    formula = query$formula
   )
   isotopes <- filter(
     isotopes,
@@ -14,9 +14,8 @@ compute_isotopes <- function(peaks, query, rt_tolerance, mass_defect_tolerance =
     avg_intensity / query$avg_intensity <= abundance_ratio,
     near(rt, query$rt, rt_tolerance),
     near(mass_defect, query$mass_defect, mass_defect_tolerance),
-    between(abs(isotope_number), 1, max_isp)
+    between(abs(isotopic_deviation), 1, max_isp)
   )
-  isotopes <- select(isotopes, -isotope_number)
 }
 
 #' @import dplyr
