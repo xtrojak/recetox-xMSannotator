@@ -10,5 +10,6 @@ License: GPL2.0
 LazyLoad: no
 Depends: XML, R2HTML, WGCNA, RCurl, doSNOW, foreach, SSOAP, png, rjson, snow, plyr, KEGGREST, flashClust, pcaMethods, Rdisop, limma
 Suggests: 
+    covr,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

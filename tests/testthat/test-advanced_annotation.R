@@ -1,9 +1,9 @@
-num_nodes <<- 8
+num_nodes <<- 12
 load("testdata/adduct_weights.rda")
 adduct_weights <<- adduct_weights
 
 test_that("advanced annotation Stage1 works", {
-  skip("Currently excluded!")
+  #skip("Currently excluded!")
   tmpdir <- tempdir()
   load("testdata/sample_peaks.rda")
   peaks <- unique(peaks)
@@ -88,8 +88,8 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
   Sys.sleep(10)
 },
 cases(
-    #qc_solvent = list(test_identifier = "qc_solvent", max_rt_diff = 0.5),
-    #qc_matrix = list(test_identifier = "qc_matrix", max_rt_diff = 0.5),
-    sample_peaks = list(test_identifier = "sample_data_custom", max_rt_diff = 10)
+    qc_solvent = list(test_identifier = "qc_solvent", max_rt_diff = 0.5),
+    qc_matrix = list(test_identifier = "qc_matrix", max_rt_diff = 0.5)
+    #sample_peaks = list(test_identifier = "sample_data_custom", max_rt_diff = 10)
   )
 )

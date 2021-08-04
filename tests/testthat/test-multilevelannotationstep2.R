@@ -1,5 +1,5 @@
 test_that("multilevelannotationstep2", {
-    skip("Currently excluded!")
+    #skip("Currently excluded!")
     # Arrange
     here <- getwd()
     setwd("testdata/multilevelannotationstep2")
