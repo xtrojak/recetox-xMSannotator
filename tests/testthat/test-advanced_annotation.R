@@ -49,6 +49,8 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
 
   peaks <- unique(readRDS(peaks_filepath))
 
+  Sys.sleep(2)
+
   queryadductlist <- c(
     "M+H", "M+2H", "M+H+NH4", "M+ACN+2H",
     "M+2ACN+2H", "M+NH4", "M+Na", "M+ACN+H",
@@ -73,20 +75,21 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
     expected <- read.csv(file.path(wd, "testdata", "advanced", testname, filename))
 
     actual <- dplyr::arrange(
-      actual, mz, time,
+      actual, Module_RTclust, mz, time,
     )
     expected <- dplyr::arrange(
-      expected, mz, time
+      expected, Module_RTclust, mz, time
     )
 
     expect_equal(actual, expected)
   }
 
   setwd(wd)
+  Sys.sleep(10)
 },
 cases(
-    qc_solvent = list(test_identifier = "qc_solvent", max_rt_diff = 0.5),
-    qc_matrix = list(test_identifier = "qc_matrix", max_rt_diff = 0.5),
+    #qc_solvent = list(test_identifier = "qc_solvent", max_rt_diff = 0.5),
+    #qc_matrix = list(test_identifier = "qc_matrix", max_rt_diff = 0.5),
     sample_peaks = list(test_identifier = "sample_data_custom", max_rt_diff = 10)
   )
 )
