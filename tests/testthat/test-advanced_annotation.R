@@ -64,7 +64,9 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
     queryadductlist = queryadductlist,
     adduct_weights = adduct_weights,
     max.rt.diff = max.rt.diff,
-    allsteps = TRUE
+    allsteps = TRUE,
+    cormethod = correlation_method,
+    mass_defect_mode = mass_defect_mode
   )
 
   for (i in seq.int(from = 1, to = 5, by = 1)) {
@@ -91,9 +93,18 @@ cases(
       test_identifier = "qc_solvent",
       max_rt_diff = 0.5,
       queryadductlist = c("M+H", "M+2H", "M+H+NH4", "M+ACN+2H"),
-      database = "HMDB"
+      database = "HMDB",
+      correlation_method = "pearson",
+      mass_defect_mode = "pos"
+    ),
+    qc_matrix = list(
+      test_identifier = "qc_matrix",
+      max_rt_diff = 0.5,
+      queryadductlist = c("M+H", "M+2H", "M+ACN+Na", "M+2ACN+H", "2M+H"),
+      database = "KEGG",
+      correlation_method = "spearman",
+      mass_defect_mode = "both"
     )
-    #qc_matrix = list(test_identifier = "qc_matrix", max_rt_diff = 0.5)
     #sample_peaks = list(test_identifier = "sample_data_custom", max_rt_diff = 10)
   )
 )
