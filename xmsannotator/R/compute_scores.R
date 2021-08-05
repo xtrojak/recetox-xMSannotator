@@ -1,9 +1,10 @@
 # Get abundance ratio of the second most abundant isotopologue
+# getMolecule initializes a list of isotopes ordered by m/z, not abundance
 #' @import Rdisop
 compute_abundance_ratio <- function(formula) {
   molecule <- getMolecule(formula)
-  isotope <- getIsotope(molecule, 2)
-  abundance_ratio <- isotope[2]
+  abundance_ratios <- sort(molecule$isotopes[[1]][2,], decreasing = TRUE)
+  sec_most_abundant <- abundance_ratios[2]
 }
 
 #' @import dplyr

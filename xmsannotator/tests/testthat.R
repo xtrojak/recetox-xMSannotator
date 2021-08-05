@@ -1,3 +1,4 @@
+library(patrick)
 library(testthat)
 library(xmsannotator)
 
