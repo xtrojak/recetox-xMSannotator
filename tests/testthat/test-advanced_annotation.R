@@ -1,4 +1,4 @@
-num_nodes <<- 8
+num_nodes <<- 16
 load("testdata/adduct_weights.rda")
 adduct_weights <<- adduct_weights
 
@@ -66,7 +66,8 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
     max.rt.diff = max.rt.diff,
     allsteps = TRUE,
     cormethod = correlation_method,
-    mass_defect_mode = mass_defect_mode
+    mass_defect_mode = mass_defect_mode,
+    mode = mode
   )
 
   for (i in seq.int(from = 1, to = 5, by = 1)) {
@@ -95,7 +96,8 @@ cases(
       queryadductlist = c("M+H", "M+2H", "M+H+NH4", "M+ACN+2H"),
       database = "HMDB",
       correlation_method = "pearson",
-      mass_defect_mode = "pos"
+      mass_defect_mode = "pos",
+      mode = "pos"
     ),
     qc_matrix = list(
       test_identifier = "qc_matrix",
@@ -103,7 +105,17 @@ cases(
       queryadductlist = c("M+H", "M+2H", "M+ACN+Na", "M+2ACN+H", "2M+H"),
       database = "KEGG",
       correlation_method = "spearman",
-      mass_defect_mode = "both"
+      mass_defect_mode = "both",
+      mode = "pos"
+    ),
+    batch1_neg_hmdb = list(
+      test_identifier = "batch1_neg",
+      max_rt_diff = 0.5,
+      queryadductlist = c("M-H", "M-2H"),
+      database = "HMDB",
+      correlation_method = "pearson",
+      mass_defect_mode = "both",
+      mode = "neg"
     )
     #sample_peaks = list(test_identifier = "sample_data_custom", max_rt_diff = 10)
   )
