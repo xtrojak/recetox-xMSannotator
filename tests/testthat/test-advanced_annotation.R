@@ -47,50 +47,48 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
   }
 
   setwd(wd)
-
-  showConnections()
 },
 cases(
-    qc_solvent = list(
-      test_identifier = "qc_solvent",
-      max_rt_diff = 0.5,
-      queryadductlist = c("M+H", "M+2H", "M+H+NH4", "M+ACN+2H"),
+    # qc_solvent = list(
+    #   test_identifier = "qc_solvent",
+    #   max_rt_diff = 0.5,
+    #   queryadductlist = c("M+H", "M+2H", "M+H+NH4", "M+ACN+2H"),
+    #   database = "HMDB",
+    #   correlation_method = "pearson",
+    #   mass_defect_mode = "pos",
+    #   mode = "pos"
+    # )
+    # qc_matrix = list(
+    #   test_identifier = "qc_matrix",
+    #   max_rt_diff = 0.5,
+    #   queryadductlist = c("M+H", "M+2H", "M+ACN+Na", "M+2ACN+H", "2M+H"),
+    #   database = "KEGG",
+    #   correlation_method = "spearman",
+    #   mass_defect_mode = "both",
+    #   mode = "pos"
+    # ),
+    # batch1_neg_hmdb = list(
+    #   test_identifier = "batch1_neg",
+    #   max_rt_diff = 0.5,
+    #   queryadductlist = c("M-H", "M-2H"),
+    #   database = "HMDB",
+    #   correlation_method = "pearson",
+    #   mass_defect_mode = "both",
+    #   mode = "neg"
+    # ),
+    sample_data_custom = list(
+      test_identifier = "sample_data_custom",
+      max_rt_diff = 2,
+      queryadductlist = c(
+        "M+H", "M+2H", "M+H+NH4", "M+ACN+2H",
+        "M+2ACN+2H", "M+NH4", "M+Na", "M+ACN+H",
+        "M+ACN+Na", "M+2ACN+H", "2M+H", "2M+Na",
+        "2M+ACN+H", "M+2Na-H", "M+H-H2O", "M+H-2H2O"
+      ),
       database = "HMDB",
       correlation_method = "pearson",
       mass_defect_mode = "pos",
       mode = "pos"
-    ),
-    qc_matrix = list(
-      test_identifier = "qc_matrix",
-      max_rt_diff = 0.5,
-      queryadductlist = c("M+H", "M+2H", "M+ACN+Na", "M+2ACN+H", "2M+H"),
-      database = "KEGG",
-      correlation_method = "spearman",
-      mass_defect_mode = "both",
-      mode = "pos"
-    ),
-    batch1_neg_hmdb = list(
-      test_identifier = "batch1_neg",
-      max_rt_diff = 0.5,
-      queryadductlist = c("M-H", "M-2H"),
-      database = "HMDB",
-      correlation_method = "pearson",
-      mass_defect_mode = "both",
-      mode = "neg"
     )
-    # sample_peaks = list(
-    #   test_identifier = "sample_data_custom",
-    #   max_rt_diff = 10,
-    #   queryadductlist <- c(
-    #     "M+H", "M+2H", "M+H+NH4", "M+ACN+2H",
-    #     "M+2ACN+2H", "M+NH4", "M+Na", "M+ACN+H",
-    #     "M+ACN+Na", "M+2ACN+H", "2M+H", "2M+Na",
-    #     "2M+ACN+H", "M+2Na-H", "M+H-H2O", "M+H-2H2O"
-    #   ),
-    #   database = "HMDB",
-    #   correlation_method = "pearson",
-    #   mode = "pos",
-    #   mass_defect_mode = "pos"
-    # )
   )
 )
