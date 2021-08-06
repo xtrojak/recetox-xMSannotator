@@ -1,3 +1,10 @@
+#' @import dplyr
+assign_isotope_abundances <- function(isotopes) {
+  molecules <- distinct(isotopes, molecular_formula)
+  molecules <- mutate(molecules, abundance_ratio = map_dbl(molecular_formula, compute_abundance_ratio))
+  isotopes <- inner_join(isotopes, molecules, by = "molecular_formula")
+}
+
 # Get abundance ratio of the second most abundant isotopologue
 # getMolecule initializes a list of isotopes ordered by m/z, not abundance
 #' @import Rdisop
@@ -34,7 +41,8 @@ compute_scores <- function(annotation, adduct_weights, mass_defect_tolerance, ma
   annotation <- filter(annotation, forms_valid_adduct_pair(.data$molecular_formula, .data$adduct))
 
   isotopes <- semi_join(annotation, adduct_weights, by = "adduct")
-  isotopes <- mutate(isotopes, abundance_ratio = map_dbl(molecular_formula, compute_abundance_ratio))
+  isotopes <- assign_isotope_abundances(isotopes)
+  # This can be parallelized on `group_split(group_by(isotopes, molecular_formula))`
   isotopes <- purrr::pmap_dfr(isotopes,
                               ~compute_isotopes(..., peaks = peaks,
                                                 rt_tolerance = rt_tolerance,

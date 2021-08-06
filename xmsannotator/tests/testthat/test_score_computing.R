@@ -30,3 +30,11 @@ patrick::with_parameters_test_that("abundance_ratio_computing", {
         )
   )
 )
+
+test_that("assign_abundance_ratios", {
+  isotopes <- readRDS("testdata/all_isotopes.Rda")
+  expected <- readRDS("testdata/isotopes_with_abundances.Rda")
+  actual <- assign_isotope_abundances(isotopes)
+
+  expect_equal(actual, expected)
+})
