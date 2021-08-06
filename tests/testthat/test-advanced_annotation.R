@@ -2,39 +2,6 @@ num_nodes <<- 16
 load("testdata/adduct_weights.rda")
 adduct_weights <<- adduct_weights
 
-# test_that("advanced annotation Stage1 works", {
-#   skip("Currently excluded!")
-#   tmpdir <- tempdir()
-#   load("testdata/sample_peaks.rda")
-#   peaks <- unique(peaks)
-
-#   load("testdata/expected_stage_1.rda")
-
-#   comparison_columns <- c("mz", "time", "rep1", "rep2", "rep3")
-
-#   annotation <- multilevelannotation(
-#     peaks,
-#     num_nodes = num_nodes,
-#     outloc = tmpdir,
-#     db_name = "HMDB",
-#     allsteps = FALSE
-#   )
-
-#   actual <- read.csv("Stage1.csv")
-
-#   actual <- subset(actual, select = -Module_RTclust)
-#   expected <- subset(expected_stage_1, select = -Module_RTclust)
-
-#   actual <- dplyr::arrange(
-#     actual, mz, time, rep1, rep2, rep3
-#   )
-#   expected <- dplyr::arrange(
-#     expected, mz, time, rep1, rep2, rep3
-#   )
-
-#   expect_equal(actual, expected)
-# })
-
 patrick::with_parameters_test_that("Advanced annotation works:", {
 
   testname <<- test_identifier
@@ -48,13 +15,6 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
   outloc <- file.path(tempdir(), testname)
 
   peaks <- unique(readRDS(peaks_filepath))
-
-  # queryadductlist <- c(
-  #   "M+H", "M+2H", "M+H+NH4", "M+ACN+2H",
-  #   "M+2ACN+2H", "M+NH4", "M+Na", "M+ACN+H",
-  #   "M+ACN+Na", "M+2ACN+H", "2M+H", "2M+Na",
-  #   "2M+ACN+H", "M+2Na-H", "M+H-H2O", "M+H-2H2O"
-  # )
 
   annotation <- multilevelannotation(
     peaks,
@@ -117,6 +77,19 @@ cases(
       mass_defect_mode = "both",
       mode = "neg"
     )
-    #sample_peaks = list(test_identifier = "sample_data_custom", max_rt_diff = 10)
+    # sample_peaks = list(
+    #   test_identifier = "sample_data_custom",
+    #   max_rt_diff = 10,
+    #   queryadductlist <- c(
+    #     "M+H", "M+2H", "M+H+NH4", "M+ACN+2H",
+    #     "M+2ACN+2H", "M+NH4", "M+Na", "M+ACN+H",
+    #     "M+ACN+Na", "M+2ACN+H", "2M+H", "2M+Na",
+    #     "2M+ACN+H", "M+2Na-H", "M+H-H2O", "M+H-2H2O"
+    #   ),
+    #   database = "HMDB",
+    #   correlation_method = "pearson",
+    #   mode = "pos",
+    #   mass_defect_mode = "pos"
+    # )
   )
 )
