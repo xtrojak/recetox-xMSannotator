@@ -20,4 +20,4 @@ dependencies:
   - r-data.table
   - r-testthat >= 3.0.0
   - r-readr
-  - r-rdisop
+  - bioconductor-rdisop
