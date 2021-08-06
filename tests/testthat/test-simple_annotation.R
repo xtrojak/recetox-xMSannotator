@@ -1,4 +1,6 @@
 test_that("simple annotation works", {
+  #skip("Currently excluded!")
+
   tmpdir <- tempdir()
   load("testdata/sample_peaks.rda")
   load("testdata/expected_simple_annotation.rda")

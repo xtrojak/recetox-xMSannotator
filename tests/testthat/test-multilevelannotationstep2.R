@@ -1,7 +1,9 @@
-test_that("multilevelannotationstep2", {
+patrick::with_parameters_test_that("multilevelannotationstep2:", {
     # Arrange
-    here <- getwd()
-    setwd("testdata/multilevelannotationstep2")
+    testthat_wd <- getwd()
+    test_path <- file.path(getwd(), "testdata/multilevelannotationstep2", test_identifier)
+    setwd(test_path)
+
     load(file = "chem_score1.Rda")
     expected <- curchemscoremat
     curchemscoremat <- NA
@@ -14,6 +16,11 @@ test_that("multilevelannotationstep2", {
     expect_equal(curchemscoremat, expected)
 
     # Annihilate
-    setwd(file.path(here, "testdata/multilevelannotationstep2"))
+    setwd(test_path)
     unlink("stage2", recursive = TRUE)
-})
+    setwd(testthat_wd)
+},
+cases(
+    base = list(test_identifier = "base"),
+    cor_mz_matrix = list(test_identifier = "cor_mz_matrix")
+))

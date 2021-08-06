@@ -3,7 +3,8 @@ load("testdata/adduct_weights.rda")
 adduct_weights <<- adduct_weights
 
 patrick::with_parameters_test_that("Advanced annotation works:", {
-
+  #skip("Currently excluded!")
+  
   testname <<- test_identifier
   max.rt.diff <<- max_rt_diff
 
