@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // match_by_mass
 DataFrame match_by_mass(DataFrame peaks, DataFrame adducts, DataFrame compounds, double tolerance);
 RcppExport SEXP _xmsannotator_match_by_mass(SEXP peaksSEXP, SEXP adductsSEXP, SEXP compoundsSEXP, SEXP toleranceSEXP) {

@@ -39,6 +39,7 @@ requirements:
     - bioconductor-rhdf5
     - r-rcpp >=0.11.0
     - r-arrow >=3.0.0
+    - bioconductor-rdisop
 
 test:
   commands:
