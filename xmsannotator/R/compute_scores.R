@@ -69,7 +69,7 @@ compute_isotopes <- function(...,
 #' @param intensity_deviation_tolerance A number. A threshold by which an intensity ratio of isotope
 #' @param mass_defect_tolerance A number. Maximum difference in mass defect between two peaks of the same compound
 #' @param max_isp A number. Maximal number of unique isotopes of a single compound
-#' @param peaks A peak table - `isp_masses_mz_data` from the original tool
+#' @param peaks A feature table containing mz, rt, rt cluster, and mean intensity of each peak
 #' @param rt_tolerance A number. Maximum rt difference for two peaks of the same substance
 #'
 #' @import dplyr
