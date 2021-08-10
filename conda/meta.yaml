@@ -1,6 +1,6 @@
-{% set name = "recetox-xMSannotator" %}
-{% set version = "2.0.1" %}
-{% set github = "https://github.com/recetox/recetox-xMSannotator" %}
+{% set name = "recetox-xmsannotator" %}
+{% set version = "0.9.1-dev" %}
+{% set github = "https://github.com/RECETOX/recetox-xMSannotator" %}
 
 package:
   name: "r-{{ name|lower }}"
@@ -27,9 +27,13 @@ requirements:
     - r-tidyr
     - r-purrr
     - r-tibble
+    - r-pastecs
+    - r-rlist
+    - r-rann
+
   run:
     - r-base >=3.5
-    - r-dplyr
+    - r-dplyr >=1.0.0
     - r-flashclust
     - r-wgcna
     - r-tidyr
@@ -39,10 +43,13 @@ requirements:
     - bioconductor-rhdf5
     - r-rcpp >=0.11.0
     - r-arrow >=3.0.0
+    - r-pastecs
+    - r-rlist
+    - r-rann
 
 test:
   commands:
-    - $R -e "library(xmsannotator)"
+    - $R -e "library(recetox.xmsannotator)"
 
 about:
   home: "{{ github }}"

@@ -20,3 +20,9 @@ dependencies:
   - r-data.table
   - r-testthat >= 3.0.0
   - r-readr
+  - r-pastecs
+  - r-rlist
+  - r-rann
+  - r-gplots
+  - r-devtools
+  - r-entropy
