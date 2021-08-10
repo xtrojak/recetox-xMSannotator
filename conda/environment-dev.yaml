@@ -17,7 +17,13 @@ dependencies:
   - r-rcpp >= 0.11.0
   - r-arrow >= 3.0.0
   - bioconductor-rhdf5
+  - bioconductor-rdisop
   - r-data.table
   - r-testthat >= 3.0.0
   - r-readr
-  - bioconductor-rdisop
+  - r-pastecs
+  - r-rlist
+  - r-rann
+  - r-gplots
+  - r-devtools
+  - r-entropy
