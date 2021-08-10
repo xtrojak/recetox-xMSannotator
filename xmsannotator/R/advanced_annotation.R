@@ -53,6 +53,7 @@ advanced_annotation <- function(
   adduct_weights = NULL,
   mass_tolerance = 5e-6,
   time_tolerance = 10,
+  peak_rt_width = 1,
   correlation_threshold = 0.7,
   deep_split = 2,
   min_cluster_size = 10,
@@ -82,6 +83,13 @@ advanced_annotation <- function(
   peak_intensity_matrix <- magrittr::set_colnames(peak_intensity_matrix, peak_table$peak)
   peak_correlation_matrix <- WGCNA::cor(peak_intensity_matrix, use = "p", method = "p")
 
+  annotation <- simple_annotation(
+    peak_table = peak_table,
+    compound_table = compound_table,
+    adduct_table = adduct_table,
+    mass_tolerance = mass_tolerance
+  )
+
   peak_modules <- compute_peak_modules(
     peak_intensity_matrix = peak_intensity_matrix,
     peak_correlation_matrix = peak_correlation_matrix,
@@ -91,20 +99,22 @@ advanced_annotation <- function(
     network_type = network_type
   )
 
-  annotation <- simple_annotation(
-    peak_table = peak_table,
-    compound_table = compound_table,
-    adduct_table = adduct_table,
-    mass_tolerance = mass_tolerance
+  peak_table <- compute_rt_modules(
+    peak_table = inner_join(peak_table, peak_modules, by = "peak"),
+    peak_width = peak_rt_width
   )
 
   annotation <- compute_mass_defect(annotation, precision = 0.01)
-  annotation <- inner_join(annotation, peak_modules, by = "peak")
+  annotation <- inner_join(annotation, peak_table, by = "peak")
 
   annotation <- compute_scores(
     annotation = annotation,
     adduct_weights = adduct_weights,
-    time_tolerance = time_tolerance
+    intensity_deviation_tolerance = intensity_deviation_tolerance,
+    mass_defect_tolerance = mass_defect_tolerance,
+    max_isp = max_isp,
+    peaks = peak_table,
+    rt_tolerance = time_tolerance
   )
 
   annotation <- compute_pathways(
