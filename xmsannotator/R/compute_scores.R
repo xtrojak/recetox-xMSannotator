@@ -16,7 +16,7 @@ assign_isotope_abundances <- function(isotopes) {
 #'
 #' @return Relative abundance ratio of the second most abundant isotope/isotopologue
 #'
-#' @import Rdisop
+#' @importFrom Rdisop getMolecule
 compute_abundance_ratio <- function(formula) {
   molecule <- getMolecule(formula)
   abundance_ratios <- sort(molecule$isotopes[[1]][2,], decreasing = TRUE)
@@ -54,7 +54,7 @@ compute_isotopes <- function(...,
   )
   isotopes <- filter(
     isotopes,
-    cluster == query$cluster,
+    RTclust == query$RTclust,
     mean_intensity / query$mean_intensity <= query$abundance_ratio + intensity_deviation_tolerance,
     near(rt, query$rt, rt_tolerance),
     near(mass_defect, query$mass_defect, mass_defect_tolerance),
@@ -74,12 +74,17 @@ compute_isotopes <- function(...,
 #'
 #' @import dplyr
 #' @importFrom rlang .data
-compute_scores <- function(annotation, adduct_weights, intensity_deviation_tolerance, mass_defect_tolerance, max_isp, peaks, rt_tolerance) {
+compute_scores <- function(annotation,
+                           adduct_weights,
+                           intensity_deviation_tolerance = 0.1,
+                           mass_defect_tolerance,
+                           max_isp,
+                           peaks,
+                           rt_tolerance) {
   annotation <- filter(annotation, forms_valid_adduct_pair(.data$molecular_formula, .data$adduct))
 
   isotopes <- semi_join(annotation, adduct_weights, by = "adduct")
   isotopes <- assign_isotope_abundances(isotopes)
-  # TODO: reproduce peak table construction from the multilevelannotation step1 of the original tool
   # This can be parallelized on `group_split(group_by(isotopes, molecular_formula))`
   isotopes <- purrr::pmap_dfr(isotopes,
                               ~compute_isotopes(..., peaks = peaks,

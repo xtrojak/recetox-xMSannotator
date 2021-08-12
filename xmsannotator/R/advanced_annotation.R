@@ -105,7 +105,9 @@ advanced_annotation <- function(
   )
 
   annotation <- compute_mass_defect(annotation, precision = 0.01)
-  annotation <- inner_join(annotation, peak_table, by = "peak")
+  annotation <- inner_join(annotation,
+                           select(peak_table, "peak", "mean_intensity", "module", "RTclust"),
+                           by = "peak")
 
   annotation <- compute_scores(
     annotation = annotation,
