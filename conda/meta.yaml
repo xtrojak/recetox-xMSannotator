@@ -1,5 +1,5 @@
 {% set name = "recetox-xmsannotator" %}
-{% set version = "0.9.0" %}
+{% set version = "0.9.1-dev" %}
 {% set github = "https://github.com/RECETOX/recetox-xMSannotator" %}
 
 package:
