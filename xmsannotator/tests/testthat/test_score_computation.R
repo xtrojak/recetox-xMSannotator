@@ -16,7 +16,7 @@ patrick::with_parameters_test_that("abundance_ratio_computing", {
   actual <- compute_abundance_ratio(test_formula)
   expect_equal(actual, expected, tolerance = expected * 0.001)
 },
-  cases(hydrogen = list(
+  patrick::cases(hydrogen = list(
         test_formula = "H",
         expected = 0.00015
         ),

@@ -4,6 +4,7 @@
 #' @return The input table with extra column containing the abundance ratio of the second most abundant isotope/isotopologue
 #'
 #' @import dplyr
+#' @import purrr
 assign_isotope_abundances <- function(isotopes) {
   molecules <- distinct(isotopes, molecular_formula)
   molecules <- mutate(molecules, abundance_ratio = map_dbl(molecular_formula, compute_abundance_ratio))
