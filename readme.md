@@ -1,9 +1,12 @@
 # xMSannotator
-
+## Usage
+![Conda](https://img.shields.io/conda/v/bioconda/r-recetox-xmsannotator)
 
 Built Docker images are available at [recetox/xmsannotator](https://hub.docker.com/repository/docker/recetox/xmsannotator).
 
 Use as a Galaxy Tool: https://github.com/RECETOX/galaxytools/tree/master/tools/xmsannotator
+
+The package is also published via [bioconda](https://anaconda.org/bioconda/r-recetox-xmsannotator)
 
 When using this tool, please cite the original [publication](https://pubs.acs.org/doi/abs/10.1021/acs.analchem.6b01214?src=recsys&).
 ### Research reproducibility
