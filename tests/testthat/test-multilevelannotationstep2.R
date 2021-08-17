@@ -1,5 +1,5 @@
 patrick::with_parameters_test_that("multilevelannotationstep2:", {
-    skip("Currently excluded!")
+    #skip("Currently excluded!")
     # Arrange
     testthat_wd <- getwd()
     test_path <- file.path(getwd(), "testdata/multilevelannotationstep2", test_identifier)
@@ -22,6 +22,6 @@ patrick::with_parameters_test_that("multilevelannotationstep2:", {
     setwd(testthat_wd)
 },
 cases(
-    base = list(test_identifier = "base"),
-    cor_mz_matrix = list(test_identifier = "cor_mz_matrix")
+    base = list(test_identifier = "base")
+    #cor_mz_matrix = list(test_identifier = "cor_mz_matrix")
 ))
