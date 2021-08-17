@@ -1,6 +1,6 @@
 # xMSannotator
 ## Usage
-![Conda](https://img.shields.io/conda/v/bioconda/r-recetox-xmsannotator)
+[![Conda](https://img.shields.io/conda/v/bioconda/r-recetox-xmsannotator)](https://anaconda.org/bioconda/r-recetox-xmsannotator)
 
 Built Docker images are available at [recetox/xmsannotator](https://hub.docker.com/repository/docker/recetox/xmsannotator).
 
