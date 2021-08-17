@@ -1,4 +1,6 @@
 # xMSannotator
+For more details please have a look at the [Wiki](https://github.com/RECETOX/recetox-xMSannotator/wiki)!
+
 ## Usage
 [![Conda](https://img.shields.io/conda/v/bioconda/r-recetox-xmsannotator)](https://anaconda.org/bioconda/r-recetox-xmsannotator)
 
