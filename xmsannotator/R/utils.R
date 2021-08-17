@@ -37,8 +37,8 @@ as_adduct_table <- function(data) {
 
 #' @import dplyr
 as_compound_table <- function(data) {
-  optional <- c('compound', 'recetox_cid')
-  required <- c('monoisotopic_mass', 'molecular_formula')
+  optional <- c('recetox_cid', 'Name')
+  required <- c('monoisotopic_mass', 'molecular_formula', 'compound')
   data <- select(data, any_of(optional), all_of(required))
 
   if ('recetox_cid' %in% colnames(data)) {
@@ -47,6 +47,7 @@ as_compound_table <- function(data) {
 
   stopifnot('compound' %in% colnames(data))
   stopifnot(anyDuplicated(data$compound) == 0)
+  stopifnot(is.numeric(data$compound))
   stopifnot(is.numeric(data$monoisotopic_mass))
   stopifnot(is.character(data$molecular_formula))
 
