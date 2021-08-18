@@ -23,5 +23,5 @@ jobs:
       run: R CMD build ./xmsannotator
       shell: bash
     - name: R Check
-      run: R CMD check ./xmsannotator
+      run: Rscript -e "devtools::check('xmsannotator')"
       shell: bash
