@@ -31,8 +31,6 @@ test_that("Integration test: RT based clustering works.", {
     expect_equal(nrow(peaks), nrow(rt_modules))
 })
 
-#' @import gplots
-#' @import entropy
 test_that("Cluster assignments are comparable.", {
     peaks <- readRDS("test-data/rt_modules/xmsannotator_qc_matrix_stage1.rda")
     peaks$peak <- as.integer(rownames(peaks))
