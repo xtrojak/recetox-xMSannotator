@@ -1,3 +1,4 @@
+#' @export
 overlapmzchild <-
 function(j,mz.thresh=10,time.thresh=NA,data_a,data_b){
     

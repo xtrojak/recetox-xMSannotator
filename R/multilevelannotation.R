@@ -1,3 +1,4 @@
+#' @import flashClust
 multilevelannotation <-
 function(dataA,max.mz.diff=10,max.rt.diff=10,cormethod="pearson",num_nodes=2,queryadductlist=c("all"),
 gradienttype="Acetonitrile",mode="pos",outloc,db_name="HMDB", adduct_weights=NA,num_sets=3000,allsteps=TRUE,

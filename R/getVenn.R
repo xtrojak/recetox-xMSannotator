@@ -1,3 +1,4 @@
+#' @export
 getVenn <-
 function(dataA,name_a, dataB,name_b,mz.thresh=10,time.thresh=30,alignment.tool=NA, xMSanalyzer.outloc,use.unique.mz=FALSE,plotvenn=TRUE,num_nodes=2)
 {

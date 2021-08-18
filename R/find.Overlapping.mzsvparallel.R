@@ -1,3 +1,4 @@
+#' @export
 find.Overlapping.mzsvparallel <-
 function(dataA, dataB, mz.thresh=10, time.thresh=NA, alignment.tool=NA,num_nodes=2)
 {
