@@ -17,7 +17,7 @@ jobs:
       with:
         r-version: '3.5'
     - name: Install Additional Requirements
-      run: sudo apt-get install texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
+      run: sudo apt-get install texlive-latex-base texlive-fonts-recommended texlive-fonts-extra && Rscript -e "install.packages('devtools')"
       shell: bash
     - name: R Build
       run: R CMD build ./xmsannotator
