@@ -15,7 +15,8 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
 
   outloc <- file.path(tempdir(), testname)
 
-  peaks <- unique(readRDS(peaks_filepath))
+  peaks <- readRDS(peaks_filepath)
+  peaks <- unique(peaks)
 
   annotation <- multilevelannotation(
     peaks,
@@ -76,12 +77,10 @@ cases(
       mass_defect_mode = "both",
       mode = "neg"
     ),
-    sample_data_custom = list(
-      test_identifier = "sample_data_custom",
+    sourceforge = list(
+      test_identifier = "sourceforge",
       max_rt_diff = 2,
-      queryadductlist = c(
-        "M+H"
-      ),
+      queryadductlist = c("M+H"),
       database = "HMDB",
       correlation_method = "pearson",
       mass_defect_mode = "pos",
