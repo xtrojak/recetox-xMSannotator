@@ -49,7 +49,7 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
 
   setwd(wd)
 },
-cases(
+patrick::cases(
     qc_solvent = list(
       test_identifier = "qc_solvent",
       max_rt_diff = 0.5,

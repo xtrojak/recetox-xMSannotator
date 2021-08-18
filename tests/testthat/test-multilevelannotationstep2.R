@@ -21,7 +21,7 @@ patrick::with_parameters_test_that("multilevelannotationstep2:", {
     unlink("stage2", recursive = TRUE)
     setwd(testthat_wd)
 },
-cases(
+patrick::cases(
     base = list(test_identifier = "base")
     #cor_mz_matrix = list(test_identifier = "cor_mz_matrix")
 ))
