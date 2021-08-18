@@ -2,6 +2,7 @@
 For more details please have a look at the [Wiki](https://github.com/RECETOX/recetox-xMSannotator/wiki)!
 
 ## Usage
+![GitHub R package version (branch & subdirectory of monorepo)](https://img.shields.io/github/r-package/v/RECETOX/recetox-xMSannotator/main?filename=xmsannotator%2FDESCRIPTION)
 [![Conda](https://img.shields.io/conda/v/bioconda/r-recetox-xmsannotator)](https://anaconda.org/bioconda/r-recetox-xmsannotator)
 
 Built Docker images are available at [recetox/xmsannotator](https://hub.docker.com/repository/docker/recetox/xmsannotator).
