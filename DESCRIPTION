@@ -22,6 +22,7 @@ Imports:
     snow,
     plyr,
     KEGGREST,
+    dynamicTreeCut,
     flashClust,
     pcaMethods,
     Rdisop,
