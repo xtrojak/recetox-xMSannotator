@@ -10,9 +10,9 @@ name: R CMD CHECK
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 12_ci ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, 12_ci ]
   workflow_dispatch:
 
 jobs:
