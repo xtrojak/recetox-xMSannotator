@@ -16,6 +16,9 @@ jobs:
       uses: r-lib/actions/setup-r@v1
       with:
         r-version: '3.5'
+    - name: Install Additional Requirements
+      run: apt-get -y install texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
+      shell: bash
     - name: R Build
       run: R CMD build ./xmsannotator
       shell: bash
