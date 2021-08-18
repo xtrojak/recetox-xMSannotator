@@ -18,7 +18,7 @@ jobs:
         r-version: '3.5'
     - name: Install Additional Requirements
       run: |
-        sudo apt-get install texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
+        sudo apt-get install texlive-latex-base texlive-fonts-recommended texlive-fonts-extra libfreetype6-dev
         Rscript -e "install.packages(c('usethis', 'curl', 'httr', 'rversions','devtools'), dependencies = TRUE)"
       shell: bash
     - name: R Build
