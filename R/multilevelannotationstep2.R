@@ -16,7 +16,7 @@ compute_something <- function(m, curmchemdata, mass_defect_window, isop_res_md) 
   as.data.frame(isop_res_md[extract_indices, ])
 }
 
-
+#' @import plyr
 compute_chemscore <- function(j,
                               chemids,
                               mchemdata,
@@ -104,6 +104,7 @@ compute_chemscore <- function(j,
   return(chemscoremat)
 }
 
+#' @import plyr
 multilevelannotationstep2 <- function(outloc1, list_number) {
   setwd(outloc1)
 
