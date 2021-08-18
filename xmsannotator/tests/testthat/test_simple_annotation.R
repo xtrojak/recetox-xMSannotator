@@ -19,10 +19,8 @@ test_that("simple_annotation functionality on real data", {
   result <- simple_annotation(peaks, DB, adduct_table=adducts, mass_tolerance=10e-6)
   
   names(result) <- c("Peak", "Adduct", "compound", "expected_mass", "mz", "time", "Name", "MonoisotopicMass", "Formula", "MatchCategory")
-  
   comparison_columns = c("Adduct","Name", "mz", "time", "Formula", "MonoisotopicMass")
-  expected <- subset(expected, select = comparison_columns)
-  actual <- subset(annotation, select = comparison_columns)
+  result <- subset(result, select = comparison_columns)
 
-  expect_equal(actual, expected)
+  expect_equal(result, expected)
 })
