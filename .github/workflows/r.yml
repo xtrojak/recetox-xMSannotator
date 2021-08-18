@@ -18,8 +18,9 @@ jobs:
         r-version: '3.5'
     - name: Install Additional Requirements
       run: |
-        sudo apt-get install texlive-latex-base texlive-fonts-recommended texlive-fonts-extra libfreetype6-dev libcurl4-openssl-dev
-        Rscript -e "install.packages(c('usethis', 'curl', 'httr', 'rversions','devtools'), dependencies = TRUE)"
+        sudo apt-get install texlive-latex-base texlive-fonts-recommended texlive-fonts-extra libfreetype6-dev libcurl4-openssl-dev libmagick++-dev libharfbuzz-dev libfribidi-dev
+        Rscript -e "install.packages(c('usethis', 'curl', 'httr','textshaping', 'rversions','devtools'), dependencies = TRUE)"
+        Rscript -e "remotes::install_deps('xmsannotator', dependencies = TRUE)"
       shell: bash
     - name: R Build
       run: R CMD build ./xmsannotator
