@@ -43,4 +43,4 @@ jobs:
       - name: Run devtools::check()
         run: |
           conda activate recetox-xmsannotator-dev
-          Rscript -e "devtools::check('xmsannotator')"
+          Rscript -e "devtools::check('xmsannotator', error_on = 'error')"
