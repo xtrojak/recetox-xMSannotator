@@ -30,7 +30,7 @@ jobs:
         with:
           activate-environment: recetox-xmsannotator-dev
           auto-update-conda: true
-          environment-file: conda/environment-dev.yml
+          environment-file: conda/environment-dev.yaml
 
       # Runs a set of commands using the runners shell
       - name: Run devtools::check()
