@@ -32,9 +32,8 @@ compute_chemscore <- function(j,
                               max_isp,
                               MplusH.abundance.ratio.check,
                               mass_defect_mode,
-                              outloc,
-                              hmdbCompMZ,
-                              hmdbAllinf) {
+                              outloc
+                              ) {
   chemid <- chemids[j]
   chemscoremat <- {}
   curmchemdata <- mchemdata[which(mchemdata$chemical_ID == chemid), ]
@@ -98,20 +97,31 @@ compute_chemscore <- function(j,
   }
   rm("curmchemdata", "isp_masses_mz_data", "mzid_cur", "chemid")
 
-  suppressWarnings(rm(hmdbCompMZ))
-  suppressWarnings(rm(hmdbAllinf))
-
   return(chemscoremat)
 }
 
 #' @import plyr
 #' @export
-multilevelannotationstep2 <- function(outloc1, list_number) {
+multilevelannotationstep2 <- function(outloc1,
+                                      list_number,
+                                      max.rt.diff = NA,
+                                      chemids_split = NA,
+                                      num_sets = NA,
+                                      mchemdata = NA,
+                                      mass_defect_window = NA,
+                                      corthresh = NA,
+                                      global_cor = NA,
+                                      mzid = NA,
+                                      adduct_table = NA,
+                                      max_isp = NA,
+                                      MplusH.abundance.ratio.check = NA,
+                                      mass_defect_mode = NA
+                                      ) {
   setwd(outloc1)
 
-  load("step1_results.Rda")
-  load("global_cor.Rda")
-  unlink("allmatches_with_isotopes.txt")
+  #load("step1_results.Rda")
+  #load("global_cor.Rda")
+  #unlink("allmatches_with_isotopes.txt")
   ls()
 
   outloc <- outloc1
@@ -162,9 +172,7 @@ multilevelannotationstep2 <- function(outloc1, list_number) {
     max_isp,
     MplusH.abundance.ratio.check,
     mass_defect_mode,
-    outloc,
-    hmdbCompMZ,
-    hmdbAllinf
+    outloc
   )
 
   chem_score2 <- chem_score[which(chem_score != "NULL")]

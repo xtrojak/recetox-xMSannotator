@@ -1,5 +1,5 @@
 patrick::with_parameters_test_that("multilevelannotationstep2:", {
-    #skip("Currently excluded!")
+    skip("Currently excluded!")
     # Arrange
     testthat_wd <- getwd()
     test_path <- file.path(getwd(), "testdata/multilevelannotationstep2", test_identifier)
