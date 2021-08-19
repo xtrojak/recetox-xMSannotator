@@ -105,6 +105,7 @@ compute_chemscore <- function(j,
 }
 
 #' @import plyr
+#' @export
 multilevelannotationstep2 <- function(outloc1, list_number) {
   setwd(outloc1)
 

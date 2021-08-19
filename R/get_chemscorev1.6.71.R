@@ -147,6 +147,7 @@ compute_score <- function(adduct_weights, cur_adducts_with_isotopes) {
 #' @import dplyr
 #' @importFrom magrittr %>%
 #' @importFrom Rdisop getMolecule
+#' @export
 get_chemscorev1.6.71 <- function(chemicalid,
                                  mchemicaldata,
                                  corthresh,

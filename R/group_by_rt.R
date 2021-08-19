@@ -1,3 +1,4 @@
+#' @export
 group_by_rt <-
 function(subdata,time_step=1,max.rt.diff=5,groupnum){
 	

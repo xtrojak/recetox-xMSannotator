@@ -1,3 +1,4 @@
+#' @export
 group_by_rt_histv2 <-
 function(mchemicaldata,time_step=1,max_diff_rt=10,groupnum){
 			
