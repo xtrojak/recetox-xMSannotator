@@ -5,6 +5,7 @@ channels:
   - defaults
 dependencies:
   - r-base >= 3.5
+  - r-devtools
   - boost-cpp
   - r-biocmanager
   - r-flashclust
