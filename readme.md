@@ -1,4 +1,6 @@
 # xMSannotator
+[![R Conda](https://github.com/RECETOX/recetox-xMSannotator/actions/workflows/r-conda.yml/badge.svg?branch=main)](https://github.com/RECETOX/recetox-xMSannotator/actions/workflows/r-conda.yml)
+
 For more details please have a look at the [Wiki](https://github.com/RECETOX/recetox-xMSannotator/wiki)!
 
 ## Usage
