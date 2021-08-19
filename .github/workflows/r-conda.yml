@@ -33,7 +33,7 @@ jobs:
           environment-file: conda/environment-dev.yaml
           auto-activate-base: false
       - run: |
-          conda init
+          conda init bash
           conda list
           conda activate recetox-xmsannotator-dev
           Rscript -e "devtools::check('xmsannotator')"
