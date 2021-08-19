@@ -35,4 +35,4 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Run devtools::check()
         run: |
-          Rscript -e "devtools::check('xmsannotator')
+          Rscript -e "devtools::check('xmsannotator')"
