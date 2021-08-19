@@ -32,6 +32,11 @@ jobs:
           auto-update-conda: true
           environment-file: conda/environment-dev.yaml
           auto-activate-base: false
+      - run: |
+          conda init
+          conda list
+          conda activate recetox-xmsannotator-dev
+          Rscript -e "devtools::check('xmsannotator')"
 
       # Runs a set of commands using the runners shell
       - name: Run devtools::check()
