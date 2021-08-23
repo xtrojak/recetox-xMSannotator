@@ -6,7 +6,8 @@ check_golden_rules,check_element,KEGG.Annotation,HMDB.Annotation,
 T3DB.Annotation,LipidMaps.Annotation,multilevelannotationstep2,get_allinf, get_chemscorev1.6.71,
 get_confidence_stage2, get_confidence_stage4,group_by_rt_histv1,group_by_rt_histv2,group_by_rt,
 Annotationbychemical_IDschild_multilevel,find.Overlapping.mzsvparallel,overlapmzchild)
-import(XML, R2HTML, RCurl, doSNOW, foreach, WGCNA, SSOAP, png, rjson, snow, plyr, KEGGREST, pcaMethods, flashClust, Rdisop)
+import(XML, R2HTML, RCurl, doSNOW, foreach, WGCNA, SSOAP, png, rjson, snow, plyr, KEGGREST, pcaMethods, flashClust, Rdisop, dplyr, tidyr, patrick)
+importFrom(magrittr,"%>%")
 exportClasses(info)
 importClassesFrom(SSOAP)
 importMethodsFrom(SSOAP)
