@@ -1,7 +1,9 @@
+#' @export
 replace_with_module <- function(module_rt_clust) {
   gsub(as.character(module_rt_clust), pattern = "_[0-9]*", replacement = "")
 }
 
+#' @export
 compute_something <- function(m, curmchemdata, mass_defect_window, isop_res_md) {
   # Get Module ID
   module_rt_group <- replace_with_module(curmchemdata$Module_RTclust[m])
@@ -17,6 +19,7 @@ compute_something <- function(m, curmchemdata, mass_defect_window, isop_res_md) 
 }
 
 #' @import plyr
+#' @export
 compute_chemscore <- function(j,
                               chemids,
                               mchemdata,
@@ -115,7 +118,9 @@ multilevelannotationstep2 <- function(outloc1,
                                       adduct_table = NA,
                                       max_isp = NA,
                                       MplusH.abundance.ratio.check = NA,
-                                      mass_defect_mode = NA
+                                      mass_defect_mode = NA,
+                                      chemids = NA,
+                                      isop_res_md = NA
                                       ) {
   setwd(outloc1)
 
@@ -187,13 +192,13 @@ multilevelannotationstep2 <- function(outloc1,
 
   Sys.sleep(1)
 
-  rm(
-    "curchemscoremat", "mchemdata", "chemids", "adduct_table",
-    "global_cor", "mzid", "max_diff_rt", "isop_res_md", "corthresh",
-    "level_module_isop_annot", "chemids_split", "corthresh",
-    "max.mz.diff", "outloc", "num_sets", "db_name", "num_nodes",
-    "num_sets", "adduct_weights", "filter.by"
-  )
+  # rm(
+  #   "curchemscoremat", "mchemdata", "chemids", "adduct_table",
+  #   "global_cor", "mzid", "max_diff_rt", "isop_res_md", "corthresh",
+  #   "level_module_isop_annot", "chemids_split", "corthresh",
+  #   "max.mz.diff", "outloc", "num_sets", "db_name", "num_nodes",
+  #   "num_sets", "adduct_weights", "filter.by"
+  # )
 
   rm(list = ls())
 }

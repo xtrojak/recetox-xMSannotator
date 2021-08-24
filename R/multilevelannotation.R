@@ -12,7 +12,9 @@ call_multilevelannotationstep2 <- function(arg1,
                                            adduct_table = NA,
                                            max_isp = NA,
                                            MplusH.abundance.ratio.check = NA,
-                                           mass_defect_mode = NA
+                                           mass_defect_mode = NA,
+                                           chemids = NA,
+                                           isop_res_md = NA
                                            ) {
     cur_fname <- paste(outloc, "/stage2/chem_score", arg1, ".Rda", sep = "")
     check_if_exists <- suppressWarnings(try(load(cur_fname)))
@@ -32,7 +34,9 @@ call_multilevelannotationstep2 <- function(arg1,
             adduct_table = adduct_table,
             max_isp = max_isp,
             MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
-            mass_defect_mode = mass_defect_mode
+            mass_defect_mode = mass_defect_mode,
+            chemids = chemids,
+            isop_res_md = isop_res_md
         )
     } else {
         print(paste("List ", arg1, " already exists.", sep = ""))
@@ -50,7 +54,6 @@ multilevelannotation <-
              status = NA, boostIDs = NA, max_isp = 5, MplusH.abundance.ratio.check = FALSE, customDB = NA, HMDBselect = "union",
              mass_defect_window = 0.01, mass_defect_mode = "pos", dbAllinf = NA, pathwaycheckmode = "pm") {
         options(warn = -1)
-
         allowWGCNAThreads(nThreads = num_nodes)
 
 
@@ -1231,14 +1234,23 @@ multilevelannotation <-
 
                     clusterExport(cl, "multilevelannotationstep2")
 
-                    clusterEvalQ(cl, "library(Rdisop)")
-                    clusterEvalQ(cl, "library(plyr)")
+                    clusterEvalQ(cl, library(Rdisop))
+                    clusterEvalQ(cl, library(plyr))
+                    clusterEvalQ(cl, library(dplyr))
+                    clusterEvalQ(cl, library(tidyr))
                     # clusterEvalQ(cl, "library(pryr)")
                     # clusterEvalQ(cl, "library(profmem)")
                     # clusterEvalQ(cl, "library(gdata)")
                     clusterExport(cl, "get_chemscorev1.6.71")
-                    # clusterExport(cl, "getMolecule")
-                    # clusterExport(cl, "ldply")
+                    clusterExport(cl, "compute_chemscore")
+                    clusterExport(cl, "compute_something")
+                    clusterExport(cl, "do_something")
+                    clusterExport(cl, "do_something_2")
+                    clusterExport(cl, "compute_score")
+                    clusterExport(cl, "replace_with_module")
+                    #clusterExport(cl, "getMolecule")
+                    #clusterExport(cl, "ldply")
+                    clusterExport(cl, "%>%")
                     # clusterExport(cl, "mem_used")
                     clusterExport(cl, "get_confidence_stage2")
 
@@ -1248,11 +1260,13 @@ multilevelannotation <-
                     clusterExport(cl, "adduct_table")
                     clusterExport(cl, "adduct_weights")
 
+                    force(mass_defect_mode)
+
                     parLapply(
                         cl,
                         1:num_sets,
                         call_multilevelannotationstep2,
-                        c(outloc = outloc,
+                        outloc = outloc,
                         max.rt.diff = max.rt.diff,
                         chemids_split = chemids_split,
                         num_sets = num_sets,
@@ -1264,7 +1278,9 @@ multilevelannotation <-
                         adduct_table = adduct_table,
                         max_isp = max_isp,
                         MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
-                        mass_defect_mode = mass_defect_mode)
+                        mass_defect_mode = mass_defect_mode,
+                        chemids = chemids,
+                        isop_res_md = isop_res_md
                     )
 
                     # max.time.diff=max.rt.diff,filter.by=filter.by,max_isp=max_isp,numnodes=1,MplusH.abundance.ratio.check=MplusH.abundance.ratio.check,mass_defect_window=mass_defect_window,mass_defect_mode=mass_defect_mode
