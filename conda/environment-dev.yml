@@ -1,4 +1,4 @@
-name: xmsannotator-conda-dev
+name: xmsannotator-dev
 channels:
   - conda-forge
   - bioconda
@@ -22,3 +22,10 @@ dependencies:
   - r-plyr
   - r-wgcna
   - r-ssoap
+  - r-tidyr
+  - r-dplyr
+  - r-devtools
+  - r-testthat
+  - bioconductor-limma
+  - r-parallel
+  - r-languageserver

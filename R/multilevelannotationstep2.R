@@ -21,6 +21,7 @@ compute_something <- function(m, curmchemdata, mass_defect_window, isop_res_md) 
 #' @import plyr
 #' @export
 compute_chemscore <- function(j,
+                              ...,
                               chemids,
                               mchemdata,
                               isop_res_md,
@@ -37,6 +38,7 @@ compute_chemscore <- function(j,
                               mass_defect_mode,
                               outloc
                               ) {
+  wrapr::stop_if_dot_args(substitute(list(...)), "f")
   chemid <- chemids[j]
   chemscoremat <- {}
   curmchemdata <- mchemdata[which(mchemdata$chemical_ID == chemid), ]
@@ -71,12 +73,12 @@ compute_chemscore <- function(j,
     mchemicaldata = curmchemdata,
     corthresh = corthresh,
     global_cor = global_cor,
-    mzid,
+    mzid = mzid,
     max_diff_rt = max_diff_rt,
     level_module_isop_annot = isp_masses_mz_data,
     adduct_table = adduct_table,
     adduct_weights = adduct_weights,
-    filter.by,
+    filter.by = filter.by,
     max_isp = max_isp,
     MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
     mass_defect_window = mass_defect_window,
@@ -120,7 +122,8 @@ multilevelannotationstep2 <- function(outloc1,
                                       MplusH.abundance.ratio.check = NA,
                                       mass_defect_mode = NA,
                                       chemids = NA,
-                                      isop_res_md = NA
+                                      isop_res_md = NA,
+                                      filter.by = NA
                                       ) {
   setwd(outloc1)
 
@@ -163,21 +166,21 @@ multilevelannotationstep2 <- function(outloc1,
   chem_score <- lapply(
     chemids_split[[list_number]],
     compute_chemscore,
-    chemids,
-    mchemdata,
-    isop_res_md,
-    mass_defect_window,
-    corthresh,
-    global_cor,
-    mzid,
-    max_diff_rt,
-    adduct_table,
-    adduct_weights,
-    filter.by,
-    max_isp,
-    MplusH.abundance.ratio.check,
-    mass_defect_mode,
-    outloc
+    chemids = chemids,
+    mchemdata = mchemdata,
+    isop_res_md = isop_res_md,
+    mass_defect_window = mass_defect_window,
+    corthresh = corthresh,
+    global_cor = global_cor,
+    mzid = mzid,
+    max_diff_rt = max_diff_rt,
+    adduct_table = adduct_table,
+    adduct_weights = adduct_weights,
+    filter.by = filter.by,
+    max_isp = max_isp,
+    MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
+    mass_defect_mode = mass_defect_mode,
+    outloc = outloc
   )
 
   chem_score2 <- chem_score[which(chem_score != "NULL")]
@@ -185,20 +188,5 @@ multilevelannotationstep2 <- function(outloc1,
   rm(chem_score)
 
   curchemscoremat <- ldply(chem_score2, rbind)
-  rm(chem_score2)
-
-  cur_fname <- paste("chem_score", list_number, ".Rda", sep = "")
-  save(curchemscoremat, file = cur_fname)
-
-  Sys.sleep(1)
-
-  # rm(
-  #   "curchemscoremat", "mchemdata", "chemids", "adduct_table",
-  #   "global_cor", "mzid", "max_diff_rt", "isop_res_md", "corthresh",
-  #   "level_module_isop_annot", "chemids_split", "corthresh",
-  #   "max.mz.diff", "outloc", "num_sets", "db_name", "num_nodes",
-  #   "num_sets", "adduct_weights", "filter.by"
-  # )
-
-  rm(list = ls())
+  return(curchemscoremat)
 }

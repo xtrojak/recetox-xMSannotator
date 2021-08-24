@@ -1,3 +1,4 @@
+#' @import foreach
 multilevelannotationstep4 <-
 function(outloc,max.mz.diff=5,max.rt.diff=30,adduct_weights=NA,filter.by=NA,min_ions_perchem=1,boostIDs=NA,max_isp=5,dbAllinf=NA,num_nodes=2){
 	

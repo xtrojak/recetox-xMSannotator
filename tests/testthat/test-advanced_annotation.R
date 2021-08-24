@@ -5,8 +5,8 @@ adduct_weights <<- adduct_weights
 patrick::with_parameters_test_that("Advanced annotation works:", {
   #skip("Currently excluded!")
   
-  testname <<- test_identifier
-  max.rt.diff <<- max_rt_diff
+  testname <- test_identifier
+  max.rt.diff <- max_rt_diff
 
   wd <- getwd()
 
@@ -50,15 +50,15 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
   setwd(wd)
 },
 patrick::cases(
-    qc_solvent = list(
-      test_identifier = "qc_solvent",
-      max_rt_diff = 0.5,
-      queryadductlist = c("M+H", "M+2H", "M+H+NH4", "M+ACN+2H"),
-      database = "HMDB",
-      correlation_method = "pearson",
-      mass_defect_mode = "pos",
-      mode = "pos"
-    ),
+    # qc_solvent = list(
+    #   test_identifier = "qc_solvent",
+    #   max_rt_diff = 0.5,
+    #   queryadductlist = c("M+H", "M+2H", "M+H+NH4", "M+ACN+2H"),
+    #   database = "HMDB",
+    #   correlation_method = "pearson",
+    #   mass_defect_mode = "pos",
+    #   mode = "pos"
+    # ),
     qc_matrix = list(
       test_identifier = "qc_matrix",
       max_rt_diff = 0.5,

@@ -14,7 +14,8 @@ call_multilevelannotationstep2 <- function(arg1,
                                            MplusH.abundance.ratio.check = NA,
                                            mass_defect_mode = NA,
                                            chemids = NA,
-                                           isop_res_md = NA
+                                           isop_res_md = NA,
+                                           filter.by = NA
                                            ) {
     cur_fname <- paste(outloc, "/stage2/chem_score", arg1, ".Rda", sep = "")
     check_if_exists <- suppressWarnings(try(load(cur_fname)))
@@ -36,7 +37,8 @@ call_multilevelannotationstep2 <- function(arg1,
             MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
             mass_defect_mode = mass_defect_mode,
             chemids = chemids,
-            isop_res_md = isop_res_md
+            isop_res_md = isop_res_md,
+            filter.by = filter.by
         )
     } else {
         print(paste("List ", arg1, " already exists.", sep = ""))
@@ -46,6 +48,9 @@ call_multilevelannotationstep2 <- function(arg1,
 #' @import flashClust
 #' @import dynamicTreeCut
 #' @import WGCNA
+#' @import parallel
+#' @import snow
+#' @export
 multilevelannotation <-
     function(dataA, max.mz.diff = 10, max.rt.diff = 10, cormethod = "pearson", num_nodes = 2, queryadductlist = c("all"),
              gradienttype = "Acetonitrile", mode = "pos", outloc, db_name = "HMDB", adduct_weights = NA, num_sets = 3000, allsteps = TRUE,
@@ -1202,13 +1207,13 @@ multilevelannotation <-
                 # rm(level_module_isop_annot)
                 # rm(dataA)
 
-                rm(tall_unimzperchem)
-                rm(tablemz)
-                rm(levelB_res2)
-                rm(levelA_res1)
+                # rm(tall_unimzperchem)
+                # rm(tablemz)
+                # rm(levelB_res2)
+                # rm(levelA_res1)
 
-                #rm(list = ls())
-                load("tempobjects.Rda")
+                # rm(list = ls())
+                # load("tempobjects.Rda")
             } else {
                 print("Status 1: Skipping step 1.")
                 print("Status 2: Using existing step1_results.Rda file.")
@@ -1230,9 +1235,8 @@ multilevelannotation <-
                 if (num_sets > num_nodes) {
                     cl <- makeSOCKcluster(num_nodes)
 
-                    clusterEvalQ(cl, "multilevelannotationstep2")
+                    #clusterEvalQ(cl, "multilevelannotationstep2")
 
-                    clusterExport(cl, "multilevelannotationstep2")
 
                     clusterEvalQ(cl, library(Rdisop))
                     clusterEvalQ(cl, library(plyr))
@@ -1241,6 +1245,7 @@ multilevelannotation <-
                     # clusterEvalQ(cl, "library(pryr)")
                     # clusterEvalQ(cl, "library(profmem)")
                     # clusterEvalQ(cl, "library(gdata)")
+                    clusterExport(cl, "multilevelannotationstep2")
                     clusterExport(cl, "get_chemscorev1.6.71")
                     clusterExport(cl, "compute_chemscore")
                     clusterExport(cl, "compute_something")
@@ -1253,35 +1258,70 @@ multilevelannotation <-
                     clusterExport(cl, "%>%")
                     # clusterExport(cl, "mem_used")
                     clusterExport(cl, "get_confidence_stage2")
-
+                    clusterExport(
+                        cl, 
+                        c(
+                            "mchemdata",
+                            "mass_defect_mode",
+                            "max_isp"
+                        ),
+                        envir = environment()
+                    )
                     # clusterExport(cl, "ll")
                     clusterExport(cl, "check_element")
                     clusterExport(cl, "group_by_rt_histv2")
                     clusterExport(cl, "adduct_table")
                     clusterExport(cl, "adduct_weights")
 
-                    force(mass_defect_mode)
-
-                    parLapply(
-                        cl,
-                        1:num_sets,
-                        call_multilevelannotationstep2,
-                        outloc = outloc,
-                        max.rt.diff = max.rt.diff,
-                        chemids_split = chemids_split,
-                        num_sets = num_sets,
-                        mchemdata = mchemdata,
-                        mass_defect_window = mass_defect_window,
-                        corthresh = corthresh,
-                        global_cor = global_cor,
-                        mzid = mzid,
-                        adduct_table = adduct_table,
-                        max_isp = max_isp,
-                        MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
-                        mass_defect_mode = mass_defect_mode,
-                        chemids = chemids,
-                        isop_res_md = isop_res_md
+                    chemscoremat <- ldply(
+                        parLapply(
+                            cl,
+                            1:num_sets,
+                            call_multilevelannotationstep2,
+                            outloc = outloc,
+                            max.rt.diff = max.rt.diff,
+                            chemids_split = chemids_split,
+                            num_sets = num_sets,
+                            mchemdata = mchemdata,
+                            mass_defect_window = mass_defect_window,
+                            corthresh = corthresh,
+                            global_cor = global_cor,
+                            mzid = mzid,
+                            adduct_table = adduct_table,
+                            max_isp = max_isp,
+                            MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
+                            mass_defect_mode = mass_defect_mode,
+                            chemids = chemids,
+                            isop_res_md = isop_res_md,
+                            filter.by = filter.by
+                        ),
+                        rbind
                     )
+
+                    # res <- parallel::mclapply(
+                    #     1:num_sets,
+                    #     call_multilevelannotationstep2,
+                    #     outloc = outloc,
+                    #     max.rt.diff = max.rt.diff,
+                    #     chemids_split = chemids_split,
+                    #     num_sets = num_sets,
+                    #     mchemdata = mchemdata,
+                    #     mass_defect_window = mass_defect_window,
+                    #     corthresh = corthresh,
+                    #     global_cor = global_cor,
+                    #     mzid = mzid,
+                    #     adduct_table = adduct_table,
+                    #     max_isp = max_isp,
+                    #     MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
+                    #     mass_defect_mode = mass_defect_mode,
+                    #     chemids = chemids,
+                    #     isop_res_md = isop_res_md,
+                    #     mc.cores = num_nodes
+                    # )
+
+                    # bad <- sapply(res, inherits, what = "try-error")
+                    # failed_jobs = res[bad]
+                    # print(failed_jobs)
 
                     # max.time.diff=max.rt.diff,filter.by=filter.by,max_isp=max_isp,numnodes=1,MplusH.abundance.ratio.check=MplusH.abundance.ratio.check,mass_defect_window=mass_defect_window,mass_defect_mode=mass_defect_mode
 
@@ -1297,11 +1337,11 @@ multilevelannotation <-
 
                 # print("Memory used after step2 before removing all objects")
                 # print(mem_used())
-                rm(list = ls())
+                #rm(list = ls())
 
-                try(rm(hmdbCompMZ), silent = TRUE)
+                #try(rm(hmdbCompMZ), silent = TRUE)
 
-                load("tempobjects.Rda")
+                #load("tempobjects.Rda")
 
                 # print("Memory used after step2 and removing all objects")
                 # print(mem_used())
@@ -1311,7 +1351,7 @@ multilevelannotation <-
                 {
                     print("Status 4: Pathway evaluation")
                     # suppressWarnings(annotres<-multilevelannotationstep3(outloc=outloc,adduct_weights=adduct_weights,boostIDs=boostIDs,pathwaycheckmode=pathwaycheckmode))
-                    annotres <- multilevelannotationstep3(outloc = outloc, adduct_weights = adduct_weights, boostIDs = boostIDs, pathwaycheckmode = pathwaycheckmode)
+                    annotres <- multilevelannotationstep3(outloc = outloc, chemscoremat = chemscoremat, adduct_weights = adduct_weights, boostIDs = boostIDs, pathwaycheckmode = pathwaycheckmode)
 
                     # print("Memory used after step3")
                     # print(mem_used())
