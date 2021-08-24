@@ -1,3 +1,4 @@
+#' @export
 do_something <- function(i,
                          mchemicaldata_goodadducts_index,
                          mchemicaldata,
@@ -121,6 +122,7 @@ do_something <- function(i,
   return(final_isp_annot_res)
 }
 
+#' @export
 do_something_2 <- function(i,
                            mod_names,
                            mchemicaldata) {
@@ -138,6 +140,7 @@ do_something_2 <- function(i,
   return(groupB)
 }
 
+#' @export
 compute_score <- function(adduct_weights, cur_adducts_with_isotopes) {
   score <- 1 * (10^max(as.numeric(as.character(adduct_weights[which(adduct_weights[, 1] %in% cur_adducts_with_isotopes), 2]))))
   return(score[1])
