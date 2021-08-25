@@ -148,6 +148,7 @@ compute_score <- function(adduct_weights, cur_adducts_with_isotopes) {
 
 #' @import tidyr
 #' @import dplyr
+#' @import plyr
 #' @importFrom magrittr %>%
 #' @importFrom Rdisop getMolecule
 #' @export

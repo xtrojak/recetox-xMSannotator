@@ -48,7 +48,6 @@ call_multilevelannotationstep2 <- function(arg1,
 #' @import flashClust
 #' @import dynamicTreeCut
 #' @import WGCNA
-#' @import parallel
 #' @import snow
 #' @export
 multilevelannotation <-
@@ -1259,7 +1258,7 @@ multilevelannotation <-
                     # clusterExport(cl, "mem_used")
                     clusterExport(cl, "get_confidence_stage2")
                     clusterExport(
-                        cl, 
+                        cl,
                         c(
                             "mchemdata",
                             "mass_defect_mode",

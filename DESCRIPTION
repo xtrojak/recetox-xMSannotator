@@ -28,8 +28,7 @@ Imports:
     Rdisop,
     limma,
     tidyr,
-    magrittr,
-    parallel
+    magrittr
 Suggests: 
     covr,
     testthat (>= 3.0.0)
