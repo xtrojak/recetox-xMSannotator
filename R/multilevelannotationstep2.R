@@ -21,7 +21,6 @@ compute_something <- function(m, curmchemdata, mass_defect_window, isop_res_md) 
 #' @import plyr
 #' @export
 compute_chemscore <- function(j,
-                              ...,
                               chemids,
                               mchemdata,
                               isop_res_md,
@@ -38,7 +37,6 @@ compute_chemscore <- function(j,
                               mass_defect_mode,
                               outloc
                               ) {
-  wrapr::stop_if_dot_args(substitute(list(...)), "f")
   chemid <- chemids[j]
   chemscoremat <- {}
   curmchemdata <- mchemdata[which(mchemdata$chemical_ID == chemid), ]
