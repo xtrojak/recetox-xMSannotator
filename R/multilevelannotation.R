@@ -10,6 +10,7 @@ call_multilevelannotationstep2 <- function(arg1,
                                            global_cor = NA,
                                            mzid = NA,
                                            adduct_table = NA,
+                                           adduct_weights = NA,
                                            max_isp = NA,
                                            MplusH.abundance.ratio.check = NA,
                                            mass_defect_mode = NA,
@@ -33,6 +34,7 @@ call_multilevelannotationstep2 <- function(arg1,
             global_cor = global_cor,
             mzid = mzid,
             adduct_table = adduct_table,
+            adduct_weights = adduct_weights,
             max_isp = max_isp,
             MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
             mass_defect_mode = mass_defect_mode,
@@ -1262,15 +1264,15 @@ multilevelannotation <-
                         c(
                             "mchemdata",
                             "mass_defect_mode",
-                            "max_isp"
+                            "max_isp",
+                            "adduct_table",
+                            "adduct_weights"
                         ),
                         envir = environment()
                     )
                     # clusterExport(cl, "ll")
                     clusterExport(cl, "check_element")
                     clusterExport(cl, "group_by_rt_histv2")
-                    clusterExport(cl, "adduct_table")
-                    clusterExport(cl, "adduct_weights")
 
                     chemscoremat <- ldply(
                         parLapply(
@@ -1287,6 +1289,7 @@ multilevelannotation <-
                             global_cor = global_cor,
                             mzid = mzid,
                             adduct_table = adduct_table,
+                            adduct_weights = adduct_weights,
                             max_isp = max_isp,
                             MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
                             mass_defect_mode = mass_defect_mode,
