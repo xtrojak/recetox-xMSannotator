@@ -1,6 +1,8 @@
 patrick::with_parameters_test_that("multilevelannotationstep2:", {
     #skip("Currently excluded!")
     # Arrange
+    load("testdata/adduct_weights.rda")
+
     testthat_wd <- getwd()
     test_path <- file.path(getwd(), "testdata/multilevelannotationstep2", test_identifier)
     setwd(test_path)
@@ -25,6 +27,7 @@ patrick::with_parameters_test_that("multilevelannotationstep2:", {
         global_cor = global_cor,
         mzid = mzid,
         adduct_table = adduct_table,
+        adduct_weights = adduct_weights,
         max_isp = max_isp,
         MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
         mass_defect_mode = mass_defect_mode,

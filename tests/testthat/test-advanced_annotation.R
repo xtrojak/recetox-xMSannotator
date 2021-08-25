@@ -1,13 +1,11 @@
-num_nodes <<- 16
-load("testdata/adduct_weights.rda")
-adduct_weights <<- adduct_weights
-
 patrick::with_parameters_test_that("Advanced annotation works:", {
   #skip("Currently excluded!")
-  
+
   testname <- test_identifier
   max.rt.diff <- max_rt_diff
-
+  num_nodes <- 16
+  load("testdata/adduct_weights.rda")
+  adduct_weights <- adduct_weights
   wd <- getwd()
 
   peaks_filename <- paste0(testname, ".rds")
@@ -44,30 +42,30 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
       expected, mz, time
     )
 
-    expect_equal(actual, expected)
+    expect_equal(actual, expected, label = filename)
   }
 
   setwd(wd)
 },
 patrick::cases(
-    # qc_solvent = list(
-    #   test_identifier = "qc_solvent",
-    #   max_rt_diff = 0.5,
-    #   queryadductlist = c("M+H", "M+2H", "M+H+NH4", "M+ACN+2H"),
-    #   database = "HMDB",
-    #   correlation_method = "pearson",
-    #   mass_defect_mode = "pos",
-    #   mode = "pos"
-    # ),
-    qc_matrix = list(
-      test_identifier = "qc_matrix",
+    qc_solvent = list(
+      test_identifier = "qc_solvent",
       max_rt_diff = 0.5,
-      queryadductlist = c("M+H", "M+2H", "M+ACN+Na", "M+2ACN+H", "2M+H"),
-      database = "KEGG",
-      correlation_method = "spearman",
-      mass_defect_mode = "both",
+      queryadductlist = c("M+H", "M+2H", "M+H+NH4", "M+ACN+2H"),
+      database = "HMDB",
+      correlation_method = "pearson",
+      mass_defect_mode = "pos",
       mode = "pos"
     ),
+    # qc_matrix = list(
+    #   test_identifier = "qc_matrix",
+    #   max_rt_diff = 0.5,
+    #   queryadductlist = c("M+H", "M+2H", "M+ACN+Na", "M+2ACN+H", "2M+H"),
+    #   database = "KEGG",
+    #   correlation_method = "spearman",
+    #   mass_defect_mode = "both",
+    #   mode = "pos"
+    # ),
     batch1_neg_hmdb = list(
       test_identifier = "batch1_neg",
       max_rt_diff = 0.5,
