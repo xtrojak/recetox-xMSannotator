@@ -1,3 +1,35 @@
+foo <- function(mind,
+                mzdup,
+                curated_res,
+                adduct_weights) {
+    mznum <- mzdup[mind]
+    dmultsub <- curated_res[which(curated_res$mz %in% mznum), ]
+    dgood_add <- which(dmultsub$Adduct %in% adduct_weights[, 1]) # =="M+H")
+    if (length(dgood_add) > 0) {
+        dmultsub$score[dgood_add] <- (dmultsub$score[dgood_add]) * 100
+    }
+    com_ind <- which(curated_res$mz %in% mznum)
+    good_ind <- which(dmultsub$score == max(dmultsub$score, na.rm = TRUE))
+
+    for (com_indval in 1:length(com_ind)) {
+        scoreval <- {}
+        if (com_indval %in% good_ind == FALSE) {
+            # print(com_indval)
+            dmat_com <- curated_res[which(curated_res$chemical_ID %in% dmultsub$chemical_ID[com_indval]), ]
+            scoreval <- ((dim(dmat_com)[1]) - 1) * dmat_com$score[1] / (dim(dmat_com)[1])
+            scorevec <- c(rep(scoreval, length(which(curated_res$chemical_ID %in% dmultsub$chemical_ID[com_indval]))))
+            if (length(scorevec) < length(which(curated_res$chemical_ID %in% dmultsub$chemical_ID[com_indval]))) {
+                break
+            }
+            curated_res$score[which(curated_res$chemical_ID %in% dmultsub$chemical_ID[com_indval])] <- scorevec
+        }
+    }
+    com_ind <- com_ind[-good_ind]
+
+    # bad_ind<-c(bad_ind,com_ind)
+    return(com_ind)
+}
+
 multilevelannotationstep5 <-
     function(outloc, max.mz.diff = 5, max.rt.diff = 30, adduct_weights = NA, filter.by = NA, min_ions_perchem = 1, boostIDs = NA, max_isp = 5, dbAllinf = NA, db_name = "HMDB", chemscoremat = NA, num_nodes = 2) {
         setwd(outloc)
@@ -72,35 +104,31 @@ multilevelannotationstep5 <-
         cl <- makeSOCKcluster(num_nodes)
         # print(format(Sys.time(), "%a %b %d %X %Y"))
 
-        bad_ind <- foreach(mind = 1:length(mzdup), .combine = rbind) %dopar% {
-            mznum <- mzdup[mind]
-            dmultsub <- curated_res[which(curated_res$mz %in% mznum), ]
-            dgood_add <- which(dmultsub$Adduct %in% adduct_weights[, 1]) # =="M+H")
-            if (length(dgood_add) > 0) {
-                dmultsub$score[dgood_add] <- (dmultsub$score[dgood_add]) * 100
-            }
-            com_ind <- which(curated_res$mz %in% mznum)
-            good_ind <- which(dmultsub$score == max(dmultsub$score, na.rm = TRUE))
+        # bad_ind_v2 <- lapply(
+        #     seq_len(length(mzdup)),
+        #     foo,
+        #     mzdup,
+        #     curated_res,
+        #     adduct_weights
+        # )
 
-            for (com_indval in 1:length(com_ind)) {
-                scoreval <- {}
-                if (com_indval %in% good_ind == FALSE) {
-                    # print(com_indval)
-                    dmat_com <- curated_res[which(curated_res$chemical_ID %in% dmultsub$chemical_ID[com_indval]), ]
-                    scoreval <- ((dim(dmat_com)[1]) - 1) * dmat_com$score[1] / (dim(dmat_com)[1])
-                    scorevec <- c(rep(scoreval, length(which(curated_res$chemical_ID %in% dmultsub$chemical_ID[com_indval]))))
-                    if (length(scorevec) < length(which(curated_res$chemical_ID %in% dmultsub$chemical_ID[com_indval]))) {
-                        break
-                    }
-                    curated_res$score[which(curated_res$chemical_ID %in% dmultsub$chemical_ID[com_indval])] <- scorevec
-                }
-            }
-            com_ind <- com_ind[-good_ind]
+        # bad_ind_v3 <- Filter(function(x) length(x) > 0, bad_ind_v2)
 
-            # bad_ind<-c(bad_ind,com_ind)
-            return(com_ind)
-        }
-        # print(format(Sys.time(), "%a %b %d %X %Y"))
+        # bad_ind_v4 <- ldply(bad_ind_v3, rbind)
+
+        # print("bad_ind_v2 dimensions")
+        # print(dim(bad_ind_v4))
+        # #print(bad_ind_v4)
+        # saveRDS(bad_ind_v4, file = "bad_ind_v4.rds")
+
+        # # ORIGINAL
+        bad_ind <- foreach(mind = 1:length(mzdup), .combine = rbind) %dopar% foo(mind, mzdup, curated_res, adduct_weights)
+
+        # print("bad_ind dimensions")
+        # print(dim(bad_ind))
+        # print(bad_ind)
+        # saveRDS(bad_ind, file = "bad_ind.rds")
+       # print(format(Sys.time(), "%a %b %d %X %Y"))
 
         stopCluster(cl)
 
