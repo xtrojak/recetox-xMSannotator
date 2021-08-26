@@ -15,7 +15,6 @@ Imports:
     WGCNA,
     RCurl,
     doSNOW,
-    foreach,
     SSOAP,
     png,
     rjson,
@@ -28,6 +27,7 @@ Imports:
     Rdisop,
     limma,
     tidyr,
+    foreach,
     magrittr
 Suggests: 
     covr,
