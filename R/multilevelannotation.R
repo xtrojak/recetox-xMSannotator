@@ -1221,6 +1221,8 @@ multilevelannotation <-
 
                 allsteps_temp <- allsteps
                 load("tempobjects.Rda")
+                load("step1_results.Rda")
+                load("global_cor.Rda")
                 allsteps <- allsteps_temp
             }
 
