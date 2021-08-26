@@ -1,4 +1,5 @@
-patrick::with_parameters_test_that("multilevelannotationstep2:", {
+test_that("multilevelannotationstep2:", {
+    test_identifier = "base"
     #skip("Currently excluded!")
     # Arrange
     load("testdata/adduct_weights.rda")
@@ -44,8 +45,9 @@ patrick::with_parameters_test_that("multilevelannotationstep2:", {
     setwd(test_path)
     unlink("stage2", recursive = TRUE)
     setwd(testthat_wd)
-},
-patrick::cases(
-    base = list(test_identifier = "base")
-    #cor_mz_matrix = list(test_identifier = "cor_mz_matrix")
-))
+})
+# },
+# patrick::cases(
+#     base = list(test_identifier = "base")
+#     #cor_mz_matrix = list(test_identifier = "cor_mz_matrix")
+# ))
