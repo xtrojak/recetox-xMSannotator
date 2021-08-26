@@ -9,7 +9,6 @@ Description: xMSannotator includes functions for metabolite annotation using HMD
 License: GPL2.0
 LazyLoad: no
 Imports:
-    dplyr (>= 0.8.0),
     XML,
     R2HTML,
     WGCNA,
@@ -20,6 +19,7 @@ Imports:
     rjson,
     snow,
     plyr,
+    dplyr (>= 0.8.0),
     KEGGREST,
     dynamicTreeCut,
     flashClust,
