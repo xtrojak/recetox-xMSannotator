@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - bioconda
   - defaults
+  - r
 dependencies:
   - r-base
   - boost-cpp
@@ -27,5 +28,6 @@ dependencies:
   - r-devtools
   - r-testthat
   - bioconductor-limma
-  - r-parallel
   - r-languageserver
+  - r-foreach
+  - r-rlang
