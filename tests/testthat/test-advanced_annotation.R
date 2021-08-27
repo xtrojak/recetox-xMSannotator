@@ -49,9 +49,9 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
     comparison <- dataCompareR::rCompare(actual, expected, keys = keys, mismatches = 1000)
     sum <- summary(comparison)
 
-    ratio_common <- sum$nrowCommon / nrow(expected)
+    ratio_error <- abs(1 - sum$nrowCommon / nrow(expected))
 
-    expect_gte(ratio_common, 0.99)
+    expect_lte(ratio_error, 0.01)
 
     #expect_equal(actual, expected, label = filename)
   }
