@@ -28,7 +28,8 @@ Imports:
     limma,
     tidyr,
     foreach,
-    magrittr
+    magrittr,
+    dataCompareR
 Suggests: 
     covr,
     testthat (>= 3.0.0)
