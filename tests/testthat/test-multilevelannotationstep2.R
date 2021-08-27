@@ -1,5 +1,5 @@
 test_that("multilevelannotationstep2:", {
-    test_identifier = "base"
+    test_identifier <- "base"
     #skip("Currently excluded!")
     # Arrange
     load("testdata/adduct_weights.rda")
