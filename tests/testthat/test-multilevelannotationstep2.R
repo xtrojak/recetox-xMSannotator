@@ -1,5 +1,6 @@
 test_that("multilevelannotationstep2:", {
-    test_identifier <- "base"
+    test_identifier <- "qc_solvent"
+    
     #skip("Currently excluded!")
     # Arrange
     load("testdata/adduct_weights.rda")
@@ -36,7 +37,6 @@ test_that("multilevelannotationstep2:", {
         isop_res_md = isop_res_md,
         filter.by = filter.by
     )
-    #load(file = "chem_score1.Rda")
 
     # Assert
     expect_equal(actual, expected)
@@ -46,8 +46,4 @@ test_that("multilevelannotationstep2:", {
     unlink("stage2", recursive = TRUE)
     setwd(testthat_wd)
 })
-# },
-# patrick::cases(
-#     base = list(test_identifier = "base")
-#     #cor_mz_matrix = list(test_identifier = "cor_mz_matrix")
-# ))
+
