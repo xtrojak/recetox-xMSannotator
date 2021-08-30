@@ -146,6 +146,20 @@ compute_score <- function(adduct_weights, cur_adducts_with_isotopes) {
   return(score[1])
 }
 
+remove_water_adducts <- function(curformula, mchemicaldata) {
+  numoxygen <- check_element(curformula, "O")
+  water_adducts <- c("M+H-H2O", "M+H-2H2O", "M-H2O-H")
+  water_adduct_ind <- which(mchemicaldata$Adduct %in% water_adducts)
+
+  if (numoxygen < 1) {
+    if (length(water_adduct_ind) > 0) {
+      return(mchemicaldata[-water_adduct_ind, ])
+    }
+  }
+
+  return(mchemicaldata)
+}
+
 #' @import tidyr
 #' @import dplyr
 #' @import plyr
@@ -179,11 +193,13 @@ get_chemscorev1.6.71 <- function(chemicalid,
   mchemicaldata$Module_RTclust <- replace_with_module(mchemicaldata$Module_RTclust)
   mchemicaldata_orig <- mchemicaldata
 
-  if (length(which(mchemicaldata_orig$Adduct %in% as.character(adduct_weights[, 1]))) > 0) {
-    rel_adduct_data <- mchemicaldata[which(mchemicaldata$Adduct %in% as.character(adduct_weights[, 1])), ]
+  adduct_weights_strings <- as.character(adduct_weights[, 1])
+  selected_adduct_weights <- which(mchemicaldata_orig$Adduct %in% adduct_weights_strings)
+
+  if (length(selected_adduct_weights) > 0) {
+    rel_adduct_data <- mchemicaldata[selected_adduct_weights, ]
 
     rel_adduct_module <- gsub(rel_adduct_data$Module_RTclust, pattern = "_[0-9]*", replacement = "")
-
     module_rt_group <- gsub(mchemicaldata$Module_RTclust, pattern = "_[0-9]*", replacement = "")
 
     mchemicaldata <- mchemicaldata[which(module_rt_group %in% rel_adduct_module), ]
@@ -197,17 +213,7 @@ get_chemscorev1.6.71 <- function(chemicalid,
   exp_isp <- which(formula_check$isotopes[[1]][2, ] >= 0.001)
   abund_ratio_vec <- formula_check$isotopes[[1]][2, exp_isp]
 
-  numoxygen <- check_element(curformula, "O")
-
-  water_adducts <- c("M+H-H2O", "M+H-2H2O", "M-H2O-H")
-
-  water_adduct_ind <- which(mchemicaldata$Adduct %in% water_adducts)
-
-  if (numoxygen < 1) {
-    if (length(water_adduct_ind) > 0) {
-      mchemicaldata <- mchemicaldata[-water_adduct_ind, ]
-    }
-  }
+  mchemicaldata <- remove_water_adducts(curformula, mchemicaldata)
 
   # water check
   if (nrow(mchemicaldata) < 1) {
