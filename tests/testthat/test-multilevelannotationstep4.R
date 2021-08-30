@@ -22,8 +22,6 @@ patrick::with_parameters_test_that("multilevelannotation step 4 works", {
   
   # compare with expected result
   expect_equal(result, expected)
-  cmp <- arsenal::comparedf(result, expected, by = names(result))
-  print(summary(cmp))
 },
 cases(
   qc_solvent = list(subfolder = "qc_solvent", max_rt_diff=0.5),
