@@ -1,7 +1,8 @@
-patrick::with_parameters_test_that("multilevelannotaton step 4 works", {
+test_that("multilevelannotaton step 4 works", {
+  
+  subfolder = "qc_solvent"
   
   # load data needed during step 4
-  load("../../data/adduct_table.rda")
   load("../../data/adduct_weights.rda")
   
   # load expected results
@@ -14,7 +15,7 @@ patrick::with_parameters_test_that("multilevelannotaton step 4 works", {
   setwd(test_path)
   
   # compute annotation step 4
-  result <- multilevelannotationstep4(".")
+  result <- multilevelannotationstep4(outloc=".", max.mz.diff=10, max.rt.diff=0.5, filter.by="M+H", adduct_weights=adduct_weights)
   row.names(result) <- 1:nrow(result)
   
   # Annihilate
@@ -22,10 +23,6 @@ patrick::with_parameters_test_that("multilevelannotaton step 4 works", {
   
   # compare with expected result
   expect_equal(result, expected)
-},
-cases(
-  qc_solvent = list(subfolder = "qc_solvent"),
-  sample_data_custom = list(subfolder = "sample_data_custom"),
-  batch1_neg = list(subfolder = "batch1_neg"),
-  qc_matrix = list(subfolder = "qc_matrix")
-))
+  cmp <- arsenal::comparedf(result, expected, by = names(result))
+  print(summary(cmp))
+})
