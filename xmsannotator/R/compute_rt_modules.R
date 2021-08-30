@@ -104,9 +104,10 @@ compute_rt_modules <- function(peak_table, peak_width = 1) {
 
     for (subdata in peak_table %>% group_split(module)) {
         cluster_positions <- compute_cluster_positions(subdata$rt, width = peak_width)
-        subdata$RTclust <- compute_cluster_assignments(cluster_positions, subdata$rt)
-        rt_cluster <- bind_rows(rt_cluster, subdata %>% select(peak, RTclust))
+        subdata$rt_cluster <- compute_cluster_assignments(cluster_positions, subdata$rt)
+        rt_cluster <- bind_rows(rt_cluster, subdata %>% select(peak, rt_cluster))
     }
-
-    return(left_join(peak_table, rt_cluster, by = "peak"))
+    peaks_without_sample_intensities <- peak_table %>%
+     select(any_of(c("peak", "mean_intensity", "module")))
+    return(left_join(peaks_without_sample_intensities, rt_cluster, by = "peak"))
 }
