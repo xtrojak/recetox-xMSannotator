@@ -1,3 +1,4 @@
+#' @export
 find.Overlapping.mzs <-
 function(dataA, dataB, mz.thresh=10, time.thresh=NA, alignment.tool=NA)
 {

@@ -1,3 +1,4 @@
+#' @export
 get_confidence_stage2 <-
 function(curdata,adduct_weights=NA,max_diff_rt=10){
 
