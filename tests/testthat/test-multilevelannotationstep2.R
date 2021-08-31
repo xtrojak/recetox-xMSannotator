@@ -1,7 +1,7 @@
 test_that("multilevelannotationstep2:", {
     test_identifier <- "qc_solvent"
-    
-    #skip("Currently excluded!")
+
+    # skip("Currently excluded!")
     # Arrange
     load("testdata/adduct_weights.rda")
 
@@ -46,4 +46,3 @@ test_that("multilevelannotationstep2:", {
     unlink("stage2", recursive = TRUE)
     setwd(testthat_wd)
 })
-
