@@ -14,26 +14,26 @@ test_that("isotope_matching", {
 
 patrick::with_parameters_test_that("abundance_ratio_computing", {
   actual <- compute_abundance_ratio(test_formula)
-  expect_equal(actual, expected, tolerance = expected * 0.001)
+  expect_equal(actual, expected, tolerance = 0.01)
 },
   patrick::cases(hydrogen = list(
-        test_formula = "H",
-        expected = 0.00015
+        test_formula = "H2",
+        expected = 0
         ),
         chlorophorm = list(
         test_formula = "CHCl3",
-        expected = 0.4126683
+        expected = 0.9599
         ),
         chlorophyll = list(
         test_formula = "C55H72O5N4Mg",
-        expected = 0.3171082
+        expected = 0.6
         )
   )
 )
 
 test_that("assign_abundance_ratios", {
-  isotopes <- readRDS("test-data/score_computation/all_isotopes.Rda")
-  expected <- readRDS("test-data/score_computation/isotopes_with_abundances.Rda")
+  isotopes <- readRDS("test-data/score_computation/molecules.rda")
+  expected <- readRDS("test-data/score_computation/molecules_with_abundances.rda")
   actual <- assign_isotope_abundances(isotopes)
 
   expect_equal(actual, expected)

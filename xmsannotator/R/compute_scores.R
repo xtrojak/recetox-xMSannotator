@@ -15,13 +15,17 @@ assign_isotope_abundances <- function(isotopes) {
 #'
 #' @param formula A string containing molecular or empirical formula of a compound
 #'
-#' @return Relative abundance ratio of the second most abundant isotope/isotopologue
+#' @return Normalized abundance ratio of the second most abundant isotope/isotopologue
 #'
-#' @importFrom Rdisop getMolecule
+#' @import dplyr
+#' @importFrom rcdk get.formula get.isotopes.pattern
 compute_abundance_ratio <- function(formula) {
-  molecule <- getMolecule(formula)
-  abundance_ratios <- sort(molecule$isotopes[[1]][2,], decreasing = TRUE)
-  sec_most_abundant <- abundance_ratios[2]
+  formula <- get.formula(formula)
+  isotopes <- get.isotopes.pattern(formula, minAbund = 0.001)
+  isotopes <- as_tibble(isotopes)
+  isotopes <- arrange(isotopes, desc(abund))
+  sec_most_abundant <- isotopes$abund[2]
+  sec_most_abundant <- max(c(sec_most_abundant, 0), na.rm = TRUE)
 }
 
 #' Match isotopes from peak table to annotated peaks

@@ -24,8 +24,8 @@ Imports:
 Suggests:
     testthat (>= 3.0.0),
     arrow (>= 3.0.0),
+    rcdk,
     readr,
-    Rdisop,
     rhdf5,
     patrick
 Config/testthat/edition: 3

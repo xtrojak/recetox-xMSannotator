@@ -41,12 +41,12 @@ requirements:
     - r-tibble
     - r-data.table
     - bioconductor-rhdf5
-    - bioconductor-rdisop
     - r-rcpp >=0.11.0
     - r-arrow >=3.0.0
     - r-pastecs
     - r-rlist
     - r-rann
+    - r-rcdk
 
 test:
   commands:
