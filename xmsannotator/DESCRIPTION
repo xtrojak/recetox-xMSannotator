@@ -20,11 +20,12 @@ Imports:
     tidyr,
     RANN,
     pastecs,
+    purrr,
+    rcdk,
     rlist
 Suggests:
     testthat (>= 3.0.0),
     arrow (>= 3.0.0),
-    rcdk,
     readr,
     rhdf5,
     patrick
