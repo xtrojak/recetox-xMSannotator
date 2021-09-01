@@ -13,6 +13,7 @@
 #'
 #' @return data frame with 3 columns: \emph{peak}, \emph{mean_intensity}, and
 #' \emph{module}
+#' @export
 #' @import WGCNA
 compute_peak_modules <- function(
   peak_intensity_matrix,
