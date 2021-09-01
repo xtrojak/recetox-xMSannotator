@@ -1,7 +1,8 @@
-#' Assign abundance ratio of the second most abundant isotope/isotopologue for each entry in a table
+#' Assign the abundance ratio of the second most abundant isotope/isotopologue for each molecule in a table
 #'
-#' @param isotopes A table with annotated peaks filtered by adducts
-#' @return The input table with extra column containing the abundance ratio of the second most abundant isotope/isotopologue
+#' @param isotopes A table with annotated peaks
+#'
+#' @return The input table with an extra column containing the normalized abundance ratio of the second most abundant isotope/isotopologue
 #'
 #' @import dplyr
 #' @import purrr
@@ -11,11 +12,13 @@ assign_isotope_abundances <- function(isotopes) {
   isotopes <- inner_join(isotopes, molecules, by = "molecular_formula")
 }
 
-#' Get abundance ratio of the second most abundant isotope/isotopologue
+#' Compute abundance ratio of the second most abundant isotope/isotopologue
 #'
 #' @param formula A string containing molecular or empirical formula of a compound
 #'
-#' @return Normalized abundance ratio of the second most abundant isotope/isotopologue
+#' @return Normalized abundance ratio of the second most abundant isotope/isotopologue. The normalization is performed
+#'  such that the most abundant isotope has a unit abundance and abundances of the rest of the isotopes are
+#'  represented as a share of this unit abundance
 #'
 #' @import dplyr
 #' @importFrom rcdk get.formula get.isotopes.pattern
@@ -28,18 +31,20 @@ compute_abundance_ratio <- function(formula) {
   sec_most_abundant <- max(c(sec_most_abundant, 0), na.rm = TRUE)
 }
 
-#' Match isotopes from peak table to annotated peaks
+#' Match isotopes from peak table to annotated peaks based on rt cluster, rt difference, peak intensity, and mass defect.
 #'
-#' @param ... A single isotope passed as a list of columns
-#' @param intensity_deviation_tolerance A number. A threshold by which an intensity ratio of isotope
-#' @param peaks A peak table - `isp_masses_mz_data` from the original tool's multilevelannotation step 1
+#' @param ... A single isotope passed as a list of columns. See [purrr::map()] for more details
+#' @param intensity_deviation_tolerance A numeric threshold by which an intensity ratio of two isotopic peaks may differ
+#'  from their actual abundance ratio
+#' @param peaks A peak table containing a peak identifier (unique number), mean intensity, module, and rt cluster
+#'  of each identified peak
 #' @param mass_defect_tolerance A number. Maximum difference in mass defect between two peaks of the same compound
-#' @param max_isp A number. Maximal number of unique isotopes of a single compound
+#' @param max_isp Maximal number of unique isotopes of a single compound
 #' @param rt_tolerance A number. Maximum rt difference for two peaks of the same substance
-#'  to a molecular peak may exceed its relative isotopic abundance. The default value was hardcoded by the
-#'  original author.
 #'
-#' @return A table of matching isotopes from `peaks` table
+#' @return A table of identified isotopes with an extra column: `isotopic deviation`.
+#'  The extra column represents a nominal mass (mass number) difference between a given isotope and the most abundant
+#'  isotope of the same molecule
 #'
 #' @import dplyr
 #' @importFrom rlang .data
@@ -67,14 +72,16 @@ compute_isotopes <- function(...,
   )
 }
 
-#' Compute a chemical (confidence) score for each annotation
+#' Compute a confidence score for each annotation
 #'
 #' @param annotation A table with annotated peaks
 #' @param adduct_weights A weight-by-adduct table
-#' @param intensity_deviation_tolerance A number. A threshold by which an intensity ratio of isotope
+#' @param intensity_deviation_tolerance A numeric threshold by which an intensity ratio of two isotopic peaks may differ
+#'  from their actual abundance ratio
 #' @param mass_defect_tolerance A number. Maximum difference in mass defect between two peaks of the same compound
-#' @param max_isp A number. Maximal number of unique isotopes of a single compound
-#' @param peaks A feature table containing mz, rt, rt cluster, and mean intensity of each peak
+#' @param max_isp Maximal number of unique isotopes of a single compound
+#' @param peaks A peak table containing a peak identifier (unique number), mean intensity, module, and rt cluster
+#'  of each identified peak
 #' @param rt_tolerance A number. Maximum rt difference for two peaks of the same substance
 #'
 #' @import dplyr
