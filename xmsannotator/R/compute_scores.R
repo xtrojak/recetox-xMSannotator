@@ -64,7 +64,7 @@ compute_isotopes <- function(...,
   )
   isotopes <- filter(
     isotopes,
-    RTclust == query$RTclust,
+    rt_cluster == query$rt_cluster,
     mean_intensity / query$mean_intensity <= query$abundance_ratio + intensity_deviation_tolerance,
     near(rt, query$rt, rt_tolerance),
     near(mass_defect, query$mass_defect, mass_defect_tolerance),
