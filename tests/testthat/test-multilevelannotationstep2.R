@@ -1,6 +1,4 @@
-test_that("multilevelannotationstep2:", {
-    test_identifier <- "qc_solvent"
-
+patrick::with_parameters_test_that("multilevelannotationstep2:", {
     # skip("Currently excluded!")
     # Arrange
     load("testdata/adduct_weights.rda")
@@ -45,4 +43,7 @@ test_that("multilevelannotationstep2:", {
     setwd(test_path)
     unlink("stage2", recursive = TRUE)
     setwd(testthat_wd)
-})
+}, patrick::cases(
+    qc_solvent = list(test_identifier = "qc_solvent"),
+    batch1_neg = list(test_identifier = "batch1_neg")
+))
