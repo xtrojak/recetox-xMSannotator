@@ -1,5 +1,9 @@
-test_that("basic simple_annotation functionality", {
-  df <- simple_annotation(sample_peak_table, sample_compound_table)
-
-  expect_s3_class(df, 'data.frame')
+test_that("simple_annotation functionality on sample data", {
+  peaks <- arrow::read_parquet("test-data/simple_annotation_sample/peaks.parquet")
+  DB <- arrow::read_parquet("test-data/simple_annotation_sample/compounds.parquet")
+  expected <- arrow::read_parquet("test-data/simple_annotation_sample/expected.parquet")
+  
+  result <- simple_annotation(peaks, DB)
+  
+  expect_equal(result, expected)
 })

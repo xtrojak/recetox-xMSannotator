@@ -1,9 +1,17 @@
 # xMSannotator
+[![R Conda](https://github.com/RECETOX/recetox-xMSannotator/actions/workflows/r-conda.yml/badge.svg?branch=main)](https://github.com/RECETOX/recetox-xMSannotator/actions/workflows/r-conda.yml)
 
+For more details please have a look at the [Wiki](https://github.com/RECETOX/recetox-xMSannotator/wiki)!
+
+## Usage
+![GitHub R package version (branch & subdirectory of monorepo)](https://img.shields.io/github/r-package/v/RECETOX/recetox-xMSannotator/main?filename=xmsannotator%2FDESCRIPTION)
+[![Conda](https://img.shields.io/conda/v/bioconda/r-recetox-xmsannotator)](https://anaconda.org/bioconda/r-recetox-xmsannotator)
 
 Built Docker images are available at [recetox/xmsannotator](https://hub.docker.com/repository/docker/recetox/xmsannotator).
 
 Use as a Galaxy Tool: https://github.com/RECETOX/galaxytools/tree/master/tools/xmsannotator
+
+The package is also published via [bioconda](https://anaconda.org/bioconda/r-recetox-xmsannotator)
 
 When using this tool, please cite the original [publication](https://pubs.acs.org/doi/abs/10.1021/acs.analchem.6b01214?src=recsys&).
 ### Research reproducibility
