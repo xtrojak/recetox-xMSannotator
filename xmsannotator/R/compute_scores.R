@@ -35,7 +35,7 @@ compute_isotopic_pattern <- function(formula, minAbund = 0.001) {
 
 #' Match isotopes from peak table to annotated peaks based on rt cluster, rt difference, peak intensity, and mass defect.
 #'
-#' @param ... A single isotope passed as a list of columns. See [purrr::map()] for more details.
+#' @param query A single annotated peak.
 #' @param intensity_deviation_tolerance A numeric threshold by which an intensity ratio of two isotopic peaks may differ
 #'  from their actual abundance ratio.
 #' @param peaks A peak table containing a peak identifier (unique number), mean intensity, module, and rt cluster
@@ -49,14 +49,13 @@ compute_isotopic_pattern <- function(formula, minAbund = 0.001) {
 #'  isotope of the same molecule.
 #'
 #' @import dplyr
-#' @importFrom rlang .data
-compute_isotopes <- function(...,
-                             intensity_deviation_tolerance = 0.1,
-                             peaks,
-                             mass_defect_tolerance = 0,
-                             max_isp,
-                             rt_tolerance) {
-  query <- tibble(...)
+filter_isotopes <- function(query,
+                            intensity_deviation_tolerance,
+                            peaks,
+                            abundance_ratio,
+                            mass_defect_tolerance,
+                            max_isp,
+                            rt_tolerance) {
   isotopes <- mutate(
     peaks,
     mass_number_difference = round(mz - query$expected_mass),
@@ -67,7 +66,7 @@ compute_isotopes <- function(...,
   isotopes <- filter(
     isotopes,
     rt_cluster == query$rt_cluster,
-    mean_intensity / query$mean_intensity <= query$abundance_ratio + intensity_deviation_tolerance,
+    mean_intensity / query$mean_intensity <= abundance_ratio + abundance_ratio * intensity_deviation_tolerance,
     near(rt, query$rt, rt_tolerance),
     near(mass_defect, query$mass_defect, mass_defect_tolerance),
     between(abs(mass_number_difference), 1, max_isp)
@@ -101,6 +100,46 @@ match_isotopes_by_intensity <- function(query,
   isotopes <- select(isotopes, -c(abund, relative_intensity))
 }
 
+#' Find all possible isotopes of a given annotated peak by filtering peaks based on several criteria
+#' (see [filter_isotopes]) and matching the intensities with natural abundances of the isotopes.
+#'
+#' @param ... A single isotope passed as a list of columns. See [purrr::map()] for more details.
+#' @param intensity_deviation_tolerance A numeric threshold by which an intensity ratio of two isotopic peaks may differ
+#'  from their actual abundance ratio.
+#' @param peaks A peak table containing a peak identifier (unique number), mean intensity, module, and rt cluster
+#'  of each identified peak.
+#' @param mass_defect_tolerance A number. Maximum difference in mass defect between two peaks of the same compound.
+#' @param max_isp Maximal number of unique isotopes of a single compound.
+#' @param rt_tolerance A number. Maximum rt difference for two peaks of the same substance.
+#'
+#' @return A table with peaks that have been identified as isotopes of a given molecule from the annotation table.
+#'
+#' @import dplyr
+#' @importFrom rlang .data
+compute_isotopes <- function(...,
+                             intensity_deviation_tolerance,
+                             peaks,
+                             mass_defect_tolerance,
+                             max_isp,
+                             rt_tolerance) {
+  query <- tibble(...)
+  isotopic_pattern <- compute_isotopic_pattern(query$molecular_formula)
+  second_most_abundant <- isotopic_pattern$abund[2]
+
+  isotopes <- filter_isotopes(query,
+                              intensity_deviation_tolerance,
+                              peaks,
+                              second_most_abundant,
+                              mass_defect_tolerance,
+                              max_isp,
+                              rt_tolerance)
+  isotopes <- distinct(isotopes)
+  isotopes <- match_isotopes_by_intensity(query,
+                                          isotopes,
+                                          isotopic_pattern,
+                                          intensity_deviation_tolerance)
+}
+
 #' Compute a confidence score for each annotation.
 #'
 #' @param annotation A table with annotated peaks.
@@ -118,14 +157,13 @@ match_isotopes_by_intensity <- function(query,
 compute_scores <- function(annotation,
                            adduct_weights,
                            intensity_deviation_tolerance = 0.1,
-                           mass_defect_tolerance,
+                           mass_defect_tolerance = 0,
                            max_isp,
                            peaks,
                            rt_tolerance) {
   annotation <- filter(annotation, forms_valid_adduct_pair(.data$molecular_formula, .data$adduct))
 
   isotopes <- semi_join(annotation, adduct_weights, by = "adduct")
-  isotopes <- assign_isotope_abundances(isotopes)
   # This can be parallelized on `group_split(group_by(isotopes, molecular_formula))`
   isotopes <- purrr::pmap_dfr(isotopes,
                               ~compute_isotopes(..., peaks = peaks,
@@ -133,7 +171,6 @@ compute_scores <- function(annotation,
                                                 intensity_deviation_tolerance = intensity_deviation_tolerance,
                                                 mass_defect_tolerance = mass_defect_tolerance,
                                                 max_isp = max_isp))
-  isotopes <- distinct(isotopes)
 
   annotation <- bind_rows(annotation, isotopes)
   annotation <- left_join(annotation, adduct_weights, by = "adduct")
