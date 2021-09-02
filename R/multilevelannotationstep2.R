@@ -21,21 +21,21 @@ compute_something <- function(m, curmchemdata, mass_defect_window, isop_res_md) 
 #' @import plyr
 #' @export
 compute_chemscore <- function(j,
-                              chemids,
-                              mchemdata,
-                              isop_res_md,
-                              mass_defect_window,
-                              corthresh,
-                              global_cor,
-                              mzid,
-                              max_diff_rt,
-                              adduct_table,
-                              adduct_weights,
-                              filter.by,
-                              max_isp,
-                              MplusH.abundance.ratio.check,
-                              mass_defect_mode,
-                              outloc
+                              chemids = NA,
+                              mchemdata = NA,
+                              isop_res_md = NA,
+                              mass_defect_window = NA,
+                              corthresh = NA,
+                              global_cor = NA,
+                              mzid = NA,
+                              max_diff_rt = NA,
+                              adduct_table = NA,
+                              adduct_weights = NA,
+                              filter.by = NA,
+                              max_isp = NA,
+                              MplusH.abundance.ratio.check = NA,
+                              mass_defect_mode = NA,
+                              outloc = NA
                               ) {
   chemid <- chemids[j]
   chemscoremat <- {}
@@ -98,7 +98,7 @@ compute_chemscore <- function(j,
   } else {
     rm(chem_score)
   }
-  rm("curmchemdata", "isp_masses_mz_data", "mzid_cur", "chemid")
+  rm("curmchemdata", "isp_masses_mz_data", "chemid")
 
   return(chemscoremat)
 }
@@ -141,7 +141,7 @@ multilevelannotationstep2 <- function(outloc1,
     return(0)
   }
 
-  if (is.na(adduct_weights) == TRUE) {
+  if (is.na(adduct_weights)) {
     data(adduct_weights)
 
     adduct_weights1 <- matrix(nrow = 2, ncol = 2, 0)
