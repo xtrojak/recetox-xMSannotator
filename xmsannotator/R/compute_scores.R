@@ -22,6 +22,7 @@ assign_isotope_abundances <- function(isotopes) {
 #' having a unit value and abundances of the other isotopes are represented as a share of the most abundant isotope.
 #' Mass number difference is 0 for the most abundant isotope.
 #'
+#' @export
 #' @import dplyr
 #' @importFrom rcdk get.formula get.isotopes.pattern
 compute_isotopic_pattern <- function(formula, minAbund = 0.001) {
