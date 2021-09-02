@@ -1,49 +1,60 @@
-patrick::with_parameters_test_that("multilevelannotationstep2:", {
-    # skip("Currently excluded!")
-    # Arrange
-    load("testdata/adduct_weights.rda")
+patrick::with_parameters_test_that(
+    "multilevelannotationstep2:",
+    {
+        # skip("Currently excluded!")
 
-    testthat_wd <- getwd()
-    test_path <- file.path(getwd(), "testdata/multilevelannotationstep2", test_identifier)
-    setwd(test_path)
+        # Arrange
+        testthat_wd <- getwd()
+        test_path <- file.path(
+            testthat_wd,
+            "testdata/multilevelannotationstep2",
+            test_identifier
+        )
+        setwd(test_path)
 
-    load(file = "chem_score1.Rda")
-    expected <- curchemscoremat
-    curchemscoremat <- NA
+        expected <- readRDS("expected.Rds")
+        load(file = "step1_results.Rda")
+        load(file = "global_cor.Rda")
+        load(file = "tempobjects.Rda")
 
-    load(file = "step1_results.Rda")
-    load(file = "global_cor.Rda")
+        # Act
+        actual <- lapply(
+            1:num_sets,
+            call_multilevelannotationstep2,
+            outloc = tempdir(),
+            max.rt.diff = max.rt.diff,
+            chemids_split = chemids_split,
+            num_sets = num_sets,
+            mchemdata = mchemdata,
+            mass_defect_window = mass_defect_window,
+            corthresh = corthresh,
+            global_cor = global_cor,
+            mzid = mzid,
+            adduct_table = adduct_table,
+            adduct_weights = adduct_weights,
+            max_isp = max_isp,
+            MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
+            mass_defect_mode = mass_defect_mode,
+            chemids = chemids,
+            isop_res_md = isop_res_md,
+            filter.by = filter.by
+        )
+        actual <- ldply(actual, rbind)
 
-    # Act
-    actual <- multilevelannotationstep2(
-        ".",
-        1,
-        max.rt.diff = max.rt.diff,
-        chemids_split = chemids_split,
-        num_sets = num_sets,
-        mchemdata = mchemdata,
-        mass_defect_window = mass_defect_window,
-        corthresh = corthresh,
-        global_cor = global_cor,
-        mzid = mzid,
-        adduct_table = adduct_table,
-        adduct_weights = adduct_weights,
-        max_isp = max_isp,
-        MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
-        mass_defect_mode = mass_defect_mode,
-        chemids = chemids,
-        isop_res_md = isop_res_md,
-        filter.by = filter.by
+        # Assert
+        expect_equal(actual, expected)
+
+        rm(actual)
+
+        # Annihilate
+        setwd(tempdir())
+        unlink("stage2", recursive = TRUE)
+        setwd(testthat_wd)
+        gc(reset = TRUE)
+    },
+    patrick::cases(
+        qc_solvent = list(test_identifier = "qc_solvent"),
+        batch1_neg = list(test_identifier = "batch1_neg"),
+        qc_matrix = list(test_identifier = "qc_matrix")
     )
-
-    # Assert
-    expect_equal(actual, expected)
-
-    # Annihilate
-    setwd(test_path)
-    unlink("stage2", recursive = TRUE)
-    setwd(testthat_wd)
-}, patrick::cases(
-    qc_solvent = list(test_identifier = "qc_solvent"),
-    batch1_neg = list(test_identifier = "batch1_neg")
-))
+)
