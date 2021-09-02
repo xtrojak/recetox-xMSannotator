@@ -30,7 +30,7 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
     mode = mode
   )
 
-  key_columns <- c('mz', 'time', 'Name', 'Adduct', 'Formula', 'chemical_ID')
+  key_columns <- c('mz', 'time', 'Name', 'Adduct', 'Formula', 'chemical_ID', 'score')
 
   for (i in seq.int(from = 1, to = 5, by = 1)) {
     filename <- paste0("Stage", i, ".csv")
