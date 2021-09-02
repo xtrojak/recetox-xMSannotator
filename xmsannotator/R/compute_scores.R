@@ -73,6 +73,33 @@ compute_isotopes <- function(...,
   )
 }
 
+#' Match prefiltered isotopes by comparing their relative intensity to their relative natural abundance.
+#' The relative values are computed as a ratio of an isotopic peak intensity to the intensity of its monoisotopic peak,
+#' respectively as a ratio of a natural abundance of the isotope to the abundance of the most abundant isotope
+#'
+#' @param query A single annotated peak
+#' @param isotopes Isotope candidates for the annotated molecule. The candidates are identified in [compute_isotopes]
+#' @param pattern Isotopic pattern of a given molecule as produced by [compute_isotopic_pattern]
+#' @param intensity_deviation_tolerance A numeric threshold by which an intensity ratio of two isotopic peaks may differ
+#'  from their actual abundance ratio
+#'
+#' @return A table of matched isotopes
+#'
+#' @import dplyr
+match_isotopes_by_intensity <- function(query,
+                                        isotopes,
+                                        pattern,
+                                        intensity_deviation_tolerance) {
+  isotopes <- mutate(isotopes,
+                     relative_intensity = mean_intensity / query$mean_intensity)
+  isotopes <- left_join(isotopes,
+                        select(pattern, mass_number_difference, abund),
+                        by = "mass_number_difference")
+  isotopes <- filter(isotopes,
+                     near(relative_intensity, abund, relative_intensity * intensity_deviation_tolerance))
+  isotopes <- select(isotopes, -c(abund, relative_intensity))
+}
+
 #' Compute a confidence score for each annotation
 #'
 #' @param annotation A table with annotated peaks

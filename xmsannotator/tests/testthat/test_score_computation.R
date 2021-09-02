@@ -12,6 +12,19 @@ test_that("isotope_matching", {
   expect_equal(actual, expected, ignore_attr = TRUE)
 })
 
+test_that("Chemscore computing: isotope matching by intensity.", {
+  query <- readRDS("test-data/score_computation/query.Rda")
+  isotopes <- readRDS("test-data/score_computation/isotopes.Rda")
+  pattern <- readRDS("test-data/score_computation/adenine_pattern.rda")
+
+  expected <- readRDS("test-data/score_computation/matched_isotopes.rda")
+  actual <- match_isotopes_by_intensity(query = query,
+                                        isotopes = isotopes,
+                                        pattern = pattern,
+                                        intensity_deviation_tolerance = 0.4)
+  expect_equal(actual, expected)
+})
+
 patrick::with_parameters_test_that("abundance_ratio_computing", {
   actual <- compute_isotopic_pattern(formula, minAbund = 0.001)
   expect_equal(actual, expected)
