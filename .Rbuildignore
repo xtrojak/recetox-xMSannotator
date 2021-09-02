@@ -1,0 +1,5 @@
+.vscode
+codecov.yml
+NAMESPACE_old
+conda
+Dockerfile

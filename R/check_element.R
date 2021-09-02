@@ -1,3 +1,4 @@
+#' @export
 check_element <-
 function(curformula,elementname){
 

@@ -1,3 +1,4 @@
+#' @export
 check_golden_rules <-
 function(curformula,NOPS_check=FALSE){
 	

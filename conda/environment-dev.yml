@@ -1,0 +1,33 @@
+name: xmsannotator-dev
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - r
+dependencies:
+  - r-base
+  - boost-cpp
+  - r-biocmanager
+  - r-rsqlite
+  - r-digest
+  - r-remotes
+  - r-xmlschema
+  - r-snow
+  - r-dosnow
+  - bioconductor-keggrest
+  - bioconductor-pcamethods
+  - bioconductor-rdisop
+  - r-flashclust
+  - r-r2html
+  - r-rjson
+  - r-plyr
+  - r-wgcna
+  - r-ssoap
+  - r-tidyr
+  - r-dplyr
+  - r-devtools
+  - r-testthat
+  - bioconductor-limma
+  - r-languageserver
+  - r-foreach
+  - r-rlang

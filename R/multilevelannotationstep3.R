@@ -1,5 +1,5 @@
 multilevelannotationstep3 <-
-function(outloc1,adduct_weights=NA,num_sets=NA,boostIDs=NA,pathwaycheckmode="p",dbAllinf=NA,scorethresh=0.1){
+function(outloc1, chemscoremat = NA, adduct_weights=NA,num_sets=NA,boostIDs=NA,pathwaycheckmode="p",dbAllinf=NA,scorethresh=0.1){
 	
 	setwd(outloc1)
 
@@ -58,33 +58,38 @@ outloc1<-paste(outloc,"/stage2/",sep="")
 suppressWarnings(dir.create(outloc1))
 setwd(outloc1)
 
-chemscoremat<-{}
 
 #print("num_sets")
 #print(num_sets)
 #print(length(chemids_split))
 
 #for(sind in seq(1,num_sets))
-chemscoremat<-lapply(1:num_sets,function(sind)
-{
-	cur_fname<-paste("chem_score",sind,".Rda",sep="")
+if(is.na(chemscoremat)) {
+    chemscoremat<-{}
+    chemscoremat<-lapply(1:num_sets,function(sind)
+    {
+    	cur_fname<-paste("chem_score",sind,".Rda",sep="")
 
-	try(load(cur_fname),silent=TRUE)
+    	load(cur_fname)
 
-	curchemscoremat<-as.data.frame(curchemscoremat)
-	
-	curchemscoremat$Formula<-gsub(curchemscoremat$Formula,pattern="_.*",replacement="")
-	
-	#colnames(curchemscoremat)<-c("cur_chem_score","Module_RTclust","mz","time", "MatchCategory","theoretical.mz","chemical_ID","Name","Formula","MonoisotopicMass","Adduct","ISgroup","time.y","mean_int_vec","MD")
-	#curchemscoremat<-curchemscoremat[,1:14]
-	#print(dim(curchemscoremat))
-	#print(colnames(curchemscoremat))
-	#chemscoremat<-rbind(chemscoremat,curchemscoremat)
-	return(curchemscoremat)
-})
+    	curchemscoremat<-as.data.frame(curchemscoremat)
+    
+    	curchemscoremat$Formula<-gsub(curchemscoremat$Formula,pattern="_.*",replacement="")
+    
+    	#colnames(curchemscoremat)<-c("cur_chem_score","Module_RTclust","mz","time", "MatchCategory","theoretical.mz","chemical_ID","Name","Formula","MonoisotopicMass","Adduct","ISgroup","time.y","mean_int_vec","MD")
+    	#curchemscoremat<-curchemscoremat[,1:14]
+    	#print(dim(curchemscoremat))
+    	#print(colnames(curchemscoremat))
+    	#chemscoremat<-rbind(chemscoremat,curchemscoremat)
+    	return(curchemscoremat)
+    })
 
-chemscoremat<-ldply(chemscoremat,rbind)
-chemscoremat<-as.data.frame(chemscoremat)
+    chemscoremat<-ldply(chemscoremat,rbind)
+    chemscoremat<-as.data.frame(chemscoremat)
+} else {
+    chemscoremat$Formula<-gsub(chemscoremat$Formula,pattern="_.*",replacement="")
+    chemscoremat<-as.data.frame(chemscoremat)
+}
 
 tempadduct<-chemscoremat$Adduct
 

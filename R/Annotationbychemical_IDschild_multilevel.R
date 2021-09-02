@@ -1,3 +1,4 @@
+#' @export
 Annotationbychemical_IDschild_multilevel <-
 function(chemid_index,dataA,queryadductlist=c("M+H"),adduct_type=c("S","Acetonitrile"),adduct_table,max.mz.diff=10,outloc, otherdbs=FALSE,otherinfo=FALSE,keggCompMZ,chemIDs=NA,
 num_nodes=2){
