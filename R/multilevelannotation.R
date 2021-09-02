@@ -19,9 +19,10 @@ call_multilevelannotationstep2 <- function(arg1,
                                            filter.by = NA
                                            ) {
     cur_fname <- paste(outloc, "/stage2/chem_score", arg1, ".Rda", sep = "")
-    check_if_exists <- suppressWarnings(try(load(cur_fname)))
+    check_if_exists <- file.exists(cur_fname)
+    
 
-    if (is(check_if_exists, "try-error")) {
+    if (check_if_exists == FALSE) {
         multilevelannotationstep2(
             outloc1 = outloc,
             list_number = arg1,
