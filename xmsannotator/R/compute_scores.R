@@ -42,7 +42,7 @@ compute_abundance_ratio <- function(formula) {
 #' @param max_isp Maximal number of unique isotopes of a single compound
 #' @param rt_tolerance A number. Maximum rt difference for two peaks of the same substance
 #'
-#' @return A table of identified isotopes with an extra column: `isotopic deviation`.
+#' @return A table of identified isotopes with an extra column: `mass_number_difference`.
 #'  The extra column represents a nominal mass (mass number) difference between a given isotope and the most abundant
 #'  isotope of the same molecule
 #'
@@ -57,7 +57,7 @@ compute_isotopes <- function(...,
   query <- tibble(...)
   isotopes <- mutate(
     peaks,
-    isotopic_deviation = round(mz - query$expected_mass),
+    mass_number_difference = round(mz - query$expected_mass),
     compound = query$compound,
     adduct = query$adduct,
     molecular_formula = query$molecular_formula
@@ -68,7 +68,7 @@ compute_isotopes <- function(...,
     mean_intensity / query$mean_intensity <= query$abundance_ratio + intensity_deviation_tolerance,
     near(rt, query$rt, rt_tolerance),
     near(mass_defect, query$mass_defect, mass_defect_tolerance),
-    between(abs(isotopic_deviation), 1, max_isp)
+    between(abs(mass_number_difference), 1, max_isp)
   )
 }
 
