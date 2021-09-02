@@ -13,20 +13,20 @@ test_that("isotope_matching", {
 })
 
 patrick::with_parameters_test_that("abundance_ratio_computing", {
-  actual <- compute_abundance_ratio(test_formula)
-  expect_equal(actual, expected, tolerance = 0.01)
+  actual <- compute_isotopic_pattern(formula, minAbund = 0.001)
+  expect_equal(actual, expected)
 },
-  patrick::cases(hydrogen = list(
-        test_formula = "H2",
-        expected = 0
+  patrick::cases(carbon = list(
+        formula = "C",
+        expected = readRDS("test-data/score_computation/C_pattern.rda")
         ),
         chlorophorm = list(
-        test_formula = "CHCl3",
-        expected = 0.9599
+        formula = "CHCl3",
+        expected = readRDS("test-data/score_computation/CHCl3_pattern.rda")
         ),
         chlorophyll = list(
-        test_formula = "C55H72O5N4Mg",
-        expected = 0.6
+        formula = "C55H72O5N4Mg",
+        expected = readRDS("test-data/score_computation/CHLA_pattern.rda")
         )
   )
 )

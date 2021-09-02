@@ -12,23 +12,24 @@ assign_isotope_abundances <- function(isotopes) {
   isotopes <- inner_join(isotopes, molecules, by = "molecular_formula")
 }
 
-#' Compute abundance ratio of the second most abundant isotope/isotopologue
+#' Compute isotopic pattern of a given molecule
 #'
 #' @param formula A string containing molecular or empirical formula of a compound
+#' @param minAbund A cutoff abundance ratio: only isotopes with abundance ratio above this value are returned
 #'
-#' @return Normalized abundance ratio of the second most abundant isotope/isotopologue. The normalization is performed
-#'  such that the most abundant isotope has a unit abundance and abundances of the rest of the isotopes are
-#'  represented as a share of this unit abundance
+#' @return A dataframe containing isotopic pattern of a given molecule. The pattern is represented by three columns:
+#' mass, mass number difference, and abundance. Abundance of the isotopes is normalized with the most abundant isotope
+#' having a unit value and abundances of the other isotopes are represented as a share of the most abundant isotope.
+#' Mass number difference is 0 for the most abundant isotope.
 #'
 #' @import dplyr
 #' @importFrom rcdk get.formula get.isotopes.pattern
-compute_abundance_ratio <- function(formula) {
+compute_isotopic_pattern <- function(formula, minAbund = 0.001) {
   formula <- get.formula(formula)
-  isotopes <- get.isotopes.pattern(formula, minAbund = 0.001)
+  isotopes <- get.isotopes.pattern(formula, minAbund)
   isotopes <- as_tibble(isotopes)
   isotopes <- arrange(isotopes, desc(abund))
-  sec_most_abundant <- isotopes$abund[2]
-  sec_most_abundant <- max(c(sec_most_abundant, 0), na.rm = TRUE)
+  isotopes <- mutate(isotopes, mass_number_difference = round(mass - mass[1]))
 }
 
 #' Match isotopes from peak table to annotated peaks based on rt cluster, rt difference, peak intensity, and mass defect.
