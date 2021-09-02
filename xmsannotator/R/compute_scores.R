@@ -1,17 +1,3 @@
-#' Assign the abundance ratio of the second most abundant isotope/isotopologue for each molecule in a table.
-#'
-#' @param isotopes A table with annotated peaks.
-#'
-#' @return The input table with an extra column containing the normalized abundance ratio of the second most abundant isotope/isotopologue.
-#'
-#' @import dplyr
-#' @import purrr
-assign_isotope_abundances <- function(isotopes) {
-  molecules <- distinct(isotopes, molecular_formula)
-  molecules <- mutate(molecules, abundance_ratio = map_dbl(molecular_formula, compute_abundance_ratio))
-  isotopes <- inner_join(isotopes, molecules, by = "molecular_formula")
-}
-
 #' Compute isotopic pattern of a given molecule.
 #'
 #' @param formula A string containing molecular or empirical formula of a compound.
