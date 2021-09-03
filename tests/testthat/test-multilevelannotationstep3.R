@@ -2,6 +2,7 @@ test_that("multilevelannotation step 3 works", {
   
   subfolder <- "qc_solvent"
   testthat_wd <- getwd()
+  load("../../data/adduct_weights.rda")
   
   # load expected results
   expected <- read.csv(file.path(getwd(), "testdata/advanced", subfolder, "Stage3.csv"))
@@ -23,5 +24,6 @@ test_that("multilevelannotation step 3 works", {
   setwd(testthat_wd)
   
   # compare with expected result
-  expect_equal(result, expected)
+  cmp <- arsenal::comparedf(result, expected, by=names(result))
+  expect_equal(arsenal::n.diff.obs(cmp), 0)
 })
