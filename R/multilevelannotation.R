@@ -1257,6 +1257,8 @@ multilevelannotation <-
                     clusterExport(cl, "do_something_2")
                     clusterExport(cl, "compute_score")
                     clusterExport(cl, "replace_with_module")
+                    clusterExport(cl, "remove_water_adducts")
+                    
                     #clusterExport(cl, "getMolecule")
                     #clusterExport(cl, "ldply")
                     clusterExport(cl, "%>%")
