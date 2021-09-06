@@ -14,6 +14,18 @@ patrick::with_parameters_test_that(
 
         expected <- readRDS("expected.Rds")
         load(file = "step1_results.Rda")
+
+        if (!file.exists("global_cor.Rda")) {
+            url_base <- "https://gitlab.ics.muni.cz/umsa/umsa-files/-/raw/master/testdata/recetox-xMSannotator/"
+            url <- paste0(url_base, test_identifier, "_global_cor.Rda")
+            error <- download.file(
+                url,
+                destfile = "global_cor.Rda",
+                mode = "wb"
+            )
+            if (error != 0) fail("Could not download test data!")
+        }
+        
         load(file = "global_cor.Rda")
         load(file = "tempobjects.Rda")
 
@@ -55,6 +67,7 @@ patrick::with_parameters_test_that(
     patrick::cases(
         qc_solvent = list(test_identifier = "qc_solvent"),
         batch1_neg = list(test_identifier = "batch1_neg"),
+        sourceforge = list(test_identifier = "sourceforge"),
         qc_matrix = list(test_identifier = "qc_matrix")
     )
 )
