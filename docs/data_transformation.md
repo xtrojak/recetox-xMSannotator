@@ -1,5 +1,27 @@
 ## recetox-aplcms to xMSannotator
+The recetox-aplcms tool outputs the peak table in a format which is not directly compatible with recetox-xMSannotator or xMSannotator. A conversion is required. Example file layouts are given below.
 
+### recetox-aplcms Example Output
+
+| feature      | mz   | rt | sample | sample_rt | sample_intensity |
+|--------------|------|----|--------|-----------|------------------|
+|1	|110.034534364169 |	246.052915606977 |	Tribrid_201005_001-MeOH_NEG_MU |NA|	0 |
+|1|	110.034534364169|	246.052915606977|	Tribrid_201005_002-Norman_NEG_MU|	729.439375046056|	256906.674516574|
+|2|	113.007573530083|	370.352087874597|	Tribrid_201005_001-MeOH_NEG_MU|	317.947801280858|	2406770.19370756|
+| ... | ... | ... | ... | ...| ... |
+
+### recetox-xMSannotator Example Input
+
+| peak      | mz   | rt | intensity_Tribrid_201005_001-MeOH_NEG_MU | intensity_Tribrid_201005_002-Norman_NEG_MU |
+|-----------|------|----|------------------------------------------|--------------------------------------------|
+| 1 |110.034534364169 | 246.052915606977 | 0 | 256906.674516574 |
+| ... | ... | ... | ... | ... |
+
+### xMSannotator Example Input
+| mz   | time | intensity_Tribrid_201005_001-MeOH_NEG_MU | intensity_Tribrid_201005_002-Norman_NEG_MU |
+|------|----|------------------------------------------|--------------------------------------------|
+|110.034534364169 | 246.052915606977 | 0 | 256906.674516574 |
+| ... | ... | ... | ... |
 ### R Sample Code
 
 ``` R
