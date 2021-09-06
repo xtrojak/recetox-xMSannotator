@@ -1,4 +1,4 @@
-# Patterns
+# Refactoring Patterns
 
 ## Restoring Data from File
 An often-used trick to avoid having many function parameters is to store variables from the environment to disk and to restore them again later (e.g [here](https://github.com/RECETOX/recetox-xMSannotator/blob/c7ad3bb2f4e7cc6aa35d8a0804fe6ef7a8389729/R/multilevelannotationstep3.R#L14-L17)). This is also used to avoid having to export variables for parallel function calls.
