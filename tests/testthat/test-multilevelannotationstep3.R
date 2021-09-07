@@ -28,9 +28,9 @@ patrick::with_parameters_test_that(
     expect_equal(arsenal::n.diff.obs(cmp), 0)
   },
   patrick::cases(
-    qc_solvent = list(subfolder <- "qc_solvent"),
-    qc_matrix = list(subfolder <- "qc_matrix"),
-    batch1_neg = list(subfolder <- "batch1_neg"),
-    sourceforge = list(subfolder <- "sourceforge")
+    qc_solvent = list(subfolder = "qc_solvent"),
+    qc_matrix = list(subfolder = "qc_matrix"),
+    batch1_neg = list(subfolder = "batch1_neg"),
+    sourceforge = list(subfolder = "sourceforge")
   )
 )
