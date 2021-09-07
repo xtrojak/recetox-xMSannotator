@@ -141,7 +141,7 @@ multilevelannotationstep2 <- function(outloc1,
     return(0)
   }
 
-  if (is.na(adduct_weights)) {
+  if (anyNA(adduct_weights)) {
     data(adduct_weights)
 
     adduct_weights1 <- matrix(nrow = 2, ncol = 2, 0)
