@@ -13,7 +13,7 @@ patrick::with_parameters_test_that(
         setwd(test_path)
 
         expected <- readRDS("expected.Rds")
-        load(file = "step1_results.Rda")       
+        load(file = "step1_results.Rda")
         load(file = "global_cor.Rda")
         load(file = "tempobjects.Rda")
 
