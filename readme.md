@@ -1,7 +1,7 @@
 # xMSannotator
 [![R Conda](https://github.com/RECETOX/recetox-xMSannotator/actions/workflows/r-conda.yml/badge.svg?branch=main)](https://github.com/RECETOX/recetox-xMSannotator/actions/workflows/r-conda.yml)
 
-For more details please have a look at the [Wiki](https://github.com/RECETOX/recetox-xMSannotator/wiki)!
+For more details please have a look at the [Docs](docs/README.md)
 
 ## Usage
 ![GitHub R package version (branch & subdirectory of monorepo)](https://img.shields.io/github/r-package/v/RECETOX/recetox-xMSannotator/main?filename=xmsannotator%2FDESCRIPTION)
