@@ -43,6 +43,7 @@ print_confidence_distribution <- function(annotation) {
 
 #' @export
 #' @import dplyr
+#' @importFrom magrittr %>%
 advanced_annotation <- function(
   peak_table,
   compound_table,
@@ -99,14 +100,19 @@ advanced_annotation <- function(
     network_type = network_type
   )
 
-  peak_table <- compute_rt_modules(
+  peak_rt_clusters <- compute_rt_modules(
     peak_table = inner_join(peak_table, peak_modules, by = "peak"),
     peak_width = peak_rt_width
   )
 
+  peak_table <- peak_table %>%
+    select(peak, mz, rt) %>%
+    inner_join(peak_rt_clusters, on = "peak") %>%
+    compute_mass_defect(precision = 0.01)
+
   annotation <- compute_mass_defect(annotation, precision = 0.01)
   annotation <- inner_join(annotation,
-                           select(peak_table, "peak", "mean_intensity", "module", "RTclust"),
+                           select(peak_rt_clusters, "peak", "mean_intensity", "module", "rt_cluster"),
                            by = "peak")
 
   annotation <- compute_scores(
