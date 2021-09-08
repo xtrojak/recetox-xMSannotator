@@ -1,7 +1,10 @@
-# xMSannotator
 [![R Conda](https://github.com/RECETOX/recetox-xMSannotator/actions/workflows/r-conda.yml/badge.svg?branch=main)](https://github.com/RECETOX/recetox-xMSannotator/actions/workflows/r-conda.yml)
 ![GitHub R package version (branch & subdirectory of monorepo)](https://img.shields.io/github/r-package/v/RECETOX/recetox-xMSannotator/main?filename=xmsannotator%2FDESCRIPTION)
 [![Conda](https://img.shields.io/conda/v/bioconda/r-recetox-xmsannotator)](https://anaconda.org/bioconda/r-recetox-xmsannotator)
+
+# recetox-xMSannotator
+
+This is a customized fork of [kuppal2/xMSannotator](https://github.com/kuppal2/xMSannotator) adapted by folks from [RECETOX](https://www.recetox.muni.cz/en) for untargeted mass spectrometry experiments.
 
 For more details please have a look at the [Docs](docs/)
 
@@ -14,3 +17,5 @@ Use as a Galaxy Tool ([source](https://github.com/RECETOX/galaxytools/tree/maste
 When using this tool, please cite the following original work :
 
 Uppal, Karan, et al. “XMSannotator: An R Package for Network-Based Annotation of High-Resolution Metabolomics Data.” Analytical Chemistry, vol. 89, no. 2, Jan. 2017, pp. 1063–67, doi:10.1021/acs.analchem.6b01214.
+
+
