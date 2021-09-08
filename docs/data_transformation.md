@@ -49,7 +49,7 @@ rcx_aplcms_to_xmsannotator <- function(peak_table) {
         subdata <- peak_table %>%
             filter(sample == level) %>%
             select(any_of(c(col_base, "sample_intensity"))) %>%
-            rename(!!level := "sample_intensity")
+            rename(!!paste0("intensity_", level) := "sample_intensity")
         output_table <- inner_join(output_table, subdata, by = col_base)
     }
 
