@@ -1,48 +1,79 @@
-test_that("multilevelannotationstep2:", {
-    test_identifier <- "qc_solvent"
+patrick::with_parameters_test_that(
+    "multilevelannotationstep2:",
+    {
+        # Arrange
+        testthat_wd <- getwd()
+        test_path <- file.path(
+            testthat_wd,
+            "testdata/multilevelannotationstep2",
+            test_identifier
+        )
+        setwd(test_path)
 
-    # skip("Currently excluded!")
-    # Arrange
-    load("testdata/adduct_weights.rda")
+        expected <- readRDS("chemscoremat.Rds")
+        load(file = "step1_results.Rda")
+        load(file = "global_cor.Rda")
+        load(file = "tempobjects.Rda")
 
-    testthat_wd <- getwd()
-    test_path <- file.path(getwd(), "testdata/multilevelannotationstep2", test_identifier)
-    setwd(test_path)
+        # Act
+        actual <- lapply(
+            1:num_sets,
+            call_multilevelannotationstep2,
+            outloc = tempdir(),
+            max.rt.diff = max.rt.diff,
+            chemids_split = chemids_split,
+            num_sets = num_sets,
+            mchemdata = mchemdata,
+            mass_defect_window = mass_defect_window,
+            corthresh = corthresh,
+            global_cor = global_cor,
+            mzid = mzid,
+            adduct_table = adduct_table,
+            adduct_weights = adduct_weights,
+            max_isp = max_isp,
+            MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
+            mass_defect_mode = mass_defect_mode,
+            chemids = chemids,
+            isop_res_md = isop_res_md,
+            filter.by = filter.by
+        )
+        actual <- ldply(actual, rbind)
+        actual$Formula<-gsub(actual$Formula,pattern="_.*",replacement="")
 
-    load(file = "chem_score1.Rda")
-    expected <- curchemscoremat
-    curchemscoremat <- NA
 
-    load(file = "step1_results.Rda")
-    load(file = "global_cor.Rda")
+        keys <- c('mz', 'time', 'Name', 'Adduct', 'Formula', 'chemical_ID', 'cur_chem_score')
 
-    # Act
-    actual <- multilevelannotationstep2(
-        ".",
-        1,
-        max.rt.diff = max.rt.diff,
-        chemids_split = chemids_split,
-        num_sets = num_sets,
-        mchemdata = mchemdata,
-        mass_defect_window = mass_defect_window,
-        corthresh = corthresh,
-        global_cor = global_cor,
-        mzid = mzid,
-        adduct_table = adduct_table,
-        adduct_weights = adduct_weights,
-        max_isp = max_isp,
-        MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
-        mass_defect_mode = mass_defect_mode,
-        chemids = chemids,
-        isop_res_md = isop_res_md,
-        filter.by = filter.by
+        actual <- dplyr::arrange_at(
+          actual, keys
+        )
+        expected <- dplyr::arrange_at(
+          expected, keys
+        )
+
+        comparison <- dataCompareR::rCompare(actual, expected, keys = keys)
+        dataCompareR::saveReport(
+            comparison,
+            reportName = test_identifier,
+            reportLocation = tempdir(),
+            showInViewer = FALSE,
+            mismatchCount = 1000
+        )
+
+        # Assert
+        expect_equal(actual, expected)
+
+        rm(actual)
+
+        # Annihilate
+        setwd(tempdir())
+        unlink("stage2", recursive = TRUE)
+        setwd(testthat_wd)
+        gc(reset = TRUE)
+    },
+    patrick::cases(
+        qc_solvent = list(test_identifier = "qc_solvent"),
+        batch1_neg = list(test_identifier = "batch1_neg"),
+        sourceforge = list(test_identifier = "sourceforge"),
+        qc_matrix = list(test_identifier = "qc_matrix")
     )
-
-    # Assert
-    expect_equal(actual, expected)
-
-    # Annihilate
-    setwd(test_path)
-    unlink("stage2", recursive = TRUE)
-    setwd(testthat_wd)
-})
+)

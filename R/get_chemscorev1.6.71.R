@@ -5,8 +5,10 @@ do_something <- function(i,
                          level_module_isop_annot,
                          max_diff_rt,
                          mass_defect_window,
+                         mass_defect_mode,
                          curformula,
                          exp_isp,
+                         max_isp,
                          abund_ratio_vec) {
   m <- mchemicaldata_goodadducts_index[i]
   final_isp_annot_res <- cbind(paste("group", i, sep = ""), mchemicaldata[m, ])
@@ -246,8 +248,10 @@ get_chemscorev1.6.71 <- function(chemicalid,
       level_module_isop_annot,
       max_diff_rt,
       mass_defect_window,
+      mass_defect_mode,
       curformula,
       exp_isp,
+      max_isp,
       abund_ratio_vec
     )
 
@@ -273,7 +277,7 @@ get_chemscorev1.6.71 <- function(chemicalid,
   mchemicaldata <- unique(ldply(diffmatB, rbind))
 
   rm(diffmatB)
-  rm(final_isp_annot_res)
+  #rm(final_isp_annot_res)
 
   write.table(mchemicaldata, file = "../Stage2_withisotopes.txt", append = TRUE, sep = "\t", col.names = FALSE)
 
@@ -948,7 +952,7 @@ get_chemscorev1.6.71 <- function(chemicalid,
     chemical_score <- 0
   }
 
-  rm("mzid", "global_cor", "temp_global_cor")
+  #rm("mzid", "global_cor", "temp_global_cor")
   setwd("..")
 
   return(list("chemical_score" = chemical_score, "filtdata" = mchemicaldata))

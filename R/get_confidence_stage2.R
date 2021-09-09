@@ -10,7 +10,7 @@ function(curdata,adduct_weights=NA,max_diff_rt=10){
 	#cur_adducts<-gsub(cur_adducts_with_isotopes,pattern="(_\\[\\+[0-9]\\])",replacement="")
 	cur_adducts<-gsub(cur_adducts_with_isotopes,pattern="(_\\[(\\+|\\-)[0-9]*\\])",replacement="")
 data(adduct_table)
-if(is.na(adduct_weights)==TRUE){
+if(anyNA(adduct_weights)){
 data(adduct_weights)
 adduct_weights1<-matrix(nrow=2,ncol=2,0)
 		adduct_weights1[1,]<-c("M+H",1)
