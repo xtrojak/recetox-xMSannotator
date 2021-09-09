@@ -77,6 +77,7 @@ compute_confidence_levels <- function(c,
 
 #' @importFrom foreach foreach %do% %dopar%
 multilevelannotationstep4 <- function(outloc,
+                                      chemscoremat,
                                       max.mz.diff = 5,
                                       max.rt.diff = 30,
                                       adduct_weights = NA,
@@ -90,9 +91,7 @@ multilevelannotationstep4 <- function(outloc,
 
     max_diff_rt <- max.rt.diff
 
-    chemscoremat_highconf <- read.csv("Stage3.csv")
-
-    chemscoremat_highconf <- as.data.frame(chemscoremat_highconf)
+    chemscoremat_highconf <- as.data.frame(chemscoremat)
     chemscoremat_highconf$mz <- as.numeric(chemscoremat_highconf$mz)
 
     cnames <- colnames(chemscoremat_highconf)

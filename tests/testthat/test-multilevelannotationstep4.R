@@ -3,34 +3,19 @@ patrick::with_parameters_test_that(
   {
     # load data needed during step 4
     load("../../data/adduct_weights.rda")
-
-    testthat_wd <- getwd()
-    test_directory <- file.path(getwd(), "testdata/multilevelannotationstep4", subfolder)
-
-    # create test folder and copy necessary files
-    dir.create(test_directory, recursive = TRUE)
-    file.copy(
-      file.path(getwd(), "testdata/advanced", subfolder, "Stage3.csv"),
-      file.path(test_directory, "Stage3.csv")
-    )
+    
+    chemscoremat <- read.csv(file.path(getwd(), "testdata/advanced", subfolder, "Stage3.csv"))
 
     # load expected results
     expected <- read.csv(file.path(getwd(), "testdata/advanced", subfolder, "Stage4.csv"))
     expected$MatchCategory <- as.character(expected$MatchCategory)
 
-    # set correct working directory
-    setwd(test_directory)
-
     # compute annotation step 4
     result <- multilevelannotationstep4(
-      outloc = ".", max.mz.diff = 10, max.rt.diff = max_rt_diff,
+      outloc = ".", chemscoremat = chemscoremat, max.mz.diff = 10, max.rt.diff = max_rt_diff,
       filter.by = "M+H", adduct_weights = adduct_weights
     )
     row.names(result) <- 1:nrow(result)
-
-    # Annihilate
-    setwd(testthat_wd)
-    unlink(file.path(getwd(), "testdata/multilevelannotationstep4"), recursive = TRUE)
 
     # compare with expected result
     expect_equal(result, expected)
