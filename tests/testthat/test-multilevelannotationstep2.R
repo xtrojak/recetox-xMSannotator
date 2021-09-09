@@ -1,8 +1,6 @@
 patrick::with_parameters_test_that(
     "multilevelannotationstep2:",
     {
-        # skip("Currently excluded!")
-
         # Arrange
         testthat_wd <- getwd()
         test_path <- file.path(
@@ -12,7 +10,7 @@ patrick::with_parameters_test_that(
         )
         setwd(test_path)
 
-        expected <- readRDS("expected.Rds")
+        expected <- readRDS("chemscoremat.Rds")
         load(file = "step1_results.Rda")
         load(file = "global_cor.Rda")
         load(file = "tempobjects.Rda")
@@ -40,6 +38,26 @@ patrick::with_parameters_test_that(
             filter.by = filter.by
         )
         actual <- ldply(actual, rbind)
+        actual$Formula<-gsub(actual$Formula,pattern="_.*",replacement="")
+
+
+        keys <- c('mz', 'time', 'Name', 'Adduct', 'Formula', 'chemical_ID', 'cur_chem_score')
+
+        actual <- dplyr::arrange_at(
+          actual, keys
+        )
+        expected <- dplyr::arrange_at(
+          expected, keys
+        )
+
+        comparison <- dataCompareR::rCompare(actual, expected, keys = keys)
+        dataCompareR::saveReport(
+            comparison,
+            reportName = test_identifier,
+            reportLocation = tempdir(),
+            showInViewer = FALSE,
+            mismatchCount = 1000
+        )
 
         # Assert
         expect_equal(actual, expected)
