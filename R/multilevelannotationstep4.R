@@ -1,14 +1,14 @@
 compute_confidence_levels <- function(c,
                                       chemids,
-                                      chemscoremat_highconf,
+                                      chemscoremat,
                                       filter.by,
-                                      max_diff_rt,
+                                      max.rt.diff,
                                       adduct_weights,
                                       max_isp,
                                       min_ions_perchem) {
     cur_chemid <- chemids[c]
 
-    curdata <- chemscoremat_highconf[which(chemscoremat_highconf$chemical_ID == cur_chemid), ]
+    curdata <- chemscoremat[which(chemscoremat$chemical_ID == cur_chemid), ]
 
     bool_check <- 1
 
@@ -24,7 +24,7 @@ compute_confidence_levels <- function(c,
     }
 
     if (bool_check == 1) {
-        final_res <- get_confidence_stage4(curdata, max_diff_rt, adduct_weights = adduct_weights, filter.by = filter.by, max_isp = max_isp, min_ions_perchem = min_ions_perchem)
+        final_res <- get_confidence_stage4(curdata, max.rt.diff, adduct_weights = adduct_weights, filter.by = filter.by, max_isp = max_isp, min_ions_perchem = min_ions_perchem)
 
         Confidence <- 0
         if (final_res != "None") {
@@ -85,28 +85,14 @@ multilevelannotationstep4 <- function(outloc,
                                       min_ions_perchem = 1,
                                       boostIDs = NA,
                                       max_isp = 5,
-                                      dbAllinf = NA,
-                                      num_nodes = 2) {
+                                      dbAllinf = NA) {
     setwd(outloc)
 
-    max_diff_rt <- max.rt.diff
-
-    chemscoremat_highconf <- as.data.frame(chemscoremat)
-    chemscoremat_highconf$mz <- as.numeric(chemscoremat_highconf$mz)
-
-    cnames <- colnames(chemscoremat_highconf)
-
-    cnames <- gsub(cnames, pattern = ".x", replacement = "")
-
-    colnames(chemscoremat_highconf) <- cnames
-
-    chemids <- chemscoremat_highconf$chemical_ID
-
-    chemids <- unique(chemids)
-
-    chemscoremat_conf_levels <- rep("High", length(chemids))
+    chemids <- unique(chemscoremat$chemical_ID)
 
     data(adduct_table)
+    adduct_table <- adduct_table[order(adduct_table$Adduct), ]
+    
     if (is.na(adduct_weights) == TRUE) {
         data(adduct_weights)
         adduct_weights1 <- matrix(nrow = 2, ncol = 2, 0)
@@ -115,67 +101,35 @@ multilevelannotationstep4 <- function(outloc,
         adduct_weights <- as.data.frame(adduct_weights1)
         colnames(adduct_weights) <- c("Adduct", "Weight")
     }
-    adduct_table <- adduct_table[order(adduct_table$Adduct), ]
-
-    chemscoremat_conf_levels <- {}
-
-    winsize <- 500
-
-    num_itrs <- round(length(chemids) / winsize)
-
-    cl <- makeSOCKcluster(num_nodes)
-
-    clusterEvalQ(cl, "get_confidence_stage4")
-    clusterEvalQ(cl, "check_element")
-    clusterEvalQ(cl, "group_by_rt")
-
-    clusterExport(cl, "multilevelannotationstep2")
-
-    clusterEvalQ(cl, "library(Rdisop)")
-    clusterEvalQ(cl, "library(plyr)")
-
-    clusterExport(cl, "getMolecule", envir = environment())
-    clusterExport(cl, "ldply", envir = environment())
-    clusterExport(cl, "max_isp", envir = environment())
-    clusterExport(cl, "get_confidence_stage4", envir = environment())
-
-    clusterExport(cl, "min_ions_perchem", envir = environment())
-    clusterExport(cl, "check_element", envir = environment())
-    clusterExport(cl, "group_by_rt", envir = environment())
-    clusterExport(cl, "adduct_table", envir = environment())
-    clusterExport(cl, "adduct_weights", envir = environment())
-    clusterExport(cl, "filter.by", envir = environment())
-    clusterExport(cl, "max_diff_rt", envir = environment())
-    clusterExport(cl, "chemscoremat_highconf", envir = environment())
-    clusterExport(cl, "chemids", envir = environment())
 
     chemscoremat_conf_levels <- lapply(
         seq_len(length(chemids)),
         compute_confidence_levels,
         chemids,
-        chemscoremat_highconf,
+        chemscoremat,
         filter.by,
         max.rt.diff,
         adduct_weights,
         max_isp,
         min_ions_perchem
     )
+    
     chemscoremat_conf_levels <- ldply(chemscoremat_conf_levels, rbind)
 
     chemscoremat_conf_levels <- as.data.frame(chemscoremat_conf_levels)
 
     chemscoremat_conf_levels <- chemscoremat_conf_levels 
 
-    chemscoremat_highconf <- unique(chemscoremat_highconf)
+    chemscoremat <- unique(chemscoremat)
     chemscoremat_conf_levels <- as.data.frame(chemscoremat_conf_levels)
 
-    curated_res <- merge(chemscoremat_conf_levels, chemscoremat_highconf, by = "chemical_ID")
+    curated_res <- merge(chemscoremat_conf_levels, chemscoremat, by = "chemical_ID")
 
     cnames <- colnames(curated_res)
 
     colnames(curated_res) <- as.character(cnames)
 
-    rm(chemscoremat_highconf)
+    rm(chemscoremat)
 
     curated_res_isp_check <- gregexpr(text = curated_res$Adduct, pattern = "(_\\[(\\+|\\-)[0-9]*\\])")
 
@@ -223,7 +177,7 @@ multilevelannotationstep4 <- function(outloc,
             validated_mzrt <- boostIDs[, c("mz", "time")]
 
             ghilicpos <- getVenn(curated_res_mzrt,
-                name_a = "exp", validated_mzrt, name_b = "boost", mz.thresh = max.mz.diff, time.thresh = max_diff_rt,
+                name_a = "exp", validated_mzrt, name_b = "boost", mz.thresh = max.mz.diff, time.thresh = max.rt.diff,
                 alignment.tool = NA, xMSanalyzer.outloc = getwd(), use.unique.mz = FALSE, plotvenn = FALSE
             )
 
@@ -232,7 +186,7 @@ multilevelannotationstep4 <- function(outloc,
             g1 <- ghilicpos$common
             rm(ghilicpos)
 
-            if (is.na(max_diff_rt) == FALSE) {
+            if (is.na(max.rt.diff) == FALSE) {
                 t1 <- table(g1$index.B)
                 ind_names <- names(t1)
                 parent_bad_ind <- {}
