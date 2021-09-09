@@ -13,7 +13,7 @@ patrick::with_parameters_test_that(
     setwd(test_directory)
     
     # load needed objects
-    load("stage2.Rda")
+    chemscoremat <- readRDS("chemscoremat.Rds")
     
     # compute annotation step 3
     result <- multilevelannotationstep3(outloc=".", chemscoremat=chemscoremat, 
