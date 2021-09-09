@@ -1,3 +1,4 @@
 .vscode
 xMSannotator-tests
-tests/testthat/testdata/multilevenannotationstep2/*/global_cor.Rda
+tests/testthat/testdata/*
+Rtmp*/
