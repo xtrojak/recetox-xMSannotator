@@ -14,7 +14,11 @@ patrick::with_parameters_test_that(
         load(file = "step1_results.Rda")
         load(file = "global_cor.Rda")
         load(file = "tempobjects.Rda")
-        outloc <- file.path(tempdir(), test_identifier)
+        outloc <- file.path(
+            tempdir(),
+            "multilevelannotationstep2",
+            test_identifier
+        )
 
         # Act
         actual <- lapply(

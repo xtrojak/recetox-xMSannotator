@@ -4,7 +4,11 @@ patrick::with_parameters_test_that(
     testthat_wd <- getwd()
     load("testdata/adduct_weights.rda")
     
-    outloc <- file.path(tempdir(), subfolder)
+    outloc <- file.path(
+        tempdir(),
+        "multilevelannotationstep2",
+        subfolder
+    )
     testdata_dir <- file.path(getwd(), "testdata", subfolder)
     # load expected results
     expected <- read.csv(file.path(testdata_dir, "Stage3.csv"))

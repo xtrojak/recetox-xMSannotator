@@ -11,7 +11,11 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
   peaks_filename <- paste0(testname, ".rds")
   peaks_filepath <- file.path(wd, "testdata", peaks_filename)
 
-  outloc <- file.path(tempdir(), testname)
+  outloc <- file.path(
+    tempdir(),
+    "advanced",
+    testname
+  )
 
   peaks <- readRDS(peaks_filepath)
   peaks <- unique(peaks)

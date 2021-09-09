@@ -5,17 +5,22 @@ patrick::with_parameters_test_that(
     load("../../data/adduct_weights.rda")
 
     testthat_wd <- getwd()
-    outloc <- file.path(tempdir(), subfolder)
+    outloc <- file.path(
+      tempdir(),
+      "multilevelannotationstep4",
+      subfolder
+    )
 
     # create test folder and copy necessary files
     dir.create(outloc, recursive = TRUE)
+    testdata_dir <- file.path(getwd(), "testdata", subfolder)
     file.copy(
-      file.path(getwd(), "testdata", subfolder, "Stage3.csv"),
+      file.path(testdata_dir, "Stage3.csv"),
       file.path(outloc, "Stage3.csv")
     )
 
     # load expected results
-    expected <- read.csv(file.path(getwd(), "testdata", subfolder, "Stage4.csv"))
+    expected <- read.csv(file.path(testdata_dir, "Stage4.csv"))
     expected$MatchCategory <- as.character(expected$MatchCategory)
 
     # compute annotation step 4
@@ -31,7 +36,6 @@ patrick::with_parameters_test_that(
 
     # Annihilate
     setwd(testthat_wd)
-    unlink(file.path(getwd(), "testdata/multilevelannotationstep4"), recursive = TRUE)
 
     # compare with expected result
     expect_equal(result, expected)
