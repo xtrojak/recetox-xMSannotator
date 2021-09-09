@@ -1,4 +1,5 @@
 test_that("multilevelannotationstep5", {
+    skip("Currently excluded!")
     load("testdata/multilevelannotationstep5/tempobjects.Rda")
     load("testdata/adduct_weights.rda")
 

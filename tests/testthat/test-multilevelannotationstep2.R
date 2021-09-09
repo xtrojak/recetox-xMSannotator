@@ -5,7 +5,7 @@ patrick::with_parameters_test_that(
         testthat_wd <- getwd()
         test_path <- file.path(
             testthat_wd,
-            "testdata/multilevelannotationstep2",
+            "testdata",
             test_identifier
         )
         setwd(test_path)
@@ -14,12 +14,13 @@ patrick::with_parameters_test_that(
         load(file = "step1_results.Rda")
         load(file = "global_cor.Rda")
         load(file = "tempobjects.Rda")
+        outloc <- file.path(tempdir(), test_identifier)
 
         # Act
         actual <- lapply(
             1:num_sets,
             call_multilevelannotationstep2,
-            outloc = tempdir(),
+            outloc = outloc,
             max.rt.diff = max.rt.diff,
             chemids_split = chemids_split,
             num_sets = num_sets,

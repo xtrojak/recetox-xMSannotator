@@ -35,7 +35,7 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
   for (i in seq.int(from = 1, to = 5, by = 1)) {
     filename <- paste0("Stage", i, ".csv")
     actual <- read.csv(file.path(outloc, filename))
-    expected <- read.csv(file.path(wd, "testdata", "advanced", testname, filename))
+    expected <- read.csv(file.path(wd, "testdata", testname, filename))
 
     keys <- key_columns[which(key_columns %in% colnames(actual))]
 
