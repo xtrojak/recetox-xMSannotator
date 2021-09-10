@@ -198,6 +198,8 @@ multilevelannotationstep4 <- function(outloc,
     
     chemscoremat_with_confidence <- compute_delta_ppm(chemscoremat_with_confidence)
 
+    # (II) Presence of required adducts/forms specified by the user 
+    # for assignment to high confidence categories (e.g., M + H).
     if (is.na(boostIDs) == FALSE) {
         chemscoremat_with_confidence <- boost_confidence_of_IDs(chemscoremat_with_confidence, boostIDs, max.mz.diff, max.rt.diff)
     }
