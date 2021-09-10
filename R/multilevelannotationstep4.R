@@ -94,14 +94,10 @@ multilevelannotationstep4 <- function(outloc,
     adduct_table <- adduct_table[order(adduct_table$Adduct), ]
     
     if (is.na(adduct_weights) == TRUE) {
-        data(adduct_weights)
-        adduct_weights1 <- matrix(nrow = 2, ncol = 2, 0)
-        adduct_weights1[1, ] <- c("M+H", 1)
-        adduct_weights1[2, ] <- c("M-H", 1)
-        adduct_weights <- as.data.frame(adduct_weights1)
-        colnames(adduct_weights) <- c("Adduct", "Weight")
+        adduct_weights <- data.frame(Adduct = c("M+H", "M-H"), Weight = c(1, 1))
     }
 
+    # assign confidence level
     chemscoremat_conf_levels <- lapply(
         seq_len(length(chemids)),
         compute_confidence_levels,
@@ -115,68 +111,38 @@ multilevelannotationstep4 <- function(outloc,
     )
     
     chemscoremat_conf_levels <- ldply(chemscoremat_conf_levels, rbind)
-
     chemscoremat_conf_levels <- as.data.frame(chemscoremat_conf_levels)
 
-    chemscoremat_conf_levels <- chemscoremat_conf_levels 
-
-    chemscoremat <- unique(chemscoremat)
-    chemscoremat_conf_levels <- as.data.frame(chemscoremat_conf_levels)
-
-    curated_res <- merge(chemscoremat_conf_levels, chemscoremat, by = "chemical_ID")
-
-    cnames <- colnames(curated_res)
-
-    colnames(curated_res) <- as.character(cnames)
-
-    rm(chemscoremat)
-
-    curated_res_isp_check <- gregexpr(text = curated_res$Adduct, pattern = "(_\\[(\\+|\\-)[0-9]*\\])")
-
-    isp_ind <- which(curated_res_isp_check > 0)
-
-    cnames <- colnames(curated_res)
-
-    outloc3 <- outloc
-    suppressWarnings(dir.create(outloc3))
-    setwd(outloc3)
-
-    curated_res <- as.data.frame(curated_res)
+    chemscoremat_with_confidence <- merge(chemscoremat_conf_levels, unique(chemscoremat), by = "chemical_ID")
+    chemscoremat_with_confidence <- as.data.frame(chemscoremat_with_confidence)
     
-    cnames1 <- colnames(curated_res)
+    cnames1 <- colnames(chemscoremat_with_confidence)
 
-    curated_res <- as.data.frame(curated_res)
+    # this is fishy
+    chemscoremat_with_confidence$mz <- as.numeric(as.character(chemscoremat_with_confidence$mz))
+    chemscoremat_with_confidence$theoretical.mz <- as.numeric(as.character(chemscoremat_with_confidence$theoretical.mz))
 
-    curated_res$mz <- as.numeric(as.character(curated_res$mz))
+    chemscoremat_with_confidence_temp <- chemscoremat_with_confidence[, c("mz", "theoretical.mz")]
+    chemscoremat_with_confidence_temp <- apply(chemscoremat_with_confidence_temp, 1, as.numeric)
+    chemscoremat_with_confidence_temp <- t(chemscoremat_with_confidence_temp)
+    chemscoremat_with_confidence_temp <- as.data.frame(chemscoremat_with_confidence_temp)
 
-
-    curated_res$theoretical.mz <- as.numeric(as.character(curated_res$theoretical.mz))
-
-    curated_res_temp <- curated_res[, c("mz", "theoretical.mz")]
-
-
-    curated_res_temp <- apply(curated_res_temp, 1, as.numeric)
-    curated_res_temp <- t(curated_res_temp)
-    curated_res_temp <- as.data.frame(curated_res_temp)
-
-    delta_ppm <- apply(curated_res_temp, 1, function(x) {
-        ppmerror <- 10^6 * abs(x[2] - x[1]) / (x[2])
-        return(ppmerror)
+    delta_ppm <- apply(chemscoremat_with_confidence_temp, 1, function(x) {
+        return(10^6 * abs(x[2] - x[1]) / (x[2]))
     })
     delta_ppm <- round(delta_ppm, 2)
 
-    curated_res <- cbind(curated_res[, 1:8], delta_ppm, curated_res[, 9:dim(curated_res)[2]])
-
-    curated_res <- curated_res[order(curated_res$Confidence, decreasing = TRUE), ]
+    chemscoremat_with_confidence <- cbind(chemscoremat_with_confidence[, 1:8], delta_ppm, chemscoremat_with_confidence[, 9:dim(chemscoremat_with_confidence)[2]])
+    chemscoremat_with_confidence <- chemscoremat_with_confidence[order(chemscoremat_with_confidence$Confidence, decreasing = TRUE), ]
 
     if (is.na(boostIDs) == FALSE) {
         cnames_boost <- colnames(boostIDs)
 
         if (length(cnames_boost) > 1) {
-            curated_res_mzrt <- curated_res[, c("mz", "time")]
+            chemscoremat_with_confidence_mzrt <- chemscoremat_with_confidence[, c("mz", "time")]
             validated_mzrt <- boostIDs[, c("mz", "time")]
 
-            ghilicpos <- getVenn(curated_res_mzrt,
+            ghilicpos <- getVenn(chemscoremat_with_confidence_mzrt,
                 name_a = "exp", validated_mzrt, name_b = "boost", mz.thresh = max.mz.diff, time.thresh = max.rt.diff,
                 alignment.tool = NA, xMSanalyzer.outloc = getwd(), use.unique.mz = FALSE, plotvenn = FALSE
             )
@@ -192,7 +158,7 @@ multilevelannotationstep4 <- function(outloc,
                 parent_bad_ind <- {}
             }
 
-            t1 <- table(curated_res$Confidence, curated_res$chemical_ID)
+            t1 <- table(chemscoremat_with_confidence$Confidence, chemscoremat_with_confidence$chemical_ID)
             cnames <- colnames(t1)
             cnames <- cnames[which(cnames %in% boostIDs$ID)]
 
@@ -203,52 +169,52 @@ multilevelannotationstep4 <- function(outloc,
                 temp_ind2 <- g1$index.B[ind2]
 
 
-                if (curated_res$chemical_ID[temp_ind1] %in% boostIDs$ID[temp_ind2]) {
+                if (chemscoremat_with_confidence$chemical_ID[temp_ind1] %in% boostIDs$ID[temp_ind2]) {
                     good_ind_1 <- c(good_ind_1, g1$index.A[ind2])
                 }
             }
 
             overlap_mz_time_id <- good_ind_1
 
-            curated_res$Confidence[overlap_mz_time_id] <- 4
-            curated_res$score[overlap_mz_time_id] <- curated_res$score[overlap_mz_time_id] * 100
-            t1 <- table(curated_res$Confidence[overlap_mz_time_id], curated_res$chemical_ID[overlap_mz_time_id])
+            chemscoremat_with_confidence$Confidence[overlap_mz_time_id] <- 4
+            chemscoremat_with_confidence$score[overlap_mz_time_id] <- chemscoremat_with_confidence$score[overlap_mz_time_id] * 100
+            t1 <- table(chemscoremat_with_confidence$Confidence[overlap_mz_time_id], chemscoremat_with_confidence$chemical_ID[overlap_mz_time_id])
 
             cnames1 <- colnames(t1)
             cnames2 <- cnames1[which(t1 > 0)]
             good_ind <- {}
             if (length(good_ind) > 0) {
-                curated_res$Confidence[good_ind] <- 4
-                curated_res$score[good_ind] <- curated_res$score[good_ind] * 100
+                chemscoremat_with_confidence$Confidence[good_ind] <- 4
+                chemscoremat_with_confidence$score[good_ind] <- chemscoremat_with_confidence$score[good_ind] * 100
             }
         } else {
-            good_ind <- which(curated_res$chemical_ID %in% boostIDs)
+            good_ind <- which(chemscoremat_with_confidence$chemical_ID %in% boostIDs)
             if (length(good_ind) > 0) {
-                curated_res$Confidence[good_ind] <- 4
-                curated_res$score[good_ind] <- curated_res$score[good_ind] * 100
+                chemscoremat_with_confidence$Confidence[good_ind] <- 4
+                chemscoremat_with_confidence$score[good_ind] <- chemscoremat_with_confidence$score[good_ind] * 100
             }
         }
     }
-    t2 <- table(curated_res$mz)
+    t2 <- table(chemscoremat_with_confidence$mz)
 
     same1 <- which(t2 == 1)
 
     uniquemz <- names(same1)
 
-    curated_res$MatchCategory <- rep("Multiple", dim(curated_res)[1])
+    chemscoremat_with_confidence$MatchCategory <- rep("Multiple", dim(chemscoremat_with_confidence)[1])
 
-    curated_res$MatchCategory[which(curated_res$mz %in% uniquemz)] <- "Unique"
+    chemscoremat_with_confidence$MatchCategory[which(chemscoremat_with_confidence$mz %in% uniquemz)] <- "Unique"
 
-    write.csv(curated_res, file = "Stage4.csv", row.names = FALSE)
+    write.csv(chemscoremat_with_confidence, file = "Stage4.csv", row.names = FALSE)
 
-    curated_res <- as.data.frame(curated_res)
-    curated_res <- curated_res[order(curated_res$Confidence, decreasing = TRUE), ]
+    chemscoremat_with_confidence <- as.data.frame(chemscoremat_with_confidence)
+    chemscoremat_with_confidence <- chemscoremat_with_confidence[order(chemscoremat_with_confidence$Confidence, decreasing = TRUE), ]
 
     print("Stage 4 confidence level distribution for unique chemical/metabolite IDs")
-    print(table(curated_res$Confidence[-which(duplicated(curated_res$chemical_ID) == TRUE)]))
+    print(table(chemscoremat_with_confidence$Confidence[-which(duplicated(chemscoremat_with_confidence$chemical_ID) == TRUE)]))
 
     print("Stage 4 confidence level distribution for unique chemical/metabolite formulas")
-    print(table(curated_res$Confidence[-which(duplicated(curated_res$Formula) == TRUE)]))
+    print(table(chemscoremat_with_confidence$Confidence[-which(duplicated(chemscoremat_with_confidence$Formula) == TRUE)]))
 
-    return(curated_res)
+    return(chemscoremat_with_confidence)
 }
