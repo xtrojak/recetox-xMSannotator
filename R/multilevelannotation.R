@@ -1376,15 +1376,23 @@ multilevelannotation <-
 
                     # 	size_objects<-sort(sapply(ls(), function(x) format(object.size(get(x)), unit = 'auto')))
                     # 	print(size_objects)
+                    
+                    chemscoremat <- read.csv("Stage3.csv")
 
                     print("Status 5: Assigning confidence levels")
                     # suppressWarnings(annotresstage4<-multilevelannotationstep4(outloc=outloc,max.rt.diff=max_diff_rt,filter.by=filter.by,adduct_weights=adduct_weights,min_ions_perchem=min_ions_perchem,boostIDs=boostIDs,max_isp=max_isp,max.mz.diff=max.mz.diff))
                     annotresstage4 <- multilevelannotationstep4(
-                        outloc = outloc, max.rt.diff = max_diff_rt, filter.by = filter.by, adduct_weights = adduct_weights,
-                        min_ions_perchem = min_ions_perchem, boostIDs = boostIDs, max_isp = max_isp,
+                        outloc = outloc,
+                        chemscoremat = chemscoremat,
+                        max.rt.diff = max_diff_rt,
+                        filter.by = filter.by,
+                        adduct_weights = adduct_weights,
+                        min_ions_perchem = min_ions_perchem,
+                        boostIDs = boostIDs,
+                        max_isp = max_isp,
                         max.mz.diff = max.mz.diff
                     )
-
+                    
                     # print("Memory used after step4")
                     # print(mem_used())
 
