@@ -232,7 +232,7 @@ multilevelannotationstep4 <- function(outloc,
 
             # chemids<-c("HMDB00277","HMDB00222","HMDB00043")
 
-            # stopCluster(cl)
+            stopCluster(cl)
 
             # save(list=c("chemscoremat_conf_levels1","chemids"),file="stage4conf_levels.Rda")
 
