@@ -195,14 +195,12 @@ multilevelannotationstep4 <- function(outloc,
             }
         }
     }
+    
     t2 <- table(chemscoremat_with_confidence$mz)
+    uniquemz <- names(which(t2 == 1))
 
-    same1 <- which(t2 == 1)
-
-    uniquemz <- names(same1)
-
+    # assign match category
     chemscoremat_with_confidence$MatchCategory <- rep("Multiple", dim(chemscoremat_with_confidence)[1])
-
     chemscoremat_with_confidence$MatchCategory[which(chemscoremat_with_confidence$mz %in% uniquemz)] <- "Unique"
 
     write.csv(chemscoremat_with_confidence, file = "Stage4.csv", row.names = FALSE)
