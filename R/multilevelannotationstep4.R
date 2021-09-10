@@ -91,6 +91,68 @@ compute_delta_ppm <- function(chemscoremat_with_confidence) {
     return(chemscoremat_with_confidence)
 }
 
+boost_confidence_of_IDs <- function(chemscoremat_with_confidence, boostIDs, max.mz.diff, max.rt.diff) {
+    cnames_boost <- colnames(boostIDs)
+    
+    if (length(cnames_boost) > 1) {
+        chemscoremat_with_confidence_mzrt <- chemscoremat_with_confidence[, c("mz", "time")]
+        validated_mzrt <- boostIDs[, c("mz", "time")]
+        
+        ghilicpos <- getVenn(chemscoremat_with_confidence_mzrt,
+                             name_a = "exp", validated_mzrt, name_b = "boost", mz.thresh = max.mz.diff, time.thresh = max.rt.diff,
+                             alignment.tool = NA, xMSanalyzer.outloc = getwd(), use.unique.mz = FALSE, plotvenn = FALSE
+        )
+        
+        save(ghilicpos, file = "ghilicpos.Rda")
+        
+        g1 <- ghilicpos$common
+        rm(ghilicpos)
+        
+        if (is.na(max.rt.diff) == FALSE) {
+            t1 <- table(g1$index.B)
+            ind_names <- names(t1)
+            parent_bad_ind <- {}
+        }
+        
+        t1 <- table(chemscoremat_with_confidence$Confidence, chemscoremat_with_confidence$chemical_ID)
+        cnames <- colnames(t1)
+        cnames <- cnames[which(cnames %in% boostIDs$ID)]
+        
+        good_ind_1 <- {}
+        
+        for (ind2 in 1:dim(g1)[1]) {
+            temp_ind1 <- g1$index.A[ind2]
+            temp_ind2 <- g1$index.B[ind2]
+            
+            
+            if (chemscoremat_with_confidence$chemical_ID[temp_ind1] %in% boostIDs$ID[temp_ind2]) {
+                good_ind_1 <- c(good_ind_1, g1$index.A[ind2])
+            }
+        }
+        
+        overlap_mz_time_id <- good_ind_1
+        
+        chemscoremat_with_confidence$Confidence[overlap_mz_time_id] <- 4
+        chemscoremat_with_confidence$score[overlap_mz_time_id] <- chemscoremat_with_confidence$score[overlap_mz_time_id] * 100
+        t1 <- table(chemscoremat_with_confidence$Confidence[overlap_mz_time_id], chemscoremat_with_confidence$chemical_ID[overlap_mz_time_id])
+        
+        cnames1 <- colnames(t1)
+        cnames2 <- cnames1[which(t1 > 0)]
+        good_ind <- {}
+        if (length(good_ind) > 0) {
+            chemscoremat_with_confidence$Confidence[good_ind] <- 4
+            chemscoremat_with_confidence$score[good_ind] <- chemscoremat_with_confidence$score[good_ind] * 100
+        }
+    } else {
+        good_ind <- which(chemscoremat_with_confidence$chemical_ID %in% boostIDs)
+        if (length(good_ind) > 0) {
+            chemscoremat_with_confidence$Confidence[good_ind] <- 4
+            chemscoremat_with_confidence$score[good_ind] <- chemscoremat_with_confidence$score[good_ind] * 100
+        }
+    }
+    return(chemscoremat_with_confidence)
+}
+
 #' @importFrom foreach foreach %do% %dopar%
 multilevelannotationstep4 <- function(outloc,
                                       chemscoremat,
@@ -137,64 +199,7 @@ multilevelannotationstep4 <- function(outloc,
     chemscoremat_with_confidence <- compute_delta_ppm(chemscoremat_with_confidence)
 
     if (is.na(boostIDs) == FALSE) {
-        cnames_boost <- colnames(boostIDs)
-
-        if (length(cnames_boost) > 1) {
-            chemscoremat_with_confidence_mzrt <- chemscoremat_with_confidence[, c("mz", "time")]
-            validated_mzrt <- boostIDs[, c("mz", "time")]
-
-            ghilicpos <- getVenn(chemscoremat_with_confidence_mzrt,
-                name_a = "exp", validated_mzrt, name_b = "boost", mz.thresh = max.mz.diff, time.thresh = max.rt.diff,
-                alignment.tool = NA, xMSanalyzer.outloc = getwd(), use.unique.mz = FALSE, plotvenn = FALSE
-            )
-
-            save(ghilicpos, file = "ghilicpos.Rda")
-
-            g1 <- ghilicpos$common
-            rm(ghilicpos)
-
-            if (is.na(max.rt.diff) == FALSE) {
-                t1 <- table(g1$index.B)
-                ind_names <- names(t1)
-                parent_bad_ind <- {}
-            }
-
-            t1 <- table(chemscoremat_with_confidence$Confidence, chemscoremat_with_confidence$chemical_ID)
-            cnames <- colnames(t1)
-            cnames <- cnames[which(cnames %in% boostIDs$ID)]
-
-            good_ind_1 <- {}
-
-            for (ind2 in 1:dim(g1)[1]) {
-                temp_ind1 <- g1$index.A[ind2]
-                temp_ind2 <- g1$index.B[ind2]
-
-
-                if (chemscoremat_with_confidence$chemical_ID[temp_ind1] %in% boostIDs$ID[temp_ind2]) {
-                    good_ind_1 <- c(good_ind_1, g1$index.A[ind2])
-                }
-            }
-
-            overlap_mz_time_id <- good_ind_1
-
-            chemscoremat_with_confidence$Confidence[overlap_mz_time_id] <- 4
-            chemscoremat_with_confidence$score[overlap_mz_time_id] <- chemscoremat_with_confidence$score[overlap_mz_time_id] * 100
-            t1 <- table(chemscoremat_with_confidence$Confidence[overlap_mz_time_id], chemscoremat_with_confidence$chemical_ID[overlap_mz_time_id])
-
-            cnames1 <- colnames(t1)
-            cnames2 <- cnames1[which(t1 > 0)]
-            good_ind <- {}
-            if (length(good_ind) > 0) {
-                chemscoremat_with_confidence$Confidence[good_ind] <- 4
-                chemscoremat_with_confidence$score[good_ind] <- chemscoremat_with_confidence$score[good_ind] * 100
-            }
-        } else {
-            good_ind <- which(chemscoremat_with_confidence$chemical_ID %in% boostIDs)
-            if (length(good_ind) > 0) {
-                chemscoremat_with_confidence$Confidence[good_ind] <- 4
-                chemscoremat_with_confidence$score[good_ind] <- chemscoremat_with_confidence$score[good_ind] * 100
-            }
-        }
+        chemscoremat_with_confidence <- boost_confidence_of_IDs(chemscoremat_with_confidence, boostIDs, max.mz.diff, max.rt.diff)
     }
     
     t2 <- table(chemscoremat_with_confidence$mz)
