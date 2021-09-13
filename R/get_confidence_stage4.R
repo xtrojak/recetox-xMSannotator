@@ -4,10 +4,10 @@ filter_clusters <- function(curdata, table_names) {
 }
 
 create_cluster_table <- function(curdata) {
-  t <- table(curdata$Module_RTclust)
-  t <- t[which(t > 0)]
-  t <- t[which(t == max(t)[1])]
-  return(t)
+  cluster_table <- table(curdata$Module_RTclust)
+  cluster_table <- cluster_table[which(cluster_table > 0)]
+  cluster_table <- cluster_table[which(cluster_table == max(cluster_table)[1])]
+  return(cluster_table)
 }
 
 compute_delta_rt <- function(curdata) {
@@ -70,24 +70,26 @@ get_confidence_stage4 <-function(curdata,
       chemscoremat_conf_levels <- "None"
     }
     
-    if (length(unique(curdata$Adduct)) < 2 && curdata$score < 10 && length(which(cur_adducts %in% filter.by)) < 1) {
-      chemscoremat_conf_levels <- "None"
-    } else if (length(unique(curdata$Adduct)) < 2 && length(which(cur_adducts %in% filter.by)) > 0) {
-      chemscoremat_conf_levels <- "Low"
-    }
-    
-    if (length(unique(curdata$Adduct)) < 2 && nrow(curdata) > 1) {
-      if (nrow(curdata) == 2) {
-        chemscoremat_conf_levels <- "Medium"
-      }
-      
-      if (length(which(cur_adducts %in% filter.by)) < 1) {
+    if (length(unique(curdata$Adduct)) < 2) {
+      if (curdata$score < 10 && length(which(cur_adducts %in% filter.by)) < 1) {
         chemscoremat_conf_levels <- "None"
-      } else {
-        curdata <- curdata[which(cur_adducts %in% filter.by), ]
-        final_res <- cbind(2, curdata)
-        return(final_res)
+      } else if (length(which(cur_adducts %in% filter.by)) > 0) {
+        chemscoremat_conf_levels <- "Low"
       }
+     
+      if (nrow(curdata) > 1) {
+        if (nrow(curdata) == 2) {
+          chemscoremat_conf_levels <- "Medium"
+        }
+        
+        if (length(which(cur_adducts %in% filter.by)) < 1) {
+          chemscoremat_conf_levels <- "None"
+        } else {
+          curdata <- curdata[which(cur_adducts %in% filter.by), ]
+          final_res <- cbind(2, curdata)
+          return(final_res)
+        }
+      } 
     }
     
     curdata$time <- as.numeric(as.character(curdata$time))
@@ -111,36 +113,25 @@ get_confidence_stage4 <-function(curdata,
       if (length(which(adduct_weights[, 1] %in% cur_adducts)) > 0 && curdata$score[1] > 0.1) {
         if (is.na(filter.by)) {
           good_mod <- curdata$Module_RTclust[which(curdata$Adduct %in% adduct_weights[, 1])]
-          curdata <- curdata[which(curdata$Module_RTclust %in% good_mod), ]
-          t <- create_cluster_table(curdata)
-          curdata <- filter_clusters(curdata, names(t))
-          delta_rt <- compute_delta_rt(curdata)
-
+        } else {
+          good_mod <- curdata$Module_RTclust[which(curdata$Adduct %in% filter.by)]
+        }
+        
+        curdata <- curdata[which(curdata$Module_RTclust %in% good_mod), ]
+        cluster_table <- create_cluster_table(curdata)
+        curdata <- filter_clusters(curdata, names(cluster_table))
+        delta_rt <- compute_delta_rt(curdata)
+        
+        if (is.na(filter.by)) {
           if (curdata$score[1] > 0 && nrow(curdata) > 1 && length(unique(curdata$Adduct)) > 1 && delta_rt < max_diff_rt) {
             chemscoremat_conf_levels <- "High"
           } else {
             chemscoremat_conf_levels <- "Low"
           }
-        } else {
-          if (length(which(cur_adducts %in% filter.by)) > 0) {
-            good_mod <- curdata$Module_RTclust[which(curdata$Adduct %in% filter.by)]
-            curdata <- curdata[which(curdata$Module_RTclust %in% good_mod), ]
-            t <- create_cluster_table(curdata)
-            curdata <- filter_clusters(curdata, names(t))
-            delta_rt <- compute_delta_rt(curdata)
-            
-            if (length(which(t > 1)) < 1) {
-              chemscoremat_conf_levels <- assign_conf(curdata, filter.by, delta_rt, max_diff_rt, chemscoremat_conf_levels)
-              }
-            } else {
-              t <- create_cluster_table(curdata)
-              curdata <- filter_clusters(curdata, names(t))
-              delta_rt <- compute_delta_rt(curdata)
-              
-              chemscoremat_conf_levels <- assign_conf(curdata, filter.by, delta_rt, max_diff_rt, chemscoremat_conf_levels)
-            }
-          }
+        } else if (length(which(cluster_table > 1)) < 1) {
+            chemscoremat_conf_levels <- assign_conf(curdata, filter.by, delta_rt, max_diff_rt, chemscoremat_conf_levels)
         }
+      }
       module_clust <- paste(curdata$module_num, curdata$Module_RTclust, sep = "")
       curdata$Module_RTclust <- module_clust
     }
