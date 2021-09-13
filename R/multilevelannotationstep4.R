@@ -13,7 +13,7 @@ compute_confidence_levels <- function(c,
     
     bool_check <- 1
 
-    if (is.na(filter.by) == FALSE) {
+    if (!is.na(filter.by)) {
         check_adduct <- which(curdata$Adduct %in% filter.by)
         if (length(check_adduct) <= 0) {
             bool_check <- 0
@@ -30,16 +30,14 @@ compute_confidence_levels <- function(c,
                         max_isp = max_isp,
                         min_ions_perchem = min_ions_perchem
                     )
-        if (curdata != "None") {
-            if (is.na(curdata[1, 1]) == FALSE) {
-                Confidence <- as.numeric(as.character(curdata[, 1]))
-                if (Confidence < 2) {
-                    if (length(which(curdata$Adduct %in% adduct_weights[which(as.numeric(adduct_weights[, 2]) > 0), 1])) > 0) {
-                        if (curdata$score > 10) {
-                            mnum <- max(as.numeric(as.character(adduct_weights[which(adduct_weights[, 1] %in% curdata$Adduct), 2])))[1]
-                            curdata <- curdata[which(curdata$Adduct %in% adduct_weights[which(as.numeric(as.character(adduct_weights[, 2])) >= mnum), 1]), ]
-                            Confidence <- 2
-                        }
+        if (!is.na(curdata[1, 1])) {
+            Confidence <- as.numeric(as.character(curdata[, 1]))
+            if (Confidence < 2) {
+                if (length(which(curdata$Adduct %in% adduct_weights[which(as.numeric(adduct_weights[, 2]) > 0), 1])) > 0) {
+                    if (curdata$score > 10) {
+                        mnum <- max(as.numeric(as.character(adduct_weights[which(adduct_weights[, 1] %in% curdata$Adduct), 2])))[1]
+                        curdata <- curdata[which(curdata$Adduct %in% adduct_weights[which(as.numeric(as.character(adduct_weights[, 2])) >= mnum), 1]), ]
+                        Confidence <- 2
                     }
                 }
             }
@@ -108,7 +106,7 @@ boost_confidence_of_IDs <- function(chemscoremat_with_confidence, boostIDs, max.
         g1 <- ghilicpos$common
         rm(ghilicpos)
         
-        if (is.na(max.rt.diff) == FALSE) {
+        if (!is.na(max.rt.diff)) {
             t1 <- table(g1$index.B)
             ind_names <- names(t1)
             parent_bad_ind <- {}
@@ -171,7 +169,7 @@ multilevelannotationstep4 <- function(outloc,
     data(adduct_table)
     adduct_table <- adduct_table[order(adduct_table$Adduct), ]
     
-    if (is.na(adduct_weights) == TRUE) {
+    if (is.na(adduct_weights)) {
         adduct_weights <- data.frame(Adduct = c("M+H", "M-H"), Weight = c(1, 1))
     }
 
@@ -200,7 +198,7 @@ multilevelannotationstep4 <- function(outloc,
 
     # (II) Presence of required adducts/forms specified by the user 
     # for assignment to high confidence categories (e.g., M + H).
-    if (is.na(boostIDs) == FALSE) {
+    if (!is.na(boostIDs)) {
         chemscoremat_with_confidence <- boost_confidence_of_IDs(chemscoremat_with_confidence, boostIDs, max.mz.diff, max.rt.diff)
     }
     

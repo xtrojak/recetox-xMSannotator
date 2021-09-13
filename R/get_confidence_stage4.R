@@ -35,7 +35,7 @@ get_confidence_stage4 <-function(curdata,
     
     cur_adducts <-gsub(cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[0-9]*\\])", replacement = "")
     
-    if (is.na(adduct_weights) == TRUE) {
+    if (is.na(adduct_weights)) {
       adduct_weights <- data.frame(Adduct = c("M+H", "M-H"), Weight = c(1, 1))
     }
   
@@ -92,7 +92,7 @@ get_confidence_stage4 <-function(curdata,
       curdata$Module_RTclust <- module_clust
       
       if (length(which(adduct_weights[, 1] %in% cur_adducts)) > 0 && curdata$score[1] > 0.1) {
-        if (is.na(filter.by) == TRUE) {
+        if (is.na(filter.by)) {
           good_mod <- curdata$Module_RTclust[which(curdata$Adduct %in% adduct_weights[, 1])]
           curdata <- filter_clusters(curdata, good_mod)
           delta_rt <- compute_delta_rt(curdata)
@@ -197,7 +197,7 @@ get_confidence_stage4 <-function(curdata,
               if (strlength[1] > (-1)) {
                 abund_ratio <- curdata$mean_int_vec[abundant] / max_int_min_mol
                 
-                if (is.na(abund_ratio) == FALSE) {
+                if (!is.na(abund_ratio)) {
                   if (abund_ratio > 1) {
                     bad_ind_status[abundant] <- 1
                     if (chemscoremat_conf_levels == "High") {
@@ -293,7 +293,6 @@ get_confidence_stage4 <-function(curdata,
         
         if (length(which(cur_adducts %in% filter.by)) < 1) {
           chemscoremat_conf_levels <- "None"
-          return(chemscoremat_conf_levels) # TODO this should be eliminated
         }
       } else {
         if (curdata$score < 10) {
@@ -319,16 +318,16 @@ get_confidence_stage4 <-function(curdata,
       score_level <- name_to_score[chemscoremat_conf_levels,]
     }
     
-    if (is.na(score_level[1]) == TRUE) {
+    if (is.na(score_level[1])) {
       stop(curdata)
     }
     
     final_res <- cbind(score_level, curdata)
     final_res <- as.data.frame(final_res)
     
-    if (length(which(is.na(final_res$score_level) == TRUE)) > 0) {
+    if (length(which(is.na(final_res$score_level))) > 0) {
       final_res$score_level <-
-        replace(final_res$score_level, which(is.na(final_res$score_level) == TRUE), 0)
+        replace(final_res$score_level, which(is.na(final_res$score_level)), 0)
     }
     
     num_uniq_adducts <- length(unique(curdata$Adduct))
