@@ -1,27 +1,28 @@
 #' @export
 call_multilevelannotationstep2 <- function(arg1,
-                                           outloc = NA,
-                                           max.rt.diff = NA,
-                                           chemids_split = NA,
-                                           num_sets = NA,
-                                           mchemdata = NA,
-                                           mass_defect_window = NA,
-                                           corthresh = NA,
-                                           global_cor = NA,
-                                           mzid = NA,
-                                           adduct_table = NA,
-                                           adduct_weights = NA,
-                                           max_isp = NA,
-                                           MplusH.abundance.ratio.check = NA,
-                                           mass_defect_mode = NA,
-                                           chemids = NA,
-                                           isop_res_md = NA,
-                                           filter.by = NA
+                                           outloc,
+                                           max.rt.diff,
+                                           chemids_split,
+                                           num_sets,
+                                           mchemdata,
+                                           mass_defect_window,
+                                           corthresh,
+                                           global_cor,
+                                           mzid,
+                                           adduct_table,
+                                           adduct_weights,
+                                           max_isp,
+                                           MplusH.abundance.ratio.check ,
+                                           mass_defect_mode,
+                                           chemids,
+                                           isop_res_md,
+                                           filter.by
                                            ) {
     cur_fname <- paste(outloc, "/stage2/chem_score", arg1, ".Rda", sep = "")
-    check_if_exists <- suppressWarnings(try(load(cur_fname)))
+    check_if_exists <- file.exists(cur_fname)
 
-    if (is(check_if_exists, "try-error")) {
+
+    if (check_if_exists == FALSE) {
         multilevelannotationstep2(
             outloc1 = outloc,
             list_number = arg1,
@@ -1256,6 +1257,8 @@ multilevelannotation <-
                     clusterExport(cl, "do_something_2")
                     clusterExport(cl, "compute_score")
                     clusterExport(cl, "replace_with_module")
+                    clusterExport(cl, "remove_water_adducts")
+                    
                     #clusterExport(cl, "getMolecule")
                     #clusterExport(cl, "ldply")
                     clusterExport(cl, "%>%")
@@ -1372,12 +1375,10 @@ multilevelannotation <-
                     load("tempobjects.Rda")
 
 
-
+                    chemscoremat <- read.csv("Stage3.csv")
 
                     # 	size_objects<-sort(sapply(ls(), function(x) format(object.size(get(x)), unit = 'auto')))
                     # 	print(size_objects)
-                    
-                    chemscoremat <- read.csv("Stage3.csv")
 
                     print("Status 5: Assigning confidence levels")
                     # suppressWarnings(annotresstage4<-multilevelannotationstep4(outloc=outloc,max.rt.diff=max_diff_rt,filter.by=filter.by,adduct_weights=adduct_weights,min_ions_perchem=min_ions_perchem,boostIDs=boostIDs,max_isp=max_isp,max.mz.diff=max.mz.diff))

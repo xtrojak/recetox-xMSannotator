@@ -30,7 +30,7 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
     mode = mode
   )
 
-  key_columns <- c('mz', 'time', 'Name', 'Adduct', 'Formula', 'chemical_ID')
+  key_columns <- c('mz', 'time', 'Name', 'Adduct', 'Formula', 'chemical_ID', 'score', 'Confidence')
 
   for (i in seq.int(from = 1, to = 5, by = 1)) {
     filename <- paste0("Stage", i, ".csv")
@@ -39,21 +39,28 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
 
     keys <- key_columns[which(key_columns %in% colnames(actual))]
 
-    actual <- dplyr::arrange(
-      actual, mz, time,
+    actual <- dplyr::arrange_at(
+      actual, keys
     )
-    expected <- dplyr::arrange(
-      expected, mz, time
+    expected <- dplyr::arrange_at(
+      expected, keys
     )
 
     comparison <- dataCompareR::rCompare(actual, expected, keys = keys, mismatches = 1000)
     sum <- summary(comparison)
-
     ratio_error <- abs(1 - sum$nrowCommon / nrow(expected))
 
-    expect_lte(ratio_error, 0.01)
+    dataCompareR::saveReport(
+        comparison,
+        reportName = test_identifier,
+        reportLocation = outloc,
+        showInViewer = FALSE,
+        mismatchCount = 1000
+    )
 
-    #expect_equal(actual, expected, label = filename)
+    #expect_lte(ratio_error, 0.01)
+
+    expect_equal(actual, expected, label = filename)
   }
 
   setwd(wd)
