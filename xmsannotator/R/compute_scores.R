@@ -27,7 +27,6 @@ compute_isotopic_pattern <- function(formula, minAbund = 0.001) {
 #' @param peaks A peak table containing a peak identifier (unique number), mean intensity, module, and rt cluster
 #'  of each identified peak.
 #' @param mass_defect_tolerance A number. Maximum difference in mass defect between two peaks of the same compound.
-#' @param max_isp Maximal number of unique isotopes of a single compound.
 #' @param rt_tolerance A number. Maximum rt difference for two peaks of the same substance.
 #'
 #' @return A table of identified isotopes with an extra column: `mass_number_difference`.
@@ -40,7 +39,6 @@ filter_isotopes <- function(query,
                             peaks,
                             abundance_ratio,
                             mass_defect_tolerance,
-                            max_isp,
                             rt_tolerance) {
   isotopes <- mutate(
     peaks,
@@ -54,8 +52,7 @@ filter_isotopes <- function(query,
     rt_cluster == query$rt_cluster,
     mean_intensity / query$mean_intensity <= abundance_ratio + abundance_ratio * intensity_deviation_tolerance,
     near(rt, query$rt, rt_tolerance),
-    near(mass_defect, query$mass_defect, mass_defect_tolerance),
-    between(abs(mass_number_difference), 1, max_isp)
+    near(mass_defect, query$mass_defect, mass_defect_tolerance)
   )
 }
 
@@ -95,7 +92,6 @@ match_isotopes_by_intensity <- function(query,
 #' @param peaks A peak table containing a peak identifier (unique number), mean intensity, module, and rt cluster
 #'  of each identified peak.
 #' @param mass_defect_tolerance A number. Maximum difference in mass defect between two peaks of the same compound.
-#' @param max_isp Maximal number of unique isotopes of a single compound.
 #' @param rt_tolerance A number. Maximum rt difference for two peaks of the same substance.
 #'
 #' @return A table with peaks that have been identified as isotopes of a given molecule from the annotation table.
@@ -106,7 +102,6 @@ compute_isotopes <- function(...,
                              intensity_deviation_tolerance,
                              peaks,
                              mass_defect_tolerance,
-                             max_isp,
                              rt_tolerance) {
   query <- tibble(...)
   isotopic_pattern <- compute_isotopic_pattern(query$molecular_formula)
@@ -117,7 +112,6 @@ compute_isotopes <- function(...,
                               peaks,
                               second_most_abundant,
                               mass_defect_tolerance,
-                              max_isp,
                               rt_tolerance)
   isotopes <- distinct(isotopes)
   isotopes <- match_isotopes_by_intensity(query,
@@ -133,7 +127,6 @@ compute_isotopes <- function(...,
 #' @param intensity_deviation_tolerance A numeric threshold by which an intensity ratio of two isotopic peaks may differ
 #'  from their actual abundance ratio.
 #' @param mass_defect_tolerance A number. Maximum difference in mass defect between two peaks of the same compound.
-#' @param max_isp Maximal number of unique isotopes of a single compound.
 #' @param peaks A peak table containing a peak identifier (unique number), mean intensity, module, and rt cluster
 #'  of each identified peak.
 #' @param rt_tolerance A number. Maximum rt difference for two peaks of the same substance.
@@ -144,7 +137,6 @@ compute_scores <- function(annotation,
                            adduct_weights,
                            intensity_deviation_tolerance = 0.1,
                            mass_defect_tolerance = 0,
-                           max_isp,
                            peaks,
                            rt_tolerance) {
   annotation <- filter(annotation, forms_valid_adduct_pair(.data$molecular_formula, .data$adduct))
@@ -155,8 +147,7 @@ compute_scores <- function(annotation,
                               ~compute_isotopes(..., peaks = peaks,
                                                 rt_tolerance = rt_tolerance,
                                                 intensity_deviation_tolerance = intensity_deviation_tolerance,
-                                                mass_defect_tolerance = mass_defect_tolerance,
-                                                max_isp = max_isp))
+                                                mass_defect_tolerance = mass_defect_tolerance))
 
   annotation <- bind_rows(annotation, isotopes)
   annotation <- left_join(annotation, adduct_weights, by = "adduct")

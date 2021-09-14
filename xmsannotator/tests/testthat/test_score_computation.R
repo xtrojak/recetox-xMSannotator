@@ -4,7 +4,6 @@ patrick::with_parameters_test_that("Chemscore computing: isotope matching", {
                              intensity_deviation_tolerance = 0.25,
                              rt_tolerance = 10,
                              mass_defect_tolerance = 0.1,
-                             max_isp = 5,
                              query)
   expect_equal(actual, expected, ignore_attr = TRUE)
 },
