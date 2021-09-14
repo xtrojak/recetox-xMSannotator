@@ -132,6 +132,7 @@ compute_isotopes <- function(...,
 #' @param rt_tolerance A number. Maximum rt difference for two peaks of the same substance.
 #'
 #' @import dplyr
+#' @import purrr
 #' @importFrom rlang .data
 compute_scores <- function(annotation,
                            adduct_weights,
