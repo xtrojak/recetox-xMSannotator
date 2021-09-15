@@ -2,43 +2,65 @@ patrick::with_parameters_test_that(
   "multilevelannotation step 4 works",
   {
     # load data needed during step 4
-    load("../../data/adduct_weights.rda")
+    testdata_dir <- file.path(getwd(), "testdata", subfolder)
+    load(file.path(testdata_dir, "tempobjects.Rda"))
 
     testthat_wd <- getwd()
-    test_directory <- file.path(getwd(), "testdata/multilevelannotationstep4", subfolder)
+    outloc <- file.path(
+      tempdir(),
+      "multilevelannotationstep4",
+      subfolder
+    )
 
     # create test folder and copy necessary files
-    dir.create(test_directory, recursive = TRUE)
+    dir.create(outloc, recursive = TRUE)
     file.copy(
-      file.path(getwd(), "testdata/advanced", subfolder, "Stage3.csv"),
-      file.path(test_directory, "Stage3.csv")
+      file.path(testdata_dir, "Stage3.csv"),
+      file.path(outloc, "Stage3.csv")
     )
 
     # load expected results
-    expected <- read.csv(file.path(getwd(), "testdata/advanced", subfolder, "Stage4.csv"))
-    expected$MatchCategory <- as.character(expected$MatchCategory)
-
-    # set correct working directory
-    setwd(test_directory)
+    expected <- read.csv(file.path(testdata_dir, "Stage4.csv"))
+    #expected$MatchCategory <- as.character(expected$MatchCategory)
 
     # compute annotation step 4
     result <- multilevelannotationstep4(
-      outloc = ".", max.mz.diff = 10, max.rt.diff = max_rt_diff,
-      filter.by = "M+H", adduct_weights = adduct_weights
+      outloc = outloc,
+      max.mz.diff = max.mz.diff,
+      max.rt.diff = max_diff_rt,
+      filter.by = filter.by,
+      adduct_weights = adduct_weights,
+      max_isp = max_isp,
+      min_ions_perchem = min_ions_perchem,
+      num_nodes = 16
     )
-    row.names(result) <- 1:nrow(result)
+    actual <- read.csv(file.path(outloc, "Stage4.csv"))
 
-    # Annihilate
     setwd(testthat_wd)
-    unlink(file.path(getwd(), "testdata/multilevelannotationstep4"), recursive = TRUE)
 
-    # compare with expected result
-    expect_equal(result, expected)
+    actual <- dplyr::arrange_all(actual)
+    expected <- dplyr::arrange_all(expected)
+
+    comparison <- dataCompareR::rCompare(
+      actual,
+      expected,
+      keys = names(actual)
+    )
+
+    dataCompareR::saveReport(
+      comparison,
+      reportName = subfolder,
+      reportLocation = outloc,
+      showInViewer = FALSE,
+      mismatchCount = 1000
+    )
+
+    expect_equal(actual, expected)
   },
   patrick::cases(
-    qc_solvent = list(subfolder = "qc_solvent", max_rt_diff = 0.5),
-    qc_matrix = list(subfolder = "qc_matrix", max_rt_diff = 0.5),
-    batch1_neg = list(subfolder = "batch1_neg", max_rt_diff = 0.5),
-    sourceforge = list(subfolder = "sourceforge", max_rt_diff = 2)
+    qc_solvent = list(subfolder = "qc_solvent"),
+    qc_matrix = list(subfolder = "qc_matrix"),
+    batch1_neg = list(subfolder = "batch1_neg"),
+    sourceforge = list(subfolder = "sourceforge")
   )
 )
