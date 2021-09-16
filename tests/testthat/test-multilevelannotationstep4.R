@@ -29,8 +29,7 @@ patrick::with_parameters_test_that(
       filter.by = filter.by,
       adduct_weights = adduct_weights,
       max_isp = max_isp,
-      min_ions_perchem = min_ions_perchem,
-      num_nodes = 16
+      min_ions_perchem = min_ions_perchem
     )
     actual <- read.csv(file.path(outloc, "Stage4.csv"))
 
