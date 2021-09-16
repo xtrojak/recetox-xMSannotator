@@ -1,17 +1,19 @@
 patrick::with_parameters_test_that("Advanced annotation works:", {
   #skip("Currently excluded!")
 
-  testname <- test_identifier
-  max.rt.diff <- max_rt_diff
   num_nodes <- 16
   load("testdata/adduct_weights.rda")
-  adduct_weights <- adduct_weights
   wd <- getwd()
 
-  peaks_filename <- paste0(testname, ".rds")
+  peaks_filename <- paste0(test_identifier, ".rds")
   peaks_filepath <- file.path(wd, "testdata", peaks_filename)
 
-  outloc <- file.path(tempdir(), testname)
+  outloc <- file.path(
+    tempdir(),
+    "advanced",
+    test_identifier
+  )
+  dir.create(outloc, recursive = TRUE)
 
   peaks <- readRDS(peaks_filepath)
   peaks <- unique(peaks)
@@ -23,47 +25,44 @@ patrick::with_parameters_test_that("Advanced annotation works:", {
     db_name = database,
     queryadductlist = queryadductlist,
     adduct_weights = adduct_weights,
-    max.rt.diff = max.rt.diff,
+    max.rt.diff = max_rt_diff,
     allsteps = TRUE,
     cormethod = correlation_method,
     mass_defect_mode = mass_defect_mode,
     mode = mode
   )
 
+  setwd(wd)
+
   key_columns <- c('mz', 'time', 'Name', 'Adduct', 'Formula', 'chemical_ID', 'score', 'Confidence')
 
   for (i in seq.int(from = 1, to = 5, by = 1)) {
     filename <- paste0("Stage", i, ".csv")
     actual <- read.csv(file.path(outloc, filename))
-    expected <- read.csv(file.path(wd, "testdata", "advanced", testname, filename))
+    expected <- read.csv(file.path(wd, "testdata", test_identifier, filename))
 
     keys <- key_columns[which(key_columns %in% colnames(actual))]
 
-    actual <- dplyr::arrange_at(
-      actual, keys
-    )
-    expected <- dplyr::arrange_at(
-      expected, keys
-    )
+    actual <- dplyr::arrange_at(actual, keys)
+    expected <- dplyr::arrange_at(expected, keys)
 
-    comparison <- dataCompareR::rCompare(actual, expected, keys = keys, mismatches = 1000)
-    sum <- summary(comparison)
-    ratio_error <- abs(1 - sum$nrowCommon / nrow(expected))
+    comparison <- dataCompareR::rCompare(
+      actual,
+      expected,
+      keys = keys,
+      mismatches = 1000
+    )
 
     dataCompareR::saveReport(
         comparison,
-        reportName = test_identifier,
+        reportName = paste0(test_identifier, "_Stage", i),
         reportLocation = outloc,
         showInViewer = FALSE,
         mismatchCount = 1000
     )
 
-    #expect_lte(ratio_error, 0.01)
-
     expect_equal(actual, expected, label = filename)
   }
-
-  setwd(wd)
 },
 patrick::cases(
     qc_solvent = list(
