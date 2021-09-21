@@ -18,7 +18,7 @@ compute_score <- function(chemscoremat, matrix, pathwaycheckmode, scorethresh, a
   
   total_chem_count <- length(unique(matrix$chemid))
   
-  if (is.na(pathwaycheckmode) == FALSE) {
+  if (! is.na(pathwaycheckmode)) {
     for (path_id in pathway_ids)
     {
       if (! path_id %in% bad_path_IDs) {
@@ -164,7 +164,7 @@ compute_score <- function(chemscoremat, matrix, pathwaycheckmode, scorethresh, a
                   if (num_chems < 3) {
                     num_chems <- 0
                   } else {
-                    if (is.na(curmchemicaldata$score[1]) == TRUE) {
+                    if (is.na(curmchemicaldata$score[1])) {
                       diff_rt <- max(curmchemicaldata$time) - min(curmchemicaldata$time)
                       
                       if (diff_rt > max_diff_rt) {
@@ -235,6 +235,71 @@ compute_matrix <- function(DB, index, pattern) {
   return(matrix)
 }
 
+load_chemscoremat <- function(num_sets) {
+  chemscoremat <- lapply(1:num_sets, function(sind)
+  {
+    cur_fname <- paste("chem_score", sind, ".Rda", sep = "")
+    load(cur_fname)
+    
+    curchemscoremat <- as.data.frame(curchemscoremat)
+    return(curchemscoremat)
+  })
+  chemscoremat <- ldply(chemscoremat, rbind)
+}
+
+sanitize_chemscoremat <- function(chemscoremat, chemCompMZ) {
+  chemscoremat$Formula <- gsub(chemscoremat$Formula,
+                               pattern = "_.*",
+                               replacement = "")
+  
+  tempadduct <- chemscoremat$Adduct
+  
+  chemscoremat$Adduct <- gsub(chemscoremat$Adduct,
+                              pattern = "_.*",
+                              replacement = "")
+  
+  chemscoremat <- cbind(chemscoremat, tempadduct)
+  
+  chemscoremat <- merge(chemscoremat,
+                        chemCompMZ[, c(2:4, 6)], 
+                        by = c("Formula", "Adduct"))
+  
+  #y because we want chemCompMZ ID and Name
+  chemscoremat <- chemscoremat[, c("cur_chem_score",
+                                   "Module_RTclust",
+                                   "mz",
+                                   "time",
+                                   "MatchCategory",
+                                   "theoretical.mz",
+                                   "chemical_ID.y",
+                                   "Name.y",
+                                   "Formula",
+                                   "MonoisotopicMass",
+                                   "tempadduct",
+                                   "ISgroup",
+                                   "mean_int_vec",
+                                   "MD"
+  )
+  ]
+  
+  colnames(chemscoremat) <- c("cur_chem_score",
+                              "Module_RTclust",
+                              "mz",
+                              "time",
+                              "MatchCategory",
+                              "theoretical.mz",
+                              "chemical_ID",
+                              "Name",
+                              "Formula",
+                              "MonoisotopicMass",
+                              "Adduct",
+                              "ISgroup",
+                              "mean_int_vec",
+                              "MD"
+  )
+  return(chemscoremat)
+}
+
 
 multilevelannotationstep3 <- function(outloc1,
                                       chemscoremat = NA,
@@ -272,66 +337,10 @@ multilevelannotationstep3 <- function(outloc1,
   setwd(outloc1)
   
   if (is.na(chemscoremat)) {
-    chemscoremat <- lapply(1:num_sets, function(sind)
-    {
-      cur_fname <- paste("chem_score", sind, ".Rda", sep = "")
-      load(cur_fname)
-      
-      curchemscoremat <- as.data.frame(curchemscoremat)
-      return(curchemscoremat)
-    })
-    chemscoremat <- ldply(chemscoremat, rbind)
+    chemscoremat <- load_chemscoremat(num_sets)
   } 
   
-  chemscoremat$Formula <- gsub(chemscoremat$Formula,
-                               pattern = "_.*",
-                               replacement = "")
-
-  tempadduct <- chemscoremat$Adduct
-  
-  chemscoremat$Adduct <- gsub(chemscoremat$Adduct,
-                              pattern = "_.*",
-                              replacement = "")
-  
-  chemscoremat <- cbind(chemscoremat, tempadduct)
-  
-  chemscoremat <- merge(chemscoremat,
-                        chemCompMZ[, c(2:4, 6)], 
-                        by = c("Formula", "Adduct"))
-  
-  #y because we want chemCompMZ ID and Name
-  chemscoremat <- chemscoremat[, c("cur_chem_score",
-                                   "Module_RTclust",
-                                   "mz",
-                                   "time",
-                                   "MatchCategory",
-                                   "theoretical.mz",
-                                   "chemical_ID.y",
-                                   "Name.y",
-                                   "Formula",
-                                   "MonoisotopicMass",
-                                   "tempadduct",
-                                   "ISgroup",
-                                   "mean_int_vec",
-                                   "MD"
-                                  )
-                               ]
-  
-  colnames(chemscoremat) <- c("cur_chem_score",
-                              "Module_RTclust",
-                              "mz",
-                              "time",
-                              "MatchCategory",
-                              "theoretical.mz",
-                              "chemical_ID",
-                              "Name",
-                              "Formula",
-                              "MonoisotopicMass",
-                              "Adduct",
-                              "ISgroup",
-                              "mean_int_vec",
-                              "MD"
-                             )
+  chemscoremat <- sanitize_chemscoremat(chemscoremat, chemCompMZ)
   
   hmdbbad <- c("HMDB29244", "HMDB29245", "HMDB29246")
   bad_indices <- which(chemscoremat$chemical_ID %in% hmdbbad)
