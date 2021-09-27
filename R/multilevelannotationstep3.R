@@ -1,4 +1,4 @@
-compute_score <- function(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, bad_path_IDs, db_name) {
+compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, bad_path_IDs, db_name) {
   pthresh = 0.05
 
   pathway_ids <- as.character(matrix[, 2])
@@ -345,7 +345,7 @@ multilevelannotationstep3 <- function(outloc1,
                           by.x = "chemical_ID",
                           by.y = "KEGGID")
     
-    chemscoremat <- compute_score(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, c("-", "map01100"), db_name)
+    chemscoremat <- compute_score_pathways(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, c("-", "map01100"), db_name)
   }
   else {
     if (db_name == "HMDB") {
@@ -363,7 +363,7 @@ multilevelannotationstep3 <- function(outloc1,
       
       rm(hmdbAllinfv3.5)
       
-      chemscoremat <- compute_score(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, c("-"), db_name)
+      chemscoremat <- compute_score_pathways(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, c("-"), db_name)
     }
   }
   
