@@ -1384,9 +1384,25 @@ multilevelannotation <- function(dataA,
 
             # if(allsteps==TRUE)
             {
+                # make sure num_sets exists
+                if (!is.na(num_sets)) {
+                    if (num_sets >= length(chemids_split)) {
+                        num_sets <- length(chemids_split)
+                    }
+                } else {
+                    num_sets <- length(chemids_split)
+                }
+                
                 print("Status 4: Pathway evaluation")
-                # suppressWarnings(annotres<-multilevelannotationstep3(outloc=outloc,adduct_weights=adduct_weights,boostIDs=boostIDs,pathwaycheckmode=pathwaycheckmode))
-                annotres <- multilevelannotationstep3(outloc = outloc, chemscoremat = chemscoremat, adduct_weights = adduct_weights, boostIDs = boostIDs, pathwaycheckmode = pathwaycheckmode)
+                annotres <- multilevelannotationstep3(
+                                outloc = outloc,
+                                chemscoremat = chemscoremat,
+                                adduct_weights = adduct_weights,
+                                num_sets = num_sets,
+                                db_name = db_name,
+                                max_diff_rt = max_diff_rt,
+                                pathwaycheckmode = pathwaycheckmode
+                )
 
                 # print("Memory used after step3")
                 # print(mem_used())

@@ -1,7 +1,6 @@
-compute_score <- function(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, bad_path_IDs, db_name) {
+compute_score <- function(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, bad_path_IDs, db_name) {
   pthresh = 0.05
-  chemids <- as.character(chemscoremat$chemical_ID)
-  
+
   pathway_ids <- as.character(matrix[, 2])
   
   pathway_ids <- unique(pathway_ids)
@@ -289,27 +288,14 @@ multilevelannotationstep3 <- function(outloc1,
                                       chemscoremat = NA,
                                       adduct_weights = NA,
                                       num_sets = NA,
-                                      boostIDs = NA,
+                                      db_name = NA,
+                                      max_diff_rt = NA,
                                       pathwaycheckmode = "p",
-                                      dbAllinf = NA,
                                       scorethresh = 0.1) {
   setwd(outloc1)
   
-  load("step1_results.Rda")
   load("chemCompMZ.Rda")
-  
-  rm(global_cor)
-  rm(global_cor, env = .GlobalEnv)
-  
-  if (!is.na(num_sets)) {
-    if (num_sets >= length(chemids_split)) {
-      num_sets <- length(chemids_split)
-    }
-  } else {
-    num_sets <- length(chemids_split)
-  }
-  
-  rm(dataA)
+
   outloc <- outloc1
   
   if (is.na(adduct_weights)) {
@@ -359,7 +345,7 @@ multilevelannotationstep3 <- function(outloc1,
                           by.x = "chemical_ID",
                           by.y = "KEGGID")
     
-    chemscoremat <- compute_score(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, c("-", "map01100"), db_name)
+    chemscoremat <- compute_score(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, c("-", "map01100"), db_name)
   }
   else {
     if (db_name == "HMDB") {
@@ -377,7 +363,7 @@ multilevelannotationstep3 <- function(outloc1,
       
       rm(hmdbAllinfv3.5)
       
-      chemscoremat <- compute_score(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, c("-"), db_name)
+      chemscoremat <- compute_score(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, c("-"), db_name)
     }
   }
   
@@ -394,29 +380,14 @@ multilevelannotationstep3 <- function(outloc1,
   
   write.csv(chemscoremat, file = "../Stage3.csv", row.names = FALSE)
   
-  rm("chemids",
-    "adduct_table",
-    "global_cor",
-    "mzid",
-    "max_diff_rt",
-    "isop_res_md",
-    "corthresh",
-    "level_module_isop_annot",
-    "chemids_split",
-    "dataA",
-    "corthresh",
-    "max.mz.diff",
-    "outloc",
+  rm("outloc",
     "num_sets",
     "db_name",
-    "num_nodes",
     "num_sets",
     "adduct_weights",
-    "filter.by",
     "chemCompMZ",
     "hmdbAllinf",
-    "hmdbAllinfv3.6",
-    "dbAllinf")
+    "hmdbAllinfv3.6")
   
   return(chemscoremat)
 }
