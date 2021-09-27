@@ -136,11 +136,6 @@ boost_confidence_of_IDs <- function(chemscoremat_with_confidence, boostIDs, max.
         
         cnames1 <- colnames(t1)
         cnames2 <- cnames1[which(t1 > 0)]
-        good_ind <- {}
-        if (length(good_ind) > 0) {
-            chemscoremat_with_confidence$Confidence[good_ind] <- 4
-            chemscoremat_with_confidence$score[good_ind] <- chemscoremat_with_confidence$score[good_ind] * 100
-        }
     } else {
         good_ind <- which(chemscoremat_with_confidence$chemical_ID %in% boostIDs)
         if (length(good_ind) > 0) {
