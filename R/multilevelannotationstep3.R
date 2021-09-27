@@ -235,6 +235,7 @@ compute_matrix <- function(DB, index, pattern) {
   return(matrix)
 }
 
+
 load_chemscoremat <- function(num_sets) {
   chemscoremat <- lapply(1:num_sets, function(sind)
   {
@@ -247,7 +248,19 @@ load_chemscoremat <- function(num_sets) {
   chemscoremat <- ldply(chemscoremat, rbind)
 }
 
-sanitize_chemscoremat <- function(chemscoremat, chemCompMZ) {
+
+select_y_names <- function(chemscoremat, column_names) {
+  #y because we want chemCompMZ ID and Name
+  column_names_y <- column_names
+  column_names_y[1] <- "cur_chem_score"
+  column_names_y[7:8] <- paste(column_names_y[7:8], ".y", sep = "")
+  column_names_y[11] <- "tempadduct"
+  chemscoremat <- chemscoremat[, column_names_y]
+  return(chemscoremat)
+}
+
+
+sanitize_chemscoremat <- function(chemscoremat, chemCompMZ, column_names) {
   chemscoremat$Formula <- gsub(chemscoremat$Formula,
                                pattern = "_.*",
                                replacement = "")
@@ -264,39 +277,8 @@ sanitize_chemscoremat <- function(chemscoremat, chemCompMZ) {
                         chemCompMZ[, c(2:4, 6)], 
                         by = c("Formula", "Adduct"))
   
-  #y because we want chemCompMZ ID and Name
-  chemscoremat <- chemscoremat[, c("cur_chem_score",
-                                   "Module_RTclust",
-                                   "mz",
-                                   "time",
-                                   "MatchCategory",
-                                   "theoretical.mz",
-                                   "chemical_ID.y",
-                                   "Name.y",
-                                   "Formula",
-                                   "MonoisotopicMass",
-                                   "tempadduct",
-                                   "ISgroup",
-                                   "mean_int_vec",
-                                   "MD"
-  )
-  ]
-  
-  colnames(chemscoremat) <- c("cur_chem_score",
-                              "Module_RTclust",
-                              "mz",
-                              "time",
-                              "MatchCategory",
-                              "theoretical.mz",
-                              "chemical_ID",
-                              "Name",
-                              "Formula",
-                              "MonoisotopicMass",
-                              "Adduct",
-                              "ISgroup",
-                              "mean_int_vec",
-                              "MD"
-  )
+  chemscoremat <- select_y_names(chemscoremat, column_names)
+  colnames(chemscoremat) <- column_names
   return(chemscoremat)
 }
 
@@ -338,9 +320,25 @@ multilevelannotationstep3 <- function(outloc1,
   
   if (is.na(chemscoremat)) {
     chemscoremat <- load_chemscoremat(num_sets)
-  } 
+  }
   
-  chemscoremat <- sanitize_chemscoremat(chemscoremat, chemCompMZ)
+  column_names <- c("score",
+                    "Module_RTclust",
+                    "mz",
+                    "time",
+                    "MatchCategory",
+                    "theoretical.mz",
+                    "chemical_ID",
+                    "Name",
+                    "Formula",
+                    "MonoisotopicMass",
+                    "Adduct",
+                    "ISgroup",
+                    "mean_int_vec",
+                    "MD"
+                   )
+  
+  chemscoremat <- sanitize_chemscoremat(chemscoremat, chemCompMZ, column_names)
   
   hmdbbad <- c("HMDB29244", "HMDB29245", "HMDB29246")
   bad_indices <- which(chemscoremat$chemical_ID %in% hmdbbad)
@@ -350,10 +348,6 @@ multilevelannotationstep3 <- function(outloc1,
   }
   
   otherchems <- mchemdata[which(chemscoremat$mz %in% chemscoremat)]
-  
-  cnames <- colnames(chemscoremat)
-  cnames[1] <- "score"
-  colnames(chemscoremat) <- cnames
   
   if (db_name == "KEGG") {
     data(keggotherinf)
@@ -393,8 +387,6 @@ multilevelannotationstep3 <- function(outloc1,
   cnames <- gsub(cnames, pattern = ".x", replacement = "")
   colnames(chemscoremat) <- cnames
   multiresmat <- chemscoremat
-  
-  cnames <- colnames(chemscoremat)
 
   good_ind <- which(chemscoremat$score >= scorethresh)
   
@@ -404,24 +396,10 @@ multilevelannotationstep3 <- function(outloc1,
     chemscoremat_highconf <-chemscoremat
     rm(chemscoremat)
   }
-  
-  chemscoremat_highconf <-
-    chemscoremat_highconf[, c(
-      "chemical_ID",
-      "score",
-      "Module_RTclust",
-      "mz",
-      "time" ,
-      "MatchCategory",
-      "theoretical.mz",
-      "Name",
-      "Formula",
-      "MonoisotopicMass",
-      "Adduct",
-      "ISgroup",
-      "mean_int_vec",
-      "MD"
-    )]
+
+  # rotate column names
+  column_names[1:7] <- c(column_names[7], column_names[1:6])
+  chemscoremat_highconf <- chemscoremat_highconf[, column_names]
   
   write.csv(chemscoremat_highconf,
             file = "../Stage3.csv",
@@ -449,13 +427,12 @@ multilevelannotationstep3 <- function(outloc1,
     "num_nodes",
     "num_sets",
     "adduct_weights",
-    "filter.by"
-  )
-  rm("chemCompMZ",
-     "mchemdata",
-     "hmdbAllinf",
-     "hmdbAllinfv3.6",
-     "dbAllinf")
+    "filter.by",
+    "chemCompMZ",
+    "mchemdata",
+    "hmdbAllinf",
+    "hmdbAllinfv3.6",
+    "dbAllinf")
   
   return(chemscoremat_highconf)
 }
