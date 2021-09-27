@@ -12,10 +12,6 @@ compute_score <- function(chemscoremat, matrix, pathwaycheckmode, scorethresh, a
   
   chemscoremat <- cbind(chemscoremat, module_num)
   
-  chemscoremat_orig <- chemscoremat
-  
-  chemscoremat <- chemscoremat_orig
-  
   total_chem_count <- length(unique(matrix$chemid))
   
   if (! is.na(pathwaycheckmode)) {
@@ -206,9 +202,7 @@ compute_score <- function(chemscoremat, matrix, pathwaycheckmode, scorethresh, a
     }
   }
   
-  cnames <- colnames(chemscoremat)
-  cnames <- gsub(cnames, pattern = ".x", replacement = "")
-  colnames(chemscoremat) <- cnames
+  chemscoremat <- replace_x_names(chemscoremat)
   return(chemscoremat)
 }
 
@@ -256,6 +250,14 @@ select_y_names <- function(chemscoremat, column_names) {
   column_names_y[7:8] <- paste(column_names_y[7:8], ".y", sep = "")
   column_names_y[11] <- "tempadduct"
   chemscoremat <- chemscoremat[, column_names_y]
+  return(chemscoremat)
+}
+
+
+replace_x_names <- function(chemscoremat) {
+  cnames <- colnames(chemscoremat)
+  cnames <- gsub(cnames, pattern = ".x", replacement = "")
+  colnames(chemscoremat) <- cnames
   return(chemscoremat)
 }
 
@@ -347,8 +349,6 @@ multilevelannotationstep3 <- function(outloc1,
     chemscoremat <- chemscoremat[-bad_indices, ]
   }
   
-  otherchems <- mchemdata[which(chemscoremat$mz %in% chemscoremat)]
-  
   if (db_name == "KEGG") {
     data(keggotherinf)
     
@@ -381,35 +381,20 @@ multilevelannotationstep3 <- function(outloc1,
     }
   }
   
-  rm(curmchemicaldata1)
-  
-  cnames <- colnames(chemscoremat)
-  cnames <- gsub(cnames, pattern = ".x", replacement = "")
-  colnames(chemscoremat) <- cnames
-  multiresmat <- chemscoremat
+  chemscoremat <- replace_x_names(chemscoremat)
 
   good_ind <- which(chemscoremat$score >= scorethresh)
-  
-  chemscoremat_highconf <- {
+  if (length(good_ind) == 0) {
+    chemscoremat <- {}
+  } else {
+    # rotate column names
+    column_names[1:7] <- c(column_names[7], column_names[1:6])
+    chemscoremat <- chemscoremat[, column_names]
   }
-  if (length(good_ind) > 0) {
-    chemscoremat_highconf <-chemscoremat
-    rm(chemscoremat)
-  }
-
-  # rotate column names
-  column_names[1:7] <- c(column_names[7], column_names[1:6])
-  chemscoremat_highconf <- chemscoremat_highconf[, column_names]
   
-  write.csv(chemscoremat_highconf,
-            file = "../Stage3.csv",
-            row.names = FALSE)
+  write.csv(chemscoremat, file = "../Stage3.csv", row.names = FALSE)
   
-  rm(chemscoremat_orig)
-  
-  rm(
-    "mchemdata",
-    "chemids",
+  rm("chemids",
     "adduct_table",
     "global_cor",
     "mzid",
@@ -429,10 +414,9 @@ multilevelannotationstep3 <- function(outloc1,
     "adduct_weights",
     "filter.by",
     "chemCompMZ",
-    "mchemdata",
     "hmdbAllinf",
     "hmdbAllinfv3.6",
     "dbAllinf")
   
-  return(chemscoremat_highconf)
+  return(chemscoremat)
 }
