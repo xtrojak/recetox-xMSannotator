@@ -132,7 +132,7 @@ detect_isotopic_peaks <- function(...,
 #'  of each identified peak.
 #' @param rt_tolerance A number. Maximum rt difference for two peaks of the same substance.
 #'
-#' @return
+#' @return Annotation table expanded by annotated isotopic peaks.
 #'
 #' @import dplyr
 #' @importFrom purrr pmap_drf
@@ -142,6 +142,7 @@ compute_isotopes <- function(annotation,
                             mass_defect_tolerance = 0,
                             peak_table,
                             rt_tolerance = 1) {
+  annotation <- mutate(annotation, mass_number_difference = 0)
   adducts <- semi_join(annotation, adduct_weights, by = "adduct")
 
   # This can be parallelized on `group_split(group_by(isotopes, molecular_formula))`
