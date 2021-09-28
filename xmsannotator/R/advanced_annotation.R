@@ -115,6 +115,15 @@ advanced_annotation <- function(
                            select(peak_rt_clusters, "peak", "mean_intensity", "module", "rt_cluster"),
                            by = "peak")
 
+  annotation <- compute_isotopes(
+    annotation = annotation,
+    adduct_weights = adduct_weights,
+    intensity_deviation_tolerance = intensity_deviation_tolerance,
+    mass_defect_tolerance = mass_defect_tolerance,
+    peak_table = peak_table,
+    rt_tolerance = time_tolerance
+  )
+
   annotation <- compute_scores(
     annotation = annotation,
     adduct_weights = adduct_weights,
