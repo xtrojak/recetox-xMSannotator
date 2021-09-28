@@ -110,6 +110,7 @@ advanced_annotation <- function(
     inner_join(peak_rt_clusters, on = "peak") %>%
     compute_mass_defect(precision = 0.01)
 
+  annotation <- filter(annotation, forms_valid_adduct_pair(.data$molecular_formula, .data$adduct))
   annotation <- compute_mass_defect(annotation, precision = 0.01)
   annotation <- inner_join(annotation,
                            select(peak_rt_clusters, "peak", "mean_intensity", "module", "rt_cluster"),
@@ -127,11 +128,6 @@ advanced_annotation <- function(
   annotation <- compute_scores(
     annotation = annotation,
     adduct_weights = adduct_weights,
-    intensity_deviation_tolerance = intensity_deviation_tolerance,
-    mass_defect_tolerance = mass_defect_tolerance,
-    max_isp = max_isp,
-    peaks = peak_table,
-    rt_tolerance = time_tolerance
   )
 
   annotation <- compute_pathways(
