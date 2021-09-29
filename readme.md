@@ -6,6 +6,8 @@
 
 This is a customized fork of [kuppal2/xMSannotator](https://github.com/kuppal2/xMSannotator) adapted by folks from [RECETOX](https://www.recetox.muni.cz/en) for untargeted mass spectrometry experiments.
 
+The [master](https://github.com/RECETOX/recetox-xMSannotator/tree/master) branch of this repository contains the original implementation by Karan Uppal which we refactored and improved test coverage of. The [main] branch is a fresh reimplementation which includes improvements and additions -- this branch we intend to use in our pipelines.
+
 For more details please have a look at the [Docs](docs/)
 
 ## Usage
