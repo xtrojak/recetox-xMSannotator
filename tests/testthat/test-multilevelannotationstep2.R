@@ -49,6 +49,7 @@ patrick::with_parameters_test_that(
 
     keys <- c("mz", "time", "Name", "Adduct", "Formula", "chemical_ID", "cur_chem_score")
 
+    actual$MonoisotopicMass <- as.character(actual$MonoisotopicMass)
     actual <- dplyr::arrange_at(
       actual, keys
     )
