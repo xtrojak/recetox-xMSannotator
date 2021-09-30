@@ -1,3 +1,14 @@
+p_test <- function(data) {
+  counts = matrix(
+    data = data,
+    nrow = 2
+  )
+  
+  result <- fisher.test(counts)
+  return(result$p.value)
+}
+
+
 filter_chemscoremat <- function(chemscoremat, scorethresh, adduct_weights) {
   indices <- which(
       chemscoremat$score >= scorethresh &
@@ -44,22 +55,12 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
         
         all_notcurpath_numchem <- length(matrix[-which(matrix[, 1] %in% curmchemical_not_in_pathway$chemical_ID), 1])
         
-        counts = matrix(
-          data = c(
-            num_chems_inpath,
-            num_chem_inpath_notinterest,
-            num_chems_notinpath,
-            all_notcurpath_numchem
-          ),
-          nrow = 2
-        )
-
-        p1 <- fisher.test(counts)
-        p1 <- p1$p.value
+        p_value <- p_test(c(num_chems_inpath, 
+                            num_chem_inpath_notinterest,
+                            num_chems_notinpath,
+                            all_notcurpath_numchem))
         
-        if (p1 > pthresh) {
-          next
-        } else {
+        if (p_value <= pthresh) {
           t1 <- table(curmchemical_in_pathway$module_num)
           
           module_counts <- t1[which(t1 > 0)]
@@ -137,16 +138,13 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
                 d <- length(unique(other_module_data2$chemical_ID)) - c
                 rm(other_module_data2)
                 
-                
-                counts = matrix(data = c(a, c, b, d), nrow = 2)
                 if (a > 1) {
-                  p1 <- fisher.test(counts)
-                  p1 <- p1$p.value
+                  p_value <- p_test(c(a, c, b, d))
                 } else {
-                  p1 = 1
+                  p_value = 1
                 }
                 
-                if (p1 > 0.2) {
+                if (p_value > 0.2) {
                   next
                 } else {
                   if (num_chems < 3) {
