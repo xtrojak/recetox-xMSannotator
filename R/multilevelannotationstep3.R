@@ -61,17 +61,9 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
                             all_notcurpath_numchem))
         
         if (p_value <= pthresh) {
-          t1 <- table(curmchemical_in_pathway$module_num)
-          
-          module_counts <- t1[which(t1 > 0)]
-          
-          module_names <- names(module_counts)
-          
-          pathway_chemicals_1 <- curmchemical_in_pathway$chemical_ID
-          
           # compatibility with wrong behavior
           if (db_name == "KEGG") {
-            pathway_chemicals_to_iterate <- pathway_chemicals_1
+            pathway_chemicals_to_iterate <- curmchemical_in_pathway$chemical_ID
           } else {
             pathway_chemicals_to_iterate <- pathway_chemicals
           }
@@ -79,108 +71,99 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
           for (chemname in pathway_chemicals_to_iterate) {
             pathway_indices <- which(as.character(curmchemical_in_pathway$chemical_ID) == chemname)
             curmchemicaldata <- curmchemical_in_pathway[pathway_indices, ]
-            chem_path_data <- matrix[which(matrix$chemid == chemname), ]
+            
             t2 <- table(curmchemicaldata$module_num)
             cur_module <- names(t2[which(t2 == max(t2)[1])])
             
-            mzid_cur <- paste(curmchemicaldata$mz,
-                              curmchemicaldata$time,
-                              sep = "_")
-            
             if (nrow(curmchemicaldata) > 0) {
-              pathwayscurchemical <- matrix[which(matrix[, 1] == chemname), 2]
-              #for(cur_module in cur_modules)
-              {
-                if (pathwaycheckmode == "pm") {
-                  num_chems <- t1[as.character(cur_module)]
-                }
-                
-                num_chems <- round(num_chems, 0)
-                
-                module_indices <- which(curmchemicaldata$module_num == cur_module)
-                num_chems_inmodule <- length(unique(curmchemical_in_pathway$chemical_ID[module_indices]))
-                
-                module_indices_in_pathway <- which(
-                  chemscoremat$module_num == cur_module &
-                    chemscoremat$chemical_ID %in% pathway_chemicals &
-                    chemscoremat$score >= scorethresh &
-                    chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
-                )
-                cur_module_data <- chemscoremat[module_indices_in_pathway, ]
-                a <- length(unique(cur_module_data$chemical_ID))
-                rm(cur_module_data)
-                
-                module_indices <- which(
-                  chemscoremat$module_num == cur_module &
-                    chemscoremat$score >= scorethresh &
-                    chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
-                )
-                cur_module_data2 <- chemscoremat[module_indices, ]
-                b <- length(unique(cur_module_data2$chemical_ID)) - a
-                rm(cur_module_data2)
-                
-                other_module_indices_in_pathway <- which(
-                  chemscoremat$module_num != cur_module &
-                    chemscoremat$chemical_ID %in% pathway_chemicals &
-                    chemscoremat$score >= scorethresh &
-                    chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
-                )
-                other_module_data <- chemscoremat[other_module_indices_in_pathway, ]
-                c <- length(unique(other_module_data$chemical_ID))
-                rm(other_module_data)
-                
-                other_module_indices <- which(
-                  chemscoremat$module_num != cur_module &
-                    chemscoremat$score >= scorethresh &
-                    chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
-                )
-                other_module_data2 <- chemscoremat[other_module_indices, ]
-                d <- length(unique(other_module_data2$chemical_ID)) - c
-                rm(other_module_data2)
-                
-                if (a > 1) {
-                  p_value <- p_test(c(a, c, b, d))
+              if (pathwaycheckmode == "pm") {
+                t1 <- table(curmchemical_in_pathway$module_num)
+                num_chems <- t1[as.character(cur_module)]
+              }
+              
+              # if pathwaycheckmode is NOT "pm" is will be an error !!!
+              num_chems <- round(num_chems, 0)
+              
+              module_indices_in_pathway <- which(
+                chemscoremat$module_num == cur_module &
+                  chemscoremat$chemical_ID %in% pathway_chemicals &
+                  chemscoremat$score >= scorethresh &
+                  chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
+              )
+              cur_module_data <- chemscoremat[module_indices_in_pathway, ]
+              a <- length(unique(cur_module_data$chemical_ID))
+              rm(cur_module_data)
+              
+              module_indices <- which(
+                chemscoremat$module_num == cur_module &
+                  chemscoremat$score >= scorethresh &
+                  chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
+              )
+              cur_module_data2 <- chemscoremat[module_indices, ]
+              b <- length(unique(cur_module_data2$chemical_ID)) - a
+              rm(cur_module_data2)
+              
+              other_module_indices_in_pathway <- which(
+                chemscoremat$module_num != cur_module &
+                  chemscoremat$chemical_ID %in% pathway_chemicals &
+                  chemscoremat$score >= scorethresh &
+                  chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
+              )
+              other_module_data <- chemscoremat[other_module_indices_in_pathway, ]
+              c <- length(unique(other_module_data$chemical_ID))
+              rm(other_module_data)
+              
+              other_module_indices <- which(
+                chemscoremat$module_num != cur_module &
+                  chemscoremat$score >= scorethresh &
+                  chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
+              )
+              other_module_data2 <- chemscoremat[other_module_indices, ]
+              d <- length(unique(other_module_data2$chemical_ID)) - c
+              rm(other_module_data2)
+              
+              if (a > 1) {
+                p_value <- p_test(c(a, c, b, d))
+              } else {
+                p_value = 1
+              }
+              
+              if (p_value > 0.2) {
+                next
+              } else {
+                if (num_chems < 3) {
+                  num_chems <- 0
                 } else {
-                  p_value = 1
-                }
-                
-                if (p_value > 0.2) {
-                  next
-                } else {
-                  if (num_chems < 3) {
-                    num_chems <- 0
-                  } else {
-                    if (is.na(curmchemicaldata$score[1])) {
-                      diff_rt <- max(curmchemicaldata$time) - min(curmchemicaldata$time)
-                      
-                      if (diff_rt > max_diff_rt) {
-                        if (length(which(t2 > 1)) == 1) {
-                          curmchemicaldata$score <- rep(0.1, length(curmchemicaldata$score))
-                        } else {
-                          curmchemicaldata$score <- rep(0, length(curmchemicaldata$score))
-                        }
+                  if (is.na(curmchemicaldata$score[1])) {
+                    diff_rt <- max(curmchemicaldata$time) - min(curmchemicaldata$time)
+                    
+                    if (diff_rt > max_diff_rt) {
+                      if (length(which(t2 > 1)) == 1) {
+                        curmchemicaldata$score <- rep(0.1, length(curmchemicaldata$score))
                       } else {
                         curmchemicaldata$score <- rep(0, length(curmchemicaldata$score))
                       }
-                    }
-                    
-                    # compatibility with wrong behavior
-                    if (db_name == "KEGG") {
-                      chemical_name <- c
                     } else {
-                      chemical_name <- chemname
+                      curmchemicaldata$score <- rep(0, length(curmchemicaldata$score))
                     }
-                    
-                    if (curmchemicaldata$score[1] < scorethresh) {
-                      indices <- which(
-                        as.character(chemscoremat$chemical_ID) == chemical_name &
-                          chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
-                      )
-                      chemscoremat$score[indices] = as.numeric(chemscoremat$score[indices][1]) + num_chems
-                    } else {
-                      chemical_indices <- which(as.character(chemscoremat$chemical_ID) == chemical_name)
-                      chemscoremat$score[chemical_indices] = chemscoremat$score[chemical_indices][1] + num_chems
-                    }
+                  }
+                  
+                  # compatibility with wrong behavior
+                  if (db_name == "KEGG") {
+                    chemical_name <- c
+                  } else {
+                    chemical_name <- chemname
+                  }
+                  
+                  if (curmchemicaldata$score[1] < scorethresh) {
+                    indices <- which(
+                      as.character(chemscoremat$chemical_ID) == chemical_name &
+                        chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
+                    )
+                    chemscoremat$score[indices] = as.numeric(chemscoremat$score[indices][1]) + num_chems
+                  } else {
+                    chemical_indices <- which(as.character(chemscoremat$chemical_ID) == chemical_name)
+                    chemscoremat$score[chemical_indices] = chemscoremat$score[chemical_indices][1] + num_chems
                   }
                 }
               }
