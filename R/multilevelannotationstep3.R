@@ -9,12 +9,25 @@ p_test <- function(data) {
 }
 
 
-filter_chemscoremat <- function(chemscoremat, scorethresh, adduct_weights) {
+filter_score_and_adducts <- function(chemscoremat, scorethresh, adduct_weights) {
   indices <- which(
       chemscoremat$score >= scorethresh &
       chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
   )
   return(chemscoremat[indices, ])
+}
+
+
+count_chemicals_occurence <- function(module_data, pathway_chemicals, scorethresh, adduct_weights) {
+  indices_in_pathway <- which(module_data$chemical_ID %in% pathway_chemicals)
+  module_data_pathway <- module_data[indices_in_pathway, ]
+  
+  module_data <- filter_score_and_adducts(module_data, scorethresh, adduct_weights)
+  module_data_pathway <- filter_score_and_adducts(module_data_pathway, scorethresh, adduct_weights)
+  
+  num_pathway <- length(unique(module_data_pathway$chemical_ID))
+  num <- length(unique(module_data$chemical_ID)) - num_pathway
+  return(list(num_pathway = num_pathway, num = num))
 }
 
 
@@ -28,7 +41,7 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
                      replacement = "")
   
   chemscoremat <- cbind(chemscoremat, module_num)
-  
+
   if (! is.na(pathwaycheckmode)) {
     for (path_id in pathway_ids)
     {
@@ -36,7 +49,7 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
         pathway_chemicals <- matrix[which(matrix[, 2] %in% path_id), 1]
         # total number of chemicals in pathway
         all_cur_path_numchem <- length(unique(pathway_chemicals))
-        curmchemical <- filter_chemscoremat(chemscoremat, scorethresh, adduct_weights)
+        curmchemical <- filter_score_and_adducts(chemscoremat, scorethresh, adduct_weights)
         
         # chemicals in pathway
         curmchemical_in_pathway <- curmchemical[which(curmchemical$chemical_ID %in% pathway_chemicals), ]
@@ -84,46 +97,27 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
               # if pathwaycheckmode is NOT "pm" is will be an error !!!
               num_chems <- round(num_chems, 0)
               
-              module_indices_in_pathway <- which(
-                chemscoremat$module_num == cur_module &
-                  chemscoremat$chemical_ID %in% pathway_chemicals &
-                  chemscoremat$score >= scorethresh &
-                  chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
-              )
-              cur_module_data <- chemscoremat[module_indices_in_pathway, ]
-              a <- length(unique(cur_module_data$chemical_ID))
-              rm(cur_module_data)
+              # a and b
+              module_indices <- which(chemscoremat$module_num == cur_module)
+              cur_module_data <- chemscoremat[module_indices, ]
+              result <- count_chemicals_occurence(cur_module_data, pathway_chemicals, scorethresh, adduct_weights)
+                
+              cur_module_number <- result$num_pathway
+              cur_module_pathway_number <- result$num
               
-              module_indices <- which(
-                chemscoremat$module_num == cur_module &
-                  chemscoremat$score >= scorethresh &
-                  chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
-              )
-              cur_module_data2 <- chemscoremat[module_indices, ]
-              b <- length(unique(cur_module_data2$chemical_ID)) - a
-              rm(cur_module_data2)
-              
-              other_module_indices_in_pathway <- which(
-                chemscoremat$module_num != cur_module &
-                  chemscoremat$chemical_ID %in% pathway_chemicals &
-                  chemscoremat$score >= scorethresh &
-                  chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
-              )
-              other_module_data <- chemscoremat[other_module_indices_in_pathway, ]
-              c <- length(unique(other_module_data$chemical_ID))
-              rm(other_module_data)
-              
-              other_module_indices <- which(
-                chemscoremat$module_num != cur_module &
-                  chemscoremat$score >= scorethresh &
-                  chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
-              )
-              other_module_data2 <- chemscoremat[other_module_indices, ]
-              d <- length(unique(other_module_data2$chemical_ID)) - c
-              rm(other_module_data2)
-              
-              if (a > 1) {
-                p_value <- p_test(c(a, c, b, d))
+              # c and d
+              other_module_indices <- which(chemscoremat$module_num != cur_module)
+              other_module_data <- chemscoremat[other_module_indices, ]
+              result <- count_chemicals_occurence(other_module_data, pathway_chemicals, scorethresh, adduct_weights)
+
+              other_module_number <- result$num_pathway
+              other_module_pathway_number <- result$num
+
+              if (cur_module_number > 1) {
+                p_value <- p_test(c(cur_module_number,
+                                    other_module_number,
+                                    cur_module_pathway_number,
+                                    other_module_pathway_number))
               } else {
                 p_value = 1
               }
@@ -150,7 +144,7 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
                   
                   # compatibility with wrong behavior
                   if (db_name == "KEGG") {
-                    chemical_name <- c
+                    chemical_name <- other_module_number
                   } else {
                     chemical_name <- chemname
                   }
