@@ -122,21 +122,13 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
                 p_value = 1
               }
               
-              if (p_value > 0.2) {
-                next
-              } else {
-                if (num_chems < 3) {
-                  num_chems <- 0
-                } else {
+              if (p_value <= 0.2) {
+                if (num_chems >= 3) {
                   if (is.na(curmchemicaldata$score[1])) {
                     diff_rt <- max(curmchemicaldata$time) - min(curmchemicaldata$time)
                     
-                    if (diff_rt > max_diff_rt) {
-                      if (length(which(t2 > 1)) == 1) {
-                        curmchemicaldata$score <- rep(0.1, length(curmchemicaldata$score))
-                      } else {
-                        curmchemicaldata$score <- rep(0, length(curmchemicaldata$score))
-                      }
+                    if (diff_rt > max_diff_rt & length(which(t2 > 1)) == 1) {
+                      curmchemicaldata$score <- rep(0.1, length(curmchemicaldata$score))
                     } else {
                       curmchemicaldata$score <- rep(0, length(curmchemicaldata$score))
                     }
@@ -152,13 +144,13 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
                   if (curmchemicaldata$score[1] < scorethresh) {
                     indices <- which(
                       as.character(chemscoremat$chemical_ID) == chemical_name &
-                        chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
+                      chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
                     )
-                    chemscoremat$score[indices] = as.numeric(chemscoremat$score[indices][1]) + num_chems
                   } else {
-                    chemical_indices <- which(as.character(chemscoremat$chemical_ID) == chemical_name)
-                    chemscoremat$score[chemical_indices] = chemscoremat$score[chemical_indices][1] + num_chems
+                    indices <- which(as.character(chemscoremat$chemical_ID) == chemical_name)
                   }
+                  
+                  chemscoremat$score[indices] = as.numeric(chemscoremat$score[indices][1]) + num_chems
                 }
               }
             }
