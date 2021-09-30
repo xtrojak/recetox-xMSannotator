@@ -1,9 +1,16 @@
+filter_chemscoremat <- function(chemscoremat, scorethresh, adduct_weights) {
+  indices <- which(
+      chemscoremat$score >= scorethresh &
+      chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
+  )
+  return(chemscoremat[indices, ])
+}
+
+
 compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, bad_path_IDs, db_name) {
   pthresh = 0.05
 
-  pathway_ids <- as.character(matrix[, 2])
-  
-  pathway_ids <- unique(pathway_ids)
+  pathway_ids <- unique(as.character(matrix[, 2]))
   
   module_num <- gsub(chemscoremat$Module_RTclust,
                      pattern = "_[0-9]*",
@@ -11,44 +18,31 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
   
   chemscoremat <- cbind(chemscoremat, module_num)
   
-  total_chem_count <- length(unique(matrix$chemid))
-  
   if (! is.na(pathwaycheckmode)) {
     for (path_id in pathway_ids)
     {
       if (! path_id %in% bad_path_IDs) {
-        pathway_chemicals <- matrix[which(matrix[, 2] %in% path_id), 1] 
-        
-        good_indices <- which(
-          chemscoremat$chemical_ID %in% pathway_chemicals &
-            chemscoremat$score >= scorethresh &
-            chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
-        )
-        
-        curmchemicaldata1 <- chemscoremat[good_indices, ]
-        
-        #molecules of interest in pathway (a)
-        num_chems_inpath <- length(unique(curmchemicaldata1$chemical_ID))
-        
-        #total number of chemicals in pathway
+        pathway_chemicals <- matrix[which(matrix[, 2] %in% path_id), 1]
+        # total number of chemicals in pathway
         all_cur_path_numchem <- length(unique(pathway_chemicals))
+        curmchemical <- filter_chemscoremat(chemscoremat, scorethresh, adduct_weights)
         
-        #non-focus molecules associated with pathway (c)
+        # chemicals in pathway
+        curmchemical_in_pathway <- curmchemical[which(curmchemical$chemical_ID %in% pathway_chemicals), ]
+        
+        # molecules of interest in pathway (a)
+        num_chems_inpath <- length(unique(curmchemical_in_pathway$chemical_ID))
+        
+        # non-focus molecules associated with pathway (c)
         num_chem_inpath_notinterest <- all_cur_path_numchem - num_chems_inpath
         
-        indices <- which(
-          chemscoremat$score >= scorethresh &
-            chemscoremat$Adduct %in% as.character(adduct_weights[, 1])
-        )
+        # chemicals NOT in pathway
+        curmchemical_not_in_pathway <- curmchemical[-which(curmchemical$chemical_ID %in% pathway_chemicals), ]
         
-        curmchemicaldata2 <- chemscoremat[indices, ]
+        # focus molecules not associated with this pathway (b)
+        num_chems_notinpath <- length(unique(curmchemical_not_in_pathway$chemical_ID))
         
-        curmchemicaldata2 <- curmchemicaldata2[-which(curmchemicaldata2$chemical_ID %in% pathway_chemicals), ]
-        
-        #focus molecules not associated with this pathway (b)
-        num_chems_notinpath <- length(unique(curmchemicaldata2$chemical_ID))
-        
-        all_notcurpath_numchem <- length(matrix[-which(matrix[, 1] %in% curmchemicaldata2$chemical_ID), 1])
+        all_notcurpath_numchem <- length(matrix[-which(matrix[, 1] %in% curmchemical_not_in_pathway$chemical_ID), 1])
         
         counts = matrix(
           data = c(
@@ -59,21 +53,20 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
           ),
           nrow = 2
         )
-        
-        rm(curmchemicaldata2)
+
         p1 <- fisher.test(counts)
         p1 <- p1$p.value
         
         if (p1 > pthresh) {
           next
         } else {
-          t1 <- table(curmchemicaldata1$module_num)
+          t1 <- table(curmchemical_in_pathway$module_num)
           
           module_counts <- t1[which(t1 > 0)]
           
           module_names <- names(module_counts)
           
-          pathway_chemicals_1 <- curmchemicaldata1$chemical_ID
+          pathway_chemicals_1 <- curmchemical_in_pathway$chemical_ID
           
           # compatibility with wrong behavior
           if (db_name == "KEGG") {
@@ -83,8 +76,8 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
           }
           
           for (chemname in pathway_chemicals_to_iterate) {
-            pathway_indices <- which(as.character(curmchemicaldata1$chemical_ID) == chemname)
-            curmchemicaldata <- curmchemicaldata1[pathway_indices, ]
+            pathway_indices <- which(as.character(curmchemical_in_pathway$chemical_ID) == chemname)
+            curmchemicaldata <- curmchemical_in_pathway[pathway_indices, ]
             chem_path_data <- matrix[which(matrix$chemid == chemname), ]
             t2 <- table(curmchemicaldata$module_num)
             cur_module <- names(t2[which(t2 == max(t2)[1])])
@@ -104,7 +97,7 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
                 num_chems <- round(num_chems, 0)
                 
                 module_indices <- which(curmchemicaldata$module_num == cur_module)
-                num_chems_inmodule <- length(unique(curmchemicaldata1$chemical_ID[module_indices]))
+                num_chems_inmodule <- length(unique(curmchemical_in_pathway$chemical_ID[module_indices]))
                 
                 module_indices_in_pathway <- which(
                   chemscoremat$module_num == cur_module &
@@ -197,7 +190,7 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
           }
         }
       }
-      rm(curmchemicaldata1)
+      rm(curmchemical_in_pathway)
     }
   }
   
