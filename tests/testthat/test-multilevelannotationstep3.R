@@ -3,9 +3,6 @@ patrick::with_parameters_test_that(
   {
     testthat_wd <- getwd()
     testdata_dir <- file.path(testthat_wd, "testdata", subfolder)
-    
-    adduct_weights <- data.frame(Adduct = c("M+H", "M-H"), Weight = c(5, 5))
-    pathwaycheckmode <- "pm"
 
     outloc <- file.path(
       tempdir(),
@@ -17,21 +14,17 @@ patrick::with_parameters_test_that(
     # load expected results
     expected <- read.csv(file.path(testdata_dir, "Stage3.csv"))
 
-    # load needed objects
+    # load and set arguments
     chemscoremat <- readRDS(file.path(testdata_dir, "chemscoremat.Rds"))
-
-    file.copy(
-      file.path(testdata_dir, "step1_results.Rda"),
-      file.path(outloc, "step1_results.Rda")
-    )
-    file.copy(
-      file.path(testdata_dir, "chemCompMZ.Rda"),
-      file.path(outloc, "chemCompMZ.Rda")
-    )
+    load(file.path(testdata_dir, "chemCompMZ.Rda"))
+    adduct_weights <- data.frame(Adduct = c("M+H", "M-H"), Weight = c(5, 5))
+    pathwaycheckmode <- "pm"
+    
+    setwd(outloc)
 
     # compute annotation step 3
     actual <- multilevelannotationstep3(
-      outloc = outloc,
+      chemCompMZ = chemCompMZ,
       chemscoremat = chemscoremat,
       adduct_weights = adduct_weights,
       num_sets = num_sets,

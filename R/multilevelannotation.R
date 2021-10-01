@@ -1393,9 +1393,11 @@ multilevelannotation <- function(dataA,
                     num_sets <- length(chemids_split)
                 }
                 
+                load("chemCompMZ.Rda")
+                
                 print("Status 4: Pathway evaluation")
                 annotres <- multilevelannotationstep3(
-                                outloc = outloc,
+                                chemCompMZ = chemCompMZ,
                                 chemscoremat = chemscoremat,
                                 adduct_weights = adduct_weights,
                                 num_sets = num_sets,

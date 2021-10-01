@@ -31,10 +31,10 @@ count_chemicals_occurence <- function(module_data, pathway_chemicals, scorethres
 }
 
 
-compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, bad_path_IDs, db_name) {
+compute_score_pathways <- function(chemscoremat, db, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, bad_path_IDs, db_name) {
   pthresh = 0.05
 
-  pathway_ids <- unique(as.character(matrix[, 2]))
+  pathway_ids <- unique(as.character(db[, 2]))
   
   module_num <- gsub(chemscoremat$Module_RTclust,
                      pattern = "_[0-9]*",
@@ -46,7 +46,7 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
     for (path_id in pathway_ids)
     {
       if (! path_id %in% bad_path_IDs) {
-        pathway_chemicals <- matrix[which(matrix[, 2] %in% path_id), 1]
+        pathway_chemicals <- db[which(db[, 2] %in% path_id), 1]
         # total number of chemicals in pathway
         all_cur_path_numchem <- length(unique(pathway_chemicals))
         curmchemical <- filter_score_and_adducts(chemscoremat, scorethresh, adduct_weights)
@@ -66,7 +66,7 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
         # focus molecules not associated with this pathway (b)
         num_chems_notinpath <- length(unique(curmchemical_not_in_pathway$chemical_ID))
         
-        all_notcurpath_numchem <- length(matrix[-which(matrix[, 1] %in% curmchemical_not_in_pathway$chemical_ID), 1])
+        all_notcurpath_numchem <- length(db[-which(db[, 1] %in% curmchemical_not_in_pathway$chemical_ID), 1])
         
         p_value <- p_test(c(num_chems_inpath, 
                             num_chem_inpath_notinterest,
@@ -94,7 +94,7 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
                 num_chems <- t1[as.character(cur_module)]
               }
               
-              # if pathwaycheckmode is NOT "pm" is will be an error !!!
+              # if pathwaycheckmode is NOT "pm" this will be an error !!!
               num_chems <- round(num_chems, 0)
               
               # a and b
@@ -157,7 +157,6 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
           }
         }
       }
-      rm(curmchemical_in_pathway)
     }
   }
   
@@ -166,39 +165,22 @@ compute_score_pathways <- function(chemscoremat, matrix, pathwaycheckmode, score
 }
 
 
-compute_matrix <- function(DB, index, pattern) {
-  temp_matrix <- apply(DB, 1, function(x) {
+preprocess_db <- function(db, index, pattern) {
+  temp_matrix <- apply(db, 1, function(x) {
     chemid <- x[1]
-    
-    g1 <- gregexpr(x[index], pattern = pattern)
-    regexp_check <- attr(g1[[1]], "match.length")
+    match <- gregexpr(x[index], pattern = pattern)
+    regexp_check <- attr(match[[1]], "match.length")
     if (regexp_check[1] < 0) {
       pathid = "-"
-      
-      return(cbind(chemid, pathid))
     } else {
       pathid <- strsplit(x = x[index], split = ";")
-      
       pathid <- unlist(pathid)
-      return(cbind(chemid, pathid))
     }
+    return(cbind(chemid, pathid))
   })
   
   matrix <- ldply(temp_matrix, rbind)
   return(matrix)
-}
-
-
-load_chemscoremat <- function(num_sets) {
-  chemscoremat <- lapply(1:num_sets, function(sind)
-  {
-    cur_fname <- paste("chem_score", sind, ".Rda", sep = "")
-    load(cur_fname)
-    
-    curchemscoremat <- as.data.frame(curchemscoremat)
-    return(curchemscoremat)
-  })
-  chemscoremat <- ldply(chemscoremat, rbind)
 }
 
 
@@ -244,30 +226,17 @@ sanitize_chemscoremat <- function(chemscoremat, chemCompMZ, column_names) {
 }
 
 
-multilevelannotationstep3 <- function(outloc1,
-                                      chemscoremat = NA,
+multilevelannotationstep3 <- function(chemCompMZ,
+                                      chemscoremat,
                                       adduct_weights = NA,
-                                      num_sets = NA,
-                                      db_name = NA,
-                                      max_diff_rt = NA,
+                                      num_sets,
+                                      db_name,
+                                      max_diff_rt,
                                       pathwaycheckmode = "p",
                                       scorethresh = 0.1) {
-  setwd(outloc1)
-  
-  load("chemCompMZ.Rda")
 
-  outloc <- outloc1
-  
   if (is.na(adduct_weights)) {
     adduct_weights <- data.frame(Adduct = c("M+H", "M-H"), Weight = c(1, 1))
-  }
-  
-  outloc1 <- paste(outloc, "/stage2/", sep = "")
-  suppressWarnings(dir.create(outloc1))
-  setwd(outloc1)
-  
-  if (is.na(chemscoremat)) {
-    chemscoremat <- load_chemscoremat(num_sets)
   }
   
   column_names <- c("score",
@@ -298,14 +267,14 @@ multilevelannotationstep3 <- function(outloc1,
   if (db_name == "KEGG") {
     data(keggotherinf)
     
-    matrix <- compute_matrix(keggotherinf, 4, "map")
+    db <- preprocess_db(keggotherinf, 4, "map")
     
     chemscoremat <- merge(chemscoremat,
                           keggotherinf,
                           by.x = "chemical_ID",
                           by.y = "KEGGID")
     
-    chemscoremat <- compute_score_pathways(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, c("-", "map01100"), db_name)
+    chemscoremat <- compute_score_pathways(chemscoremat, db, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, c("-", "map01100"), db_name)
   }
   else {
     if (db_name == "HMDB") {
@@ -314,7 +283,7 @@ multilevelannotationstep3 <- function(outloc1,
       hmdbAllinfv3.5 <- hmdbAllinf[, -c(26:27)]
       rm(hmdbAllinf, envir = .GlobalEnv)
 
-      matrix <- compute_matrix(hmdbAllinfv3.5, 14, "SM")
+      db <- preprocess_db(hmdbAllinfv3.5, 14, "SM")
       
       chemscoremat <- merge(chemscoremat,
                             hmdbAllinfv3.5,
@@ -323,7 +292,7 @@ multilevelannotationstep3 <- function(outloc1,
       
       rm(hmdbAllinfv3.5)
       
-      chemscoremat <- compute_score_pathways(chemscoremat, matrix, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, c("-"), db_name)
+      chemscoremat <- compute_score_pathways(chemscoremat, db, pathwaycheckmode, scorethresh, adduct_weights, max_diff_rt, c("-"), db_name)
     }
   }
   
@@ -338,10 +307,9 @@ multilevelannotationstep3 <- function(outloc1,
     chemscoremat <- chemscoremat[, column_names]
   }
   
-  write.csv(chemscoremat, file = "../Stage3.csv", row.names = FALSE)
+  write.csv(chemscoremat, file = "Stage3.csv", row.names = FALSE)
   
-  rm("outloc",
-    "num_sets",
+  rm("num_sets",
     "db_name",
     "num_sets",
     "adduct_weights",
