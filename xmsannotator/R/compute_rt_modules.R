@@ -6,7 +6,6 @@
 #' @param plot_lines Whether to plot vertical lines at the cluster centers or not.
 #' Red circles & lines.
 #'
-#' @return
 plot_clustering <- function(pdf, data, peak_indices, plot_lines = FALSE) {
     plot(pdf, type = "l", xaxt = "n")
     axis(1, at = data, las = 2)
@@ -18,7 +17,7 @@ plot_clustering <- function(pdf, data, peak_indices, plot_lines = FALSE) {
 
 #' Compute the positions of peak indices for given kernel density estimate.
 #'
-#' @param density Kernel density estimates (stats::density$y).
+#' @param density y attribute from kernel density estimates [stats::density()].
 #'
 #' @return Indices at which kernel density estimate position is a cluster.
 #' @importFrom pastecs turnpoints
@@ -50,7 +49,7 @@ compute_num_kernel_points <- function(data) {
 #' @param kernel Kernel to use. See stats::density for details.
 #' Recommended ["gaussian","biweight","cosine","epanechnikov"].
 #'
-#' @return Kernel density estimate (stats::density).
+#' @return Kernel density estimate [stats::density()].
 estimate_kernel_density <- function(data, width = 1, kernel = "gaussian") {
     start <- max(min(data) - 1, 0)
     end <- max(data) + 1
@@ -69,7 +68,7 @@ estimate_kernel_density <- function(data, width = 1, kernel = "gaussian") {
 #'
 #' @param data Data for which to compute the clustering.
 #' @param width Bandwidth of the clustering.
-#' @param kernel Kernel to use. See stats::density for details.
+#' @param kernel Kernel to use. See [stats::density()] for details.
 #' @param show If TRUE, plot the resulting clustering. 
 #' Scan rate should be consulted to optimize clustering. [0.5;2.0]
 #'
@@ -88,7 +87,8 @@ compute_cluster_positions <- function(data, width = 1, kernel = "gaussian", show
 #' @param clusters Position of cluster centers.
 #' @param data Data to assign to clusters
 #'
-#' @return Indices of closest cluster for each query point
+#' @return Indices of closest cluster for each query point computed using [RANN::nn2()].
+#' 
 #' @importFrom RANN nn2
 compute_cluster_assignments <- function(clusters, data) {
     nn2(clusters, data, k = 1)$nn.idx[, 1]
@@ -98,9 +98,10 @@ compute_cluster_assignments <- function(clusters, data) {
 #'
 #' @param peak_table Feature table with columns ['rt', 'module','peak'].
 #' @param peak_width Estimated chromatographic peak width.
-#' @param show If TRUE, plot the resulting clustering. 
+#' @param show If TRUE, plot the resulting clustering.
 #'
-#' @return
+#' @return data frame with 4 columns: \emph{peak}, \emph{mean_intensity},
+#' \emph{module} and \emph{rt_cluster}
 #' @export
 #' @import dplyr
 compute_rt_modules <- function(peak_table, peak_width = 1, show = FALSE) {
@@ -113,5 +114,10 @@ compute_rt_modules <- function(peak_table, peak_width = 1, show = FALSE) {
     }
     peaks_without_sample_intensities <- peak_table %>%
         select(any_of(c("peak", "mean_intensity", "module")))
-    return(left_join(peaks_without_sample_intensities, rt_cluster, by = "peak"))
+
+    output_table <- left_join(
+        peaks_without_sample_intensities,
+        rt_cluster,
+        by = "peak")
+    return(output_table)
 }
