@@ -12,27 +12,24 @@ patrick::with_parameters_test_that(
       subfolder
     )
 
-    # create test folder and copy necessary files
+    # create test folder
     dir.create(outloc, recursive = TRUE)
-    file.copy(
-      file.path(testdata_dir, "Stage3.csv"),
-      file.path(outloc, "Stage3.csv")
-    )
+    
+    chemscoremat <- read.csv(file.path(testdata_dir, "Stage3.csv"))
 
     # load expected results
     expected <- read.csv(file.path(testdata_dir, "Stage4.csv"))
-    #expected$MatchCategory <- as.character(expected$MatchCategory)
 
     # compute annotation step 4
     result <- multilevelannotationstep4(
       outloc = outloc,
+      chemscoremat = chemscoremat,
       max.mz.diff = max.mz.diff,
       max.rt.diff = max_diff_rt,
       filter.by = filter.by,
       adduct_weights = adduct_weights,
       max_isp = max_isp,
-      min_ions_perchem = min_ions_perchem,
-      num_nodes = 16
+      min_ions_perchem = min_ions_perchem
     )
     actual <- read.csv(file.path(outloc, "Stage4.csv"))
 
