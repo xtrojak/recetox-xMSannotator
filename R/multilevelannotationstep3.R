@@ -102,22 +102,22 @@ compute_score_pathways <- function(chemscoremat, db, pathwaycheckmode, scorethre
               cur_module_data <- chemscoremat[module_indices, ]
               result <- count_chemicals_occurence(cur_module_data, pathway_chemicals, scorethresh, adduct_weights)
                 
-              cur_module_number <- result$num_pathway
-              cur_module_pathway_number <- result$num
+              cur_module_pathway_number <- result$num_pathway
+              cur_module_number <- result$num
               
               # c and d
               other_module_indices <- which(chemscoremat$module_num != cur_module)
               other_module_data <- chemscoremat[other_module_indices, ]
               result <- count_chemicals_occurence(other_module_data, pathway_chemicals, scorethresh, adduct_weights)
 
-              other_module_number <- result$num_pathway
-              other_module_pathway_number <- result$num
+              other_module_pathway_number <- result$num_pathway
+              other_module_number <- result$num
 
-              if (cur_module_number > 1) {
-                p_value <- p_test(c(cur_module_number,
-                                    other_module_number,
-                                    cur_module_pathway_number,
-                                    other_module_pathway_number))
+              if (cur_module_pathway_number > 1) {
+                p_value <- p_test(c(cur_module_pathway_number,
+                                    other_module_pathway_number,
+                                    cur_module_number,
+                                    other_module_number))
               } else {
                 p_value = 1
               }
@@ -136,7 +136,7 @@ compute_score_pathways <- function(chemscoremat, db, pathwaycheckmode, scorethre
                   
                   # compatibility with wrong behavior
                   if (db_name == "KEGG") {
-                    chemical_name <- other_module_number
+                    chemical_name <- other_module_pathway_number
                   } else {
                     chemical_name <- chemname
                   }
