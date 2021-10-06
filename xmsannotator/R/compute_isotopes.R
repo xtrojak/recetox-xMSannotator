@@ -19,14 +19,13 @@ compute_isotopic_pattern <- function(formula, minAbund = 0.001) {
   isotopes <- mutate(isotopes, mass_number_difference = round(mass - mass[1]))
 }
 
-#' Match isotopes from peak table to annotated peaks based on rt cluster, rt difference, peak intensity, and mass defect.
+#' Match isotopes from peak table to annotated peaks based on rt cluster, rt difference, and mass defect.
 #'
 #' @param query A single annotated peak.
 #' @param intensity_deviation_tolerance A numeric threshold by which an intensity ratio of two isotopic peaks may differ
 #'  from their actual abundance ratio.
 #' @param peaks A peak table containing a peak identifier (unique number), mean intensity, module, and rt cluster
 #'  of each identified peak.
-#' @param abundance_ratio Normalized abundance ratio of the second most abundant isotope/isotopologue.
 #' @param mass_defect_tolerance A number. Maximum difference in mass defect between two peaks of the same compound.
 #' @param rt_tolerance A number. Maximum rt difference for two peaks of the same substance.
 #'
@@ -38,7 +37,6 @@ compute_isotopic_pattern <- function(formula, minAbund = 0.001) {
 filter_isotopes <- function(query,
                             intensity_deviation_tolerance,
                             peaks,
-                            abundance_ratio,
                             mass_defect_tolerance,
                             rt_tolerance) {
   isotopes <- mutate(
@@ -50,8 +48,8 @@ filter_isotopes <- function(query,
   )
   isotopes <- filter(
     isotopes,
+    peak != query$peak,
     rt_cluster == query$rt_cluster,
-    mean_intensity / query$mean_intensity <= abundance_ratio + abundance_ratio * intensity_deviation_tolerance,
     near(rt, query$rt, rt_tolerance),
     near(mass_defect, query$mass_defect, mass_defect_tolerance)
   )
@@ -110,13 +108,11 @@ detect_isotopic_peaks <- function(...,
                                   rt_tolerance) {
   query <- tibble(...)
   isotopic_pattern <- compute_isotopic_pattern(query$molecular_formula)
-  second_most_abundant <- isotopic_pattern$abund[2]
 
   isotopes <- filter_isotopes(
     query,
     intensity_deviation_tolerance,
     peaks,
-    second_most_abundant,
     mass_defect_tolerance,
     rt_tolerance
   )
