@@ -1,3 +1,4 @@
 .vscode
 *.Rcheck
 *.Rd
+.Rhistory

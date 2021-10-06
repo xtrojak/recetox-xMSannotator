@@ -27,7 +27,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      
+
       - name: Create conda environment
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -38,8 +38,14 @@ jobs:
       - run: |
           conda init bash
           conda env list
-
-      # Runs a set of commands using the runners shell
+      - name: Fetch batch1_neg test data
+        run: wget -P xmsannotator/tests/testthat/testdata/batch1_neg -i xmsannotator/tests/remote-files/fetch_batch1_neg.txt
+      - name: Fetch qc_solvent test data
+        run: wget -P xmsannotator/tests/testthat/testdata/qc_solvent -i xmsannotator/tests/remote-files/fetch_qc_solvent.txt
+      - name: Fetch sourceforge test data
+        run: wget -P xmsannotator/tests/testthat/testdata/sourceforge -i xmsannotator/tests/remote-files/fetch_sourceforge.txt
+      - name: Fetch qc_matrix test data
+        run: wget -P xmsannotator/tests/testthat/testdata/qc_matrix -i xmsannotator/tests/remote-files/fetch_qc_matrix.txt
       - name: Run devtools::check()
         run: |
           conda activate recetox-xmsannotator-dev
