@@ -1,15 +1,15 @@
 #' @import dplyr
 #' @importFrom rlang .data
-compute_mass_defect <- function (peaks, precision) {
+compute_mass_defect <- function(peaks, precision) {
   mutate(peaks, mass_defect = cut(.data$mz %% 1, seq(0, 1, precision), labels = FALSE))
 }
 
 #' @import dplyr
 #' @importFrom rlang .data
 remove_duplicates <- function(annotation, adduct_weights) {
-  is_max <- function (x) x == max(x)
-  is_unique <- function (score, adduct) is_max(score * 100^is.element(adduct, adduct_weights$adduct))
-  recompute_score <- function (mask, score) score * (sum(mask) / length(mask)) # FIXME: check if decreasing the score is OK
+  is_max <- function(x) x == max(x)
+  is_unique <- function(score, adduct) is_max(score * 100^is.element(adduct, adduct_weights$adduct))
+  recompute_score <- function(mask, score) score * (sum(mask) / length(mask)) # FIXME: check if decreasing the score is OK
 
   annotation <- group_by(annotation, .data$mz)
   annotation <- mutate(annotation, unique = is_unique(.data$score, .data$adduct))
@@ -44,28 +44,26 @@ print_confidence_distribution <- function(annotation) {
 #' @export
 #' @import dplyr
 #' @importFrom magrittr %>%
-advanced_annotation <- function(
-  peak_table,
-  compound_table,
-  pathway_mapping = NULL,
-  exluded_pathways = NULL,
-  exluded_pathway_compounds = NULL,
-  adduct_table = NULL,
-  adduct_weights = NULL,
-  intensity_deviation_tolerance = 0.1,
-  mass_tolerance = 5e-6,
-  mass_defect_tolerance = 0.1,
-  time_tolerance = 10,
-  peak_rt_width = 1,
-  correlation_threshold = 0.7,
-  deep_split = 2,
-  min_cluster_size = 10,
-  network_type = "unsigned",
-  expected_adducts = NULL,
-  boosted_compounds = NULL,
-  redundancy_filtering = TRUE,
-  n_workers = parallel::detectCores()
-) {
+advanced_annotation <- function(peak_table,
+                                compound_table,
+                                pathway_mapping = NULL,
+                                exluded_pathways = NULL,
+                                exluded_pathway_compounds = NULL,
+                                adduct_table = NULL,
+                                adduct_weights = NULL,
+                                intensity_deviation_tolerance = 0.1,
+                                mass_tolerance = 5e-6,
+                                mass_defect_tolerance = 0.1,
+                                time_tolerance = 10,
+                                peak_rt_width = 1,
+                                correlation_threshold = 0.7,
+                                deep_split = 2,
+                                min_cluster_size = 10,
+                                network_type = "unsigned",
+                                expected_adducts = NULL,
+                                boosted_compounds = NULL,
+                                redundancy_filtering = TRUE,
+                                n_workers = parallel::detectCores()) {
   if (is.null(adduct_table)) {
     adduct_table <- sample_adduct_table
   }
@@ -115,8 +113,9 @@ advanced_annotation <- function(
   annotation <- filter(annotation, forms_valid_adduct_pair(.data$molecular_formula, .data$adduct))
   annotation <- compute_mass_defect(annotation, precision = 0.01)
   annotation <- inner_join(annotation,
-                           select(peak_rt_clusters, "peak", "mean_intensity", "module", "rt_cluster"),
-                           by = "peak")
+    select(peak_rt_clusters, "peak", "mean_intensity", "module", "rt_cluster"),
+    by = "peak"
+  )
 
   annotation <- compute_isotopes(
     annotation = annotation,

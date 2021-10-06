@@ -75,12 +75,16 @@ match_isotopes_by_intensity <- function(query,
                                         pattern,
                                         intensity_deviation_tolerance) {
   isotopes <- mutate(isotopes,
-                     relative_intensity = mean_intensity / query$mean_intensity)
+    relative_intensity = mean_intensity / query$mean_intensity
+  )
   isotopes <- left_join(isotopes,
-                        select(pattern, mass_number_difference, abund),
-                        by = "mass_number_difference")
-  isotopes <- filter(isotopes,
-                     near(relative_intensity, abund, relative_intensity * intensity_deviation_tolerance))
+    select(pattern, mass_number_difference, abund),
+    by = "mass_number_difference"
+  )
+  isotopes <- filter(
+    isotopes,
+    near(relative_intensity, abund, relative_intensity * intensity_deviation_tolerance)
+  )
   isotopes <- select(isotopes, -c(abund, relative_intensity))
 }
 
@@ -100,25 +104,29 @@ match_isotopes_by_intensity <- function(query,
 #' @import dplyr
 #' @importFrom rlang .data
 detect_isotopic_peaks <- function(...,
-                             intensity_deviation_tolerance,
-                             peaks,
-                             mass_defect_tolerance,
-                             rt_tolerance) {
+                                  intensity_deviation_tolerance,
+                                  peaks,
+                                  mass_defect_tolerance,
+                                  rt_tolerance) {
   query <- tibble(...)
   isotopic_pattern <- compute_isotopic_pattern(query$molecular_formula)
   second_most_abundant <- isotopic_pattern$abund[2]
 
-  isotopes <- filter_isotopes(query,
-                              intensity_deviation_tolerance,
-                              peaks,
-                              second_most_abundant,
-                              mass_defect_tolerance,
-                              rt_tolerance)
+  isotopes <- filter_isotopes(
+    query,
+    intensity_deviation_tolerance,
+    peaks,
+    second_most_abundant,
+    mass_defect_tolerance,
+    rt_tolerance
+  )
   isotopes <- distinct(isotopes)
-  isotopes <- match_isotopes_by_intensity(query,
-                                          isotopes,
-                                          isotopic_pattern,
-                                          intensity_deviation_tolerance)
+  isotopes <- match_isotopes_by_intensity(
+    query,
+    isotopes,
+    isotopic_pattern,
+    intensity_deviation_tolerance
+  )
 }
 
 #' For each annotated feature all find possible isotopes from peak table.
@@ -137,19 +145,23 @@ detect_isotopic_peaks <- function(...,
 #' @import dplyr
 #' @importFrom purrr pmap_drf
 compute_isotopes <- function(annotation,
-                            adduct_weights,
-                            intensity_deviation_tolerance = 0.1,
-                            mass_defect_tolerance = 0,
-                            peak_table,
-                            rt_tolerance = 1) {
+                             adduct_weights,
+                             intensity_deviation_tolerance = 0.1,
+                             mass_defect_tolerance = 0,
+                             peak_table,
+                             rt_tolerance = 1) {
   annotation <- mutate(annotation, mass_number_difference = 0)
   adducts <- semi_join(annotation, adduct_weights, by = "adduct")
 
   # This can be parallelized on `group_split(group_by(isotopes, molecular_formula))`
-  isotopes <- purrr::pmap_dfr(adducts,
-                              ~detect_isotopic_peaks(..., peaks = peak_table,
-                                                rt_tolerance = rt_tolerance,
-                                                intensity_deviation_tolerance = intensity_deviation_tolerance,
-                                                mass_defect_tolerance = mass_defect_tolerance))
+  isotopes <- purrr::pmap_dfr(
+    adducts,
+    ~ detect_isotopic_peaks(...,
+        peaks = peak_table,
+        rt_tolerance = rt_tolerance,
+        intensity_deviation_tolerance = intensity_deviation_tolerance,
+        mass_defect_tolerance = mass_defect_tolerance
+    )
+  )
   annotation <- bind_rows(annotation, isotopes)
 }
