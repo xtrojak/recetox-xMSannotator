@@ -162,7 +162,6 @@ multilevelannotationstep5 <- function(outloc,
   try(unlink("Rplots.pdf"), silent = TRUE)
   try(unlink("Rplots.pdf"), silent = TRUE)
 
-  curated_res$chemical_ID <- chemIDs
 
   curated_res <- as.data.frame(curated_res)
 
