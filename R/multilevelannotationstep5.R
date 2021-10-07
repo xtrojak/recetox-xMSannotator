@@ -39,31 +39,34 @@ multilevelannotationstep5 <- function(outloc,
   bad_ind <- {}
   cl <- makeSOCKcluster(num_nodes)
 
-  bad_ind <- foreach(mind = 1:length(duplicated_features), .combine = rbind) %dopar% {
-    mznum <- duplicated_features[mind]
-    dmultsub <- curated_res[which(curated_res$mz %in% mznum), ]
-    dgood_add <- which(dmultsub$Adduct %in% adduct_weights[, 1])
-    if (length(dgood_add) > 0) {
-      dmultsub$score[dgood_add] <- (dmultsub$score[dgood_add]) * 100
-    }
-    com_ind <- which(curated_res$mz %in% mznum)
-    good_ind <- which(dmultsub$score == max(dmultsub$score, na.rm = TRUE))
+  bad_ind <- foreach(mz_idx = 1:length(duplicated_features), .combine = rbind) %dopar% {
+    mz <- duplicated_features[mz_idx]
+    common_mz_idx <- which(curated_res$mz %in% mz)
+    multimatch_features <- curated_res[common_mz_idx, ]
 
-    for (com_indval in 1:length(com_ind)) {
+    features_adducts <- which(multimatch_features$Adduct %in% adduct_weights[, 1])
+    if (length(features_adducts) > 0) {
+      multimatch_features$score[features_adducts] <- (multimatch_features$score[features_adducts]) * 100
+    }
+    good_idx <- which(multimatch_features$score == max(multimatch_features$score, na.rm = TRUE))
+
+    for (com_indval in 1:length(common_mz_idx)) {
       scoreval <- {}
-      if (com_indval %in% good_ind == FALSE) {
-        dmat_com <- curated_res[which(curated_res$chemical_ID %in% dmultsub$chemical_ID[com_indval]), ]
+
+      if (!com_indval %in% good_idx) {
+        dmat_com <- curated_res[which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[com_indval]), ]
         scoreval <- ((dim(dmat_com)[1]) - 1) * dmat_com$score[1] / (dim(dmat_com)[1])
-        scorevec <- c(rep(scoreval, length(which(curated_res$chemical_ID %in% dmultsub$chemical_ID[com_indval]))))
-        if (length(scorevec) < length(which(curated_res$chemical_ID %in% dmultsub$chemical_ID[com_indval]))) {
+        scorevec <- c(rep(scoreval, length(which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[com_indval]))))
+
+        if (length(scorevec) < length(which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[com_indval]))) {
           break
         }
-        curated_res$score[which(curated_res$chemical_ID %in% dmultsub$chemical_ID[com_indval])] <- scorevec
+        curated_res$score[which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[com_indval])] <- scorevec
       }
     }
-    com_ind <- com_ind[-good_ind]
+    common_mz_idx <- common_mz_idx[-good_idx]
 
-    return(com_ind)
+    return(common_mz_idx)
   }
 
 
