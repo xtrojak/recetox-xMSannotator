@@ -61,10 +61,6 @@ multilevelannotationstep5 <- function(outloc,
         dmat_com <- curated_res[which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[com_indval]), ]
         scoreval <- ((dim(dmat_com)[1]) - 1) * dmat_com$score[1] / (dim(dmat_com)[1])
         scorevec <- c(rep(scoreval, length(which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[com_indval]))))
-
-        if (length(scorevec) < length(which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[com_indval]))) {
-          break
-        }
         curated_res$score[which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[com_indval])] <- scorevec
       }
     }
