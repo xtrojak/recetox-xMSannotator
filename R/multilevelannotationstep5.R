@@ -26,13 +26,7 @@ multilevelannotationstep5 <- function(outloc,
 
 
 
-  t1 <- table(curated_res$mz, curated_res$chemical_ID)
-  t2 <- apply(t1, 1, sum)
 
-  multi_mz <- names(t2[which(t2 > 1)])
-
-  curated_res$MatchCategory <- gsub(as.character(curated_res$MatchCategory), pattern = "Multiple", replacement = "Unique")
-  curated_res$MatchCategory[which(curated_res$mz %in% multi_mz)] <- "Multiple"
   curated_res <- curated_res[order(curated_res$Confidence, curated_res$chemical_ID, curated_res$score, curated_res$Adduct, decreasing = TRUE), ]
 
 
