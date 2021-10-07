@@ -42,7 +42,6 @@ multilevelannotationstep5 <- function(outloc,
   curated_res$MatchCategory[which(curated_res$mz %in% multi_mz)] <- "Multiple"
   curated_res <- curated_res[order(curated_res$Confidence, curated_res$chemical_ID, curated_res$score, curated_res$Adduct, decreasing = TRUE), ]
 
-  # curated_res<-curated_res[order(curated_res$Confidence,decreasing=TRUE),]
 
 
 
@@ -62,15 +61,12 @@ multilevelannotationstep5 <- function(outloc,
   mzdup <- mzdup[, 1]
 
   bad_ind <- {}
-  # for(mind in 1:length(mzdup)){
   cl <- makeSOCKcluster(num_nodes)
-  # print(format(Sys.time(), "%a %b %d %X %Y"))
 
-  # ORIGINAL
   bad_ind <- foreach(mind = 1:length(mzdup), .combine = rbind) %dopar% {
     mznum <- mzdup[mind]
     dmultsub <- curated_res[which(curated_res$mz %in% mznum), ]
-    dgood_add <- which(dmultsub$Adduct %in% adduct_weights[, 1]) # =="M+H")
+    dgood_add <- which(dmultsub$Adduct %in% adduct_weights[, 1])
     if (length(dgood_add) > 0) {
       dmultsub$score[dgood_add] <- (dmultsub$score[dgood_add]) * 100
     }
@@ -80,7 +76,6 @@ multilevelannotationstep5 <- function(outloc,
     for (com_indval in 1:length(com_ind)) {
       scoreval <- {}
       if (com_indval %in% good_ind == FALSE) {
-        # print(com_indval)
         dmat_com <- curated_res[which(curated_res$chemical_ID %in% dmultsub$chemical_ID[com_indval]), ]
         scoreval <- ((dim(dmat_com)[1]) - 1) * dmat_com$score[1] / (dim(dmat_com)[1])
         scorevec <- c(rep(scoreval, length(which(curated_res$chemical_ID %in% dmultsub$chemical_ID[com_indval]))))
@@ -92,16 +87,10 @@ multilevelannotationstep5 <- function(outloc,
     }
     com_ind <- com_ind[-good_ind]
 
-    # bad_ind<-c(bad_ind,com_ind)
     return(com_ind)
   }
 
 
-  # print("bad_ind dimensions")
-  # print(dim(bad_ind))
-  # print(bad_ind)
-  # saveRDS(bad_ind, file = "bad_ind.rds")
-  # print(format(Sys.time(), "%a %b %d %X %Y"))
 
   stopCluster(cl)
 
@@ -129,7 +118,6 @@ multilevelannotationstep5 <- function(outloc,
 
   curated_res$MatchCategory[which(curated_res$mz %in% uniquemz)] <- "Unique"
 
-  # write.table(curated_res,file="Stage5.txt",sep="\t",row.names=FALSE)
 
   write.csv(curated_res, file = "Stage5.csv", row.names = FALSE)
 
@@ -145,7 +133,6 @@ multilevelannotationstep5 <- function(outloc,
   link_text <- chemIDs[1]
   t2 <- gregexpr(pattern = "HMDB", perl = FALSE, text = link_text)
 
-  # if(length(t2)>1){
   if (db_name == "HMDB") {
     htmllink <- paste("<a href=http://www.hmdb.ca/metabolites/", chemIDs, ">", chemIDs, "</a>", sep = "")
   } else {
@@ -167,41 +154,35 @@ multilevelannotationstep5 <- function(outloc,
 
   curated_res$chemical_ID <- htmllink
 
-  #    HTMLInitFile(filename=fname,Title="Stage 5 annotation results", outdir=outloc)
-  #    fname=paste(outloc,"/Stage5_annotation_results.html",sep="")
-  #   HTML(curated_res,file=fname,Border=1,innerBorder=1,useCSS=TRUE)
-  #   HTMLEndFile(file=fname)
-
-  # if(FALSE)
-  {
-    outloc2 <- paste(outloc, "/stage2/", sep = "")
-
-    unlink(outloc2, force = TRUE, recursive = TRUE)
-
-    outloc2 <- paste(outloc, "/stage2", sep = "")
-
-    unlink(outloc2, force = TRUE, recursive = TRUE)
-
-    file.remove(dir(outloc2, full.names = TRUE))
-
-    outloc2 <- paste(outloc, "/stage3/", sep = "")
-    unlink(outloc2, force = TRUE, recursive = TRUE)
-    file.remove(dir(outloc2, full.names = TRUE))
-    outloc2 <- paste(outloc, "/stage4/", sep = "")
-    file.remove(dir(outloc2, full.names = TRUE))
-    unlink(outloc2, force = TRUE, recursive = TRUE)
-    outloc2 <- paste(outloc, "/stage5/", sep = "")
-    file.remove(dir(outloc2, full.names = TRUE))
-    unlink(outloc2, force = TRUE, recursive = TRUE)
-
-    suppressWarnings(unlink("*.Rda"))
 
 
-    try(unlink("step1_results.Rda"), silent = TRUE)
-    try(unlink("plot.pdf"), silent = TRUE)
-    try(unlink("Rplots.pdf"), silent = TRUE)
-    try(unlink("Rplots.pdf"), silent = TRUE)
-  }
+  outloc2 <- paste(outloc, "/stage2/", sep = "")
+
+  unlink(outloc2, force = TRUE, recursive = TRUE)
+
+  outloc2 <- paste(outloc, "/stage2", sep = "")
+
+  unlink(outloc2, force = TRUE, recursive = TRUE)
+
+  file.remove(dir(outloc2, full.names = TRUE))
+
+  outloc2 <- paste(outloc, "/stage3/", sep = "")
+  unlink(outloc2, force = TRUE, recursive = TRUE)
+  file.remove(dir(outloc2, full.names = TRUE))
+  outloc2 <- paste(outloc, "/stage4/", sep = "")
+  file.remove(dir(outloc2, full.names = TRUE))
+  unlink(outloc2, force = TRUE, recursive = TRUE)
+  outloc2 <- paste(outloc, "/stage5/", sep = "")
+  file.remove(dir(outloc2, full.names = TRUE))
+  unlink(outloc2, force = TRUE, recursive = TRUE)
+
+  suppressWarnings(unlink("*.Rda"))
+
+
+  try(unlink("step1_results.Rda"), silent = TRUE)
+  try(unlink("plot.pdf"), silent = TRUE)
+  try(unlink("Rplots.pdf"), silent = TRUE)
+  try(unlink("Rplots.pdf"), silent = TRUE)
 
   curated_res$chemical_ID <- chemIDs
 
