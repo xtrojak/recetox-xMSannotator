@@ -5,7 +5,7 @@ multilevelannotationstep5 <- function(outloc,
                                       num_nodes = 2) {
   setwd(outloc)
 
-  if (is.na(chemscoremat) == TRUE) {
+  if (is.na(chemscoremat)) {
     curated_res <- read.csv("Stage4.csv")
   } else {
     curated_res <- chemscoremat
@@ -20,7 +20,7 @@ multilevelannotationstep5 <- function(outloc,
 
 
   data(adduct_table)
-  if (is.na(adduct_weights) == TRUE) {
+  if (is.na(adduct_weights)) {
     data(adduct_weights)
     adduct_weights1 <- matrix(nrow = 2, ncol = 2, 0)
     adduct_weights1[1, ] <- c("M+H", 1)
