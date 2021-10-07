@@ -31,12 +31,7 @@ multilevelannotationstep5 <- function(outloc,
 
 
 
-
-  t1 <- table(curated_res$mz, curated_res$chemical_ID)
-
-  s1 <- apply(t1, 1, sum)
-
-  rm(t1)
+  s1 <- table(curated_res$mz)
 
 
   s2 <- s1[which(s1 > 1)]
