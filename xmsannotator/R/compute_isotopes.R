@@ -125,7 +125,7 @@ detect_isotopic_peaks <- function(...,
   )
 }
 
-#' For each annotated feature all find possible isotopes from peak table.
+#' For each annotated feature find all possible isotopes from peak table.
 #'
 #' @param annotation A table with annotated peaks.
 #' @param adduct_weights A weight-by-adduct table.
