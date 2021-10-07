@@ -11,11 +11,11 @@ multilevelannotationstep5 <- function(outloc,
                                       adduct_weights = NA,
                                       db_name = "HMDB",
                                       chemscoremat = NA,
-                                      num_nodes = 2) {
+                                      num_nodes = 2,
+                                      scorethresh = 0) {
   setwd(outloc)
   curated_res <- init.chemscoremat(chemscoremat)
 
-  scorethresh <- 0
 
 
 
