@@ -15,6 +15,15 @@ reevaluate.multimatches.score <- function(multimatch_features, adduct_weights) {
   multimatch_features
 }
 
+get.features <- function(mz, match) {
+  feature_count <- table(mz)
+  features <- switch(match,
+    "multiple" = feature_count[which(feature_count > 1)],
+    "unique" = feature_count[which(feature_count == 1)]
+  )
+  features <- names(features)
+}
+
 multilevelannotationstep5 <- function(outloc,
                                       adduct_weights = NA,
                                       db_name = "HMDB",
@@ -37,9 +46,7 @@ multilevelannotationstep5 <- function(outloc,
     decreasing = TRUE
   ), ]
 
-  feature_count <- table(curated_res$mz)
-  duplicated_features <- feature_count[which(feature_count > 1)]
-  duplicated_features <- names(duplicated_features)
+  duplicated_features <- get.features(curated_res$mz, "multiple")
 
   cl <- makeSOCKcluster(num_nodes)
   bad_ind <- {}
@@ -71,12 +78,10 @@ multilevelannotationstep5 <- function(outloc,
     curated_res <- curated_res[-c(bad_ind), ]
   }
 
-  t2 <- table(curated_res$mz)
-  same1 <- which(t2 == 1)
-  uniquemz <- names(same1)
+  unique_features <- get.features(curated_res$mz, "unique")
 
   curated_res$MatchCategory <- rep("Multiple", dim(curated_res)[1])
-  curated_res$MatchCategory[which(curated_res$mz %in% uniquemz)] <- "Unique"
+  curated_res$MatchCategory[which(curated_res$mz %in% unique_features)] <- "Unique"
 
   write.csv(curated_res, file = "Stage5.csv", row.names = FALSE)
 
