@@ -19,8 +19,7 @@ multilevelannotationstep5 <- function(outloc,
                                       adduct_weights = NA,
                                       db_name = "HMDB",
                                       chemscoremat = NA,
-                                      num_nodes = 2,
-                                      scorethresh = 0) {
+                                      num_nodes = 2) {
   setwd(outloc)
   curated_res <- init.chemscoremat(chemscoremat)
 
@@ -69,19 +68,9 @@ multilevelannotationstep5 <- function(outloc,
   stopCluster(cl)
 
   if (length(bad_ind) > 0) {
-    curated_res_unique <- curated_res[-c(bad_ind), ]
-  } else {
-    curated_res_unique <- curated_res
+    curated_res <- curated_res[-c(bad_ind), ]
   }
 
-  good_ind <- which(curated_res_unique$score >= scorethresh)
-
-  curated_res_unique_highconf <- {}
-  if (length(good_ind) > 0) {
-    curated_res_unique_highconf <- curated_res_unique[good_ind, ]
-  }
-
-  curated_res <- curated_res_unique_highconf
   t2 <- table(curated_res$mz)
   same1 <- which(t2 == 1)
   uniquemz <- names(same1)
