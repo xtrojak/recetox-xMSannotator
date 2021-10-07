@@ -92,11 +92,11 @@ multilevelannotationstep5 <- function(outloc,
 
 
   chemIDs <- curated_res$chemical_ID
-  switch(db_name,
-    "HMDB" = htmllink <- paste("<a href=http://www.hmdb.ca/metabolites/", chemIDs, ">", chemIDs, "</a>", sep = ""),
-    "KEGG" = htmllink <- paste("<a href=http://www.genome.jp/dbget-bin/www_bget?", chemIDs, ">", chemIDs, "</a>", sep = ""),
-    "LipidMaps" = htmllink <- paste("<a href=http://www.lipidmaps.org/data/LMSDRecord.php?LMID=", chemIDs, ">", chemIDs, "</a>", sep = ""),
-    "T3DB" = htmllink <- paste("<a href=http://www.t3db.ca/toxins/", chemIDs, ">", chemIDs, "</a>", sep = "")
+  htmllink <- switch(db_name,
+    "HMDB" = paste("<a href=http://www.hmdb.ca/metabolites/", chemIDs, ">", chemIDs, "</a>", sep = ""),
+    "KEGG" = paste("<a href=http://www.genome.jp/dbget-bin/www_bget?", chemIDs, ">", chemIDs, "</a>", sep = ""),
+    "LipidMaps" = paste("<a href=http://www.lipidmaps.org/data/LMSDRecord.php?LMID=", chemIDs, ">", chemIDs, "</a>", sep = ""),
+    "T3DB" = paste("<a href=http://www.t3db.ca/toxins/", chemIDs, ">", chemIDs, "</a>", sep = "")
   )
   curated_res$chemical_ID <- htmllink
 
