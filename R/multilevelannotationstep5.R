@@ -54,12 +54,13 @@ multilevelannotationstep5 <- function(outloc,
     multimatch_features <- reevaluate.multimatches.score(curated_res[common_mz_idx, ], adduct_weights)
     good_idx <- which(multimatch_features$score == max(multimatch_features$score, na.rm = TRUE))
 
+    # For all features with the same 'mz' except those that have the highest scores
+    # Change the score of all annotations of a given molecule to:
+    # 'highest score among annotations of the given molecule * [num(annotations of the molecule) - 1] / num(annotations of the molecule)
     for (com_indval in 1:length(common_mz_idx)) {
-      scoreval <- {}
-
       if (!com_indval %in% good_idx) {
-        dmat_com <- curated_res[which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[com_indval]), ]
-        scoreval <- ((dim(dmat_com)[1]) - 1) * dmat_com$score[1] / (dim(dmat_com)[1])
+        alike_annotations <- curated_res[which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[com_indval]), ]
+        scoreval <- ((dim(alike_annotations)[1]) - 1) * alike_annotations$score[1] / (dim(alike_annotations)[1])
         scorevec <- c(rep(scoreval, length(which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[com_indval]))))
         curated_res$score[which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[com_indval])] <- scorevec
       }
