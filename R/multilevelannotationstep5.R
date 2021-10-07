@@ -109,8 +109,6 @@ multilevelannotationstep5 <- function(outloc,
   chemIDs <- curated_res$chemical_ID
   htmllink <- curated_res$chemical_ID
 
-  link_text <- chemIDs[1]
-
   switch(db_name,
          "HMDB" = htmllink <- paste("<a href=http://www.hmdb.ca/metabolites/", chemIDs, ">", chemIDs, "</a>", sep = ""),
          "KEGG" = htmllink <- paste("<a href=http://www.genome.jp/dbget-bin/www_bget?", chemIDs, ">", chemIDs, "</a>", sep = ""),
