@@ -1,18 +1,19 @@
+init.chemscoremat <- function(chemscoremat) {
+  if (is.na(chemscoremat)) {
+    chemscoremat <- read.csv("Stage4.csv")
+  }
+  chemscoremat <- as.data.frame(chemscoremat)
+  chemscoremat$mz <- as.numeric(chemscoremat$mz)
+  chemscoremat
+}
+
 multilevelannotationstep5 <- function(outloc,
                                       adduct_weights = NA,
                                       db_name = "HMDB",
                                       chemscoremat = NA,
                                       num_nodes = 2) {
   setwd(outloc)
-
-  if (is.na(chemscoremat)) {
-    curated_res <- read.csv("Stage4.csv")
-  } else {
-    curated_res <- chemscoremat
-    rm(chemscoremat)
-  }
-  curated_res <- as.data.frame(curated_res)
-  curated_res$mz <- as.numeric(curated_res$mz)
+  curated_res <- init.chemscoremat(chemscoremat)
 
   scorethresh <- 0
 
