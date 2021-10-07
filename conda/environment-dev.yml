@@ -22,7 +22,6 @@ dependencies:
   - r-rjson
   - r-plyr
   - r-wgcna
-  - r-ssoap
   - r-tidyr
   - r-dplyr
   - r-devtools
@@ -31,3 +30,5 @@ dependencies:
   - r-languageserver
   - r-foreach
   - r-rlang
+  - r-datacomparer
+  - r-patrick
