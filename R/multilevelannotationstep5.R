@@ -133,34 +133,16 @@ multilevelannotationstep5 <- function(outloc,
   curated_res$chemical_ID <- htmllink
 
 
-
-  outloc2 <- paste(outloc, "/stage2/", sep = "")
-
-  unlink(outloc2, force = TRUE, recursive = TRUE)
-
-  outloc2 <- paste(outloc, "/stage2", sep = "")
-
-  unlink(outloc2, force = TRUE, recursive = TRUE)
-
-  file.remove(dir(outloc2, full.names = TRUE))
-
-  outloc2 <- paste(outloc, "/stage3/", sep = "")
-  unlink(outloc2, force = TRUE, recursive = TRUE)
-  file.remove(dir(outloc2, full.names = TRUE))
-  outloc2 <- paste(outloc, "/stage4/", sep = "")
-  file.remove(dir(outloc2, full.names = TRUE))
-  unlink(outloc2, force = TRUE, recursive = TRUE)
-  outloc2 <- paste(outloc, "/stage5/", sep = "")
-  file.remove(dir(outloc2, full.names = TRUE))
-  unlink(outloc2, force = TRUE, recursive = TRUE)
+  for (file in c("/stage2/", "/stage3/", "/stage4/", "/stage5/")) {
+    outloc2 <- paste(outloc, file, sep = "")
+    unlink(outloc2, force = TRUE, recursive = TRUE)
+  }
 
   suppressWarnings(unlink("*.Rda"))
 
-
-  try(unlink("step1_results.Rda"), silent = TRUE)
-  try(unlink("plot.pdf"), silent = TRUE)
-  try(unlink("Rplots.pdf"), silent = TRUE)
-  try(unlink("Rplots.pdf"), silent = TRUE)
+  for (file in c("step1_results.Rda", "plot.pdf", "Rplots.pdf", "Rplots.pdf")) {
+    try(unlink(file), silent = TRUE)
+  }
 
 
   curated_res <- as.data.frame(curated_res)
