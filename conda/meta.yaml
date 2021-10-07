@@ -46,6 +46,8 @@ requirements:
     - r-pastecs
     - r-rlist
     - r-rann
+    - r-rcdk
+    - r-patrick
 
 test:
   commands:

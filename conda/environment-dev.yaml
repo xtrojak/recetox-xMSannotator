@@ -27,3 +27,5 @@ dependencies:
   - r-gplots
   - r-devtools
   - r-entropy
+  - r-rcdk
+  - r-patrick

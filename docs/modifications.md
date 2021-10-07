@@ -9,6 +9,16 @@
 * The clustering by this new method results in a finer grouping of peaks into more individual clusters, see the example image below.
 ![RT Clustering](images/rt_clustering.png)
 
-## Isotopic Pattern Detection
-* Instead of checking only the isotopic patterns of [M+H] or [M-H] annotated peaks, this modified version checks all adducts for isotopes.
-* Only the second most abundant isotope is checked in the raw data.
+## Isotopes Detection
+* The peaks corresponding to the isotopes of a given compound are detected based on several criteria:
+  1. **mass-to-charge ratio**
+  2. **mass defect**,
+  3. **peak intensity**,
+  4. **retention time**.
+* For each annotated feature a **peak table** is filtered to find peaks that: 
+  1. lie in the same **RT cluster** as the feature, 
+  2. have **RT** within `rt_tolerance` from the feature's **RT**,
+  3. have **mass defect** within `mass_defect_tolerance` from that of the feature,
+* After such peaks are identified, their intensities are compared to theoretical expected intensities of corresponding isotopes.
+Peaks that differ in intensities more than `intensity_deviation_tolerance` (relative scale) from expected values are filtered out.
+* Lastly, the detected isotopic peaks are appended to the **annotation** table
