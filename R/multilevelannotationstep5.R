@@ -85,12 +85,6 @@ multilevelannotationstep5 <- function(outloc,
 
   write.csv(curated_res, file = "Stage5.csv", row.names = FALSE)
 
-  curated_res$mz <- sprintf("%.5f", as.numeric(curated_res$mz))
-
-
-
-
-
   chemIDs <- curated_res$chemical_ID
   htmllink <- switch(db_name,
     "HMDB" = paste("<a href=http://www.hmdb.ca/metabolites/", chemIDs, ">", chemIDs, "</a>", sep = ""),
