@@ -32,7 +32,6 @@ multilevelannotationstep5 <- function(outloc,
 
   t1 <- table(curated_res$mz, curated_res$chemical_ID)
   t2 <- apply(t1, 1, sum)
-  t2 <- apply(t1, 1, sum)
 
   multi_mz <- names(t2[which(t2 > 1)])
 
@@ -49,9 +48,6 @@ multilevelannotationstep5 <- function(outloc,
 
   rm(t1)
 
-  mzunique <- colnames(which(s1 == 1))
-
-  dunique <- curated_res[which(curated_res$mz %in% mzunique), ]
 
   s2 <- s1[which(s1 > 1)]
   mzdup <- names(s2)
@@ -129,7 +125,6 @@ multilevelannotationstep5 <- function(outloc,
   htmllink <- curated_res$chemical_ID
 
   link_text <- chemIDs[1]
-  t2 <- gregexpr(pattern = "HMDB", perl = FALSE, text = link_text)
 
   if (db_name == "HMDB") {
     htmllink <- paste("<a href=http://www.hmdb.ca/metabolites/", chemIDs, ">", chemIDs, "</a>", sep = "")
