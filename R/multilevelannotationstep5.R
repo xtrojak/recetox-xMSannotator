@@ -20,12 +20,8 @@ multilevelannotationstep5 <- function(outloc,
 
 
   if (is.na(adduct_weights)) {
-    data(adduct_weights)
-    adduct_weights1 <- matrix(nrow = 2, ncol = 2, 0)
-    adduct_weights1[1, ] <- c("M+H", 1)
-    adduct_weights1[2, ] <- c("M-H", 1)
-    adduct_weights <- as.data.frame(adduct_weights1)
-    colnames(adduct_weights) <- c("Adduct", "Weight")
+    adduct_weights <- data.frame(Adduct = c("M+H", "M-H"),
+                                 Weight = c(1, 1))
   }
 
 
