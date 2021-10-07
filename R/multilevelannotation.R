@@ -605,12 +605,10 @@ multilevelannotation <- function(dataA,
                 clusterEvalQ(cl, library(XML))
                 clusterEvalQ(cl, library(R2HTML))
                 clusterEvalQ(cl, library(RCurl))
-                clusterEvalQ(cl, library(SSOAP))
                 clusterEvalQ(cl, library(limma))
 
                 clusterEvalQ(cl, library(plyr))
 
-                clusterEvalQ(cl, "processWSDL")
                 clusterEvalQ(cl, library(png))
                 clusterExport(cl, "Annotationbychemical_IDschild_multilevel")
 

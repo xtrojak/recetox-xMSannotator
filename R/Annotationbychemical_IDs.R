@@ -40,10 +40,7 @@ mz_search_list_1<-apply(mz_search_list_1,2,as.numeric)
 		clusterEvalQ(cl, library(XML))
 		clusterEvalQ(cl, library(R2HTML))
 		clusterEvalQ(cl, library(RCurl))
-		clusterEvalQ(cl, library(SSOAP))
-		
-
-			clusterEvalQ(cl, "processWSDL")
+    
 		clusterEvalQ(cl, library(png))
 		clusterEvalQ(cl, "Annotationbychemical_IDschild")
 		clusterEvalQ(cl, "keggCompMZ")
