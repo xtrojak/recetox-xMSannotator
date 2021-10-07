@@ -7,6 +7,14 @@ init.chemscoremat <- function(chemscoremat) {
   chemscoremat
 }
 
+reevaluate.multimatches.score <- function(multimatch_features, adduct_weights) {
+  features_adducts <- which(multimatch_features$Adduct %in% adduct_weights[, 1])
+  if (length(features_adducts) > 0) {
+      multimatch_features$score[features_adducts] <- (multimatch_features$score[features_adducts]) * 100
+    }
+  multimatch_features
+}
+
 multilevelannotationstep5 <- function(outloc,
                                       adduct_weights = NA,
                                       db_name = "HMDB",
@@ -42,12 +50,8 @@ multilevelannotationstep5 <- function(outloc,
   bad_ind <- foreach(mz_idx = 1:length(duplicated_features), .combine = rbind) %dopar% {
     mz <- duplicated_features[mz_idx]
     common_mz_idx <- which(curated_res$mz %in% mz)
-    multimatch_features <- curated_res[common_mz_idx, ]
 
-    features_adducts <- which(multimatch_features$Adduct %in% adduct_weights[, 1])
-    if (length(features_adducts) > 0) {
-      multimatch_features$score[features_adducts] <- (multimatch_features$score[features_adducts]) * 100
-    }
+    multimatch_features <- reevaluate.multimatches.score(curated_res[common_mz_idx, ], adduct_weights)
     good_idx <- which(multimatch_features$score == max(multimatch_features$score, na.rm = TRUE))
 
     for (com_indval in 1:length(common_mz_idx)) {
