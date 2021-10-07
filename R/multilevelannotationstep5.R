@@ -111,21 +111,11 @@ multilevelannotationstep5 <- function(outloc,
 
   link_text <- chemIDs[1]
 
-  if (db_name == "HMDB") {
-    htmllink <- paste("<a href=http://www.hmdb.ca/metabolites/", chemIDs, ">", chemIDs, "</a>", sep = "")
-  } else {
-    if (db_name == "KEGG") {
-      htmllink <- paste("<a href=http://www.genome.jp/dbget-bin/www_bget?", chemIDs, ">", chemIDs, "</a>", sep = "")
-    } else {
-      if (db_name == "LipidMaps") {
-        htmllink <- paste("<a href=http://www.lipidmaps.org/data/LMSDRecord.php?LMID=", chemIDs, ">", chemIDs, "</a>", sep = "")
-      } else {
-        if (db_name == "T3DB") {
-          htmllink <- paste("<a href=http://www.t3db.ca/toxins/", chemIDs, ">", chemIDs, "</a>", sep = "")
-        }
-      }
-    }
-  }
+  switch(db_name,
+         "HMDB" = htmllink <- paste("<a href=http://www.hmdb.ca/metabolites/", chemIDs, ">", chemIDs, "</a>", sep = ""),
+         "KEGG" = htmllink <- paste("<a href=http://www.genome.jp/dbget-bin/www_bget?", chemIDs, ">", chemIDs, "</a>", sep = ""),
+         "LipidMaps" = htmllink <- paste("<a href=http://www.lipidmaps.org/data/LMSDRecord.php?LMID=", chemIDs, ">", chemIDs, "</a>", sep = ""),
+         "T3DB" = htmllink <- paste("<a href=http://www.t3db.ca/toxins/", chemIDs, ">", chemIDs, "</a>", sep = ""))
 
   fname <- paste("Stage5_annotation_results", sep = "")
   unlink(fname)
