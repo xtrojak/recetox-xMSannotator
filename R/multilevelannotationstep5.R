@@ -19,7 +19,6 @@ multilevelannotationstep5 <- function(outloc,
 
 
 
-  data(adduct_table)
   if (is.na(adduct_weights)) {
     data(adduct_weights)
     adduct_weights1 <- matrix(nrow = 2, ncol = 2, 0)
@@ -28,7 +27,6 @@ multilevelannotationstep5 <- function(outloc,
     adduct_weights <- as.data.frame(adduct_weights1)
     colnames(adduct_weights) <- c("Adduct", "Weight")
   }
-  adduct_table <- adduct_table[order(adduct_table$Adduct), ]
 
 
 
