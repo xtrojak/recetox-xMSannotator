@@ -31,19 +31,15 @@ multilevelannotationstep5 <- function(outloc,
 
 
 
-  s1 <- table(curated_res$mz)
-
-
-  s2 <- s1[which(s1 > 1)]
-  mzdup <- names(s2)
-  mzdup <- as.data.frame(mzdup)
-  mzdup <- mzdup[, 1]
+  feature_count <- table(curated_res$mz)
+  duplicated_features <- feature_count[which(feature_count > 1)]
+  duplicated_features <- names(duplicated_features)
 
   bad_ind <- {}
   cl <- makeSOCKcluster(num_nodes)
 
-  bad_ind <- foreach(mind = 1:length(mzdup), .combine = rbind) %dopar% {
-    mznum <- mzdup[mind]
+  bad_ind <- foreach(mind = 1:length(duplicated_features), .combine = rbind) %dopar% {
+    mznum <- duplicated_features[mind]
     dmultsub <- curated_res[which(curated_res$mz %in% mznum), ]
     dgood_add <- which(dmultsub$Adduct %in% adduct_weights[, 1])
     if (length(dgood_add) > 0) {
