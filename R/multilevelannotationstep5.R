@@ -136,16 +136,7 @@ multilevelannotationstep5 <- function(outloc,
 
 
   curated_res <- as.data.frame(curated_res)
-
   curated_res <- curated_res[order(curated_res$Confidence, decreasing = TRUE), ]
-
-  print("Stage 5 confidence level distribution for unique chemical/metabolite IDs")
-  print(table(curated_res$Confidence[-which(duplicated(curated_res$chemical_ID) == TRUE)]))
-
-
-  print("Stage 5 confidence level distribution for unique chemical/metabolite formulas")
-  print(table(curated_res$Confidence[-which(duplicated(curated_res$Formula) == TRUE)]))
-
 
   return(curated_res)
 }
