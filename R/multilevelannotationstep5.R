@@ -10,8 +10,8 @@ init.chemscoremat <- function(chemscoremat) {
 reevaluate.multimatches.score <- function(multimatch_features, adduct_weights) {
   features_adducts <- which(multimatch_features$Adduct %in% adduct_weights[, 1])
   if (length(features_adducts) > 0) {
-      multimatch_features$score[features_adducts] <- (multimatch_features$score[features_adducts]) * 100
-    }
+    multimatch_features$score[features_adducts] <- (multimatch_features$score[features_adducts]) * 100
+  }
   multimatch_features
 }
 
@@ -24,29 +24,26 @@ multilevelannotationstep5 <- function(outloc,
   setwd(outloc)
   curated_res <- init.chemscoremat(chemscoremat)
 
-
-
-
-
   if (is.na(adduct_weights)) {
-    adduct_weights <- data.frame(Adduct = c("M+H", "M-H"),
-                                 Weight = c(1, 1))
+    adduct_weights <- data.frame(
+      Adduct = c("M+H", "M-H"),
+      Weight = c(1, 1)
+    )
   }
 
-
-
-
-  curated_res <- curated_res[order(curated_res$Confidence, curated_res$chemical_ID, curated_res$score, curated_res$Adduct, decreasing = TRUE), ]
-
-
+  curated_res <- curated_res[order(curated_res$Confidence,
+    curated_res$chemical_ID,
+    curated_res$score,
+    curated_res$Adduct,
+    decreasing = TRUE
+  ), ]
 
   feature_count <- table(curated_res$mz)
   duplicated_features <- feature_count[which(feature_count > 1)]
   duplicated_features <- names(duplicated_features)
 
-  bad_ind <- {}
   cl <- makeSOCKcluster(num_nodes)
-
+  bad_ind <- {}
   bad_ind <- foreach(mz_idx = 1:length(duplicated_features), .combine = rbind) %dopar% {
     mz <- duplicated_features[mz_idx]
     common_mz_idx <- which(curated_res$mz %in% mz)
@@ -69,9 +66,6 @@ multilevelannotationstep5 <- function(outloc,
 
     return(common_mz_idx)
   }
-
-
-
   stopCluster(cl)
 
   if (length(bad_ind) > 0) {
@@ -89,15 +83,11 @@ multilevelannotationstep5 <- function(outloc,
 
   curated_res <- curated_res_unique_highconf
   t2 <- table(curated_res$mz)
-
   same1 <- which(t2 == 1)
-
   uniquemz <- names(same1)
 
   curated_res$MatchCategory <- rep("Multiple", dim(curated_res)[1])
-
   curated_res$MatchCategory[which(curated_res$mz %in% uniquemz)] <- "Unique"
-
 
   write.csv(curated_res, file = "Stage5.csv", row.names = FALSE)
 
@@ -109,16 +99,15 @@ multilevelannotationstep5 <- function(outloc,
 
   chemIDs <- curated_res$chemical_ID
   switch(db_name,
-         "HMDB" = htmllink <- paste("<a href=http://www.hmdb.ca/metabolites/", chemIDs, ">", chemIDs, "</a>", sep = ""),
-         "KEGG" = htmllink <- paste("<a href=http://www.genome.jp/dbget-bin/www_bget?", chemIDs, ">", chemIDs, "</a>", sep = ""),
-         "LipidMaps" = htmllink <- paste("<a href=http://www.lipidmaps.org/data/LMSDRecord.php?LMID=", chemIDs, ">", chemIDs, "</a>", sep = ""),
-         "T3DB" = htmllink <- paste("<a href=http://www.t3db.ca/toxins/", chemIDs, ">", chemIDs, "</a>", sep = ""))
+    "HMDB" = htmllink <- paste("<a href=http://www.hmdb.ca/metabolites/", chemIDs, ">", chemIDs, "</a>", sep = ""),
+    "KEGG" = htmllink <- paste("<a href=http://www.genome.jp/dbget-bin/www_bget?", chemIDs, ">", chemIDs, "</a>", sep = ""),
+    "LipidMaps" = htmllink <- paste("<a href=http://www.lipidmaps.org/data/LMSDRecord.php?LMID=", chemIDs, ">", chemIDs, "</a>", sep = ""),
+    "T3DB" = htmllink <- paste("<a href=http://www.t3db.ca/toxins/", chemIDs, ">", chemIDs, "</a>", sep = "")
+  )
+  curated_res$chemical_ID <- htmllink
 
   fname <- paste("Stage5_annotation_results", sep = "")
   unlink(fname)
-
-  curated_res$chemical_ID <- htmllink
-
 
   for (file in c("/stage2/", "/stage3/", "/stage4/", "/stage5/")) {
     outloc2 <- paste(outloc, file, sep = "")
@@ -130,7 +119,6 @@ multilevelannotationstep5 <- function(outloc,
   for (file in c("step1_results.Rda", "plot.pdf", "Rplots.pdf", "Rplots.pdf")) {
     try(unlink(file), silent = TRUE)
   }
-
 
   curated_res <- as.data.frame(curated_res)
   curated_res <- curated_res[order(curated_res$Confidence, decreasing = TRUE), ]
