@@ -130,7 +130,7 @@ detect_isotopic_peaks <- function(...,
 #' @param annotation A table with annotated peaks.
 #' @param adduct_weights A weight-by-adduct table.
 #' @param intensity_deviation_tolerance A numeric threshold by which an intensity ratio of two isotopic peaks may differ
-#'  from their actual abundance ratio.
+#'  from their actual abundance ratio. (Cl35 1.0 and Cl37 0.95 -> absolute abundances are about 0.45 and 0.42)
 #' @param mass_defect_tolerance A number. Maximum difference in mass defect between two peaks of the same compound.
 #' @param peak_table A peak table containing a peak identifier (unique number), mean intensity, module, and rt cluster
 #'  of each identified peak.
