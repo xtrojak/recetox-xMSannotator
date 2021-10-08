@@ -82,7 +82,7 @@ do_something <- function(i,
       max_isp_count <- max_isp
 
       if (max_isp_count > 0 && isnum <= max_isp_count && bool_check > 0) {
-        isnum2 <- (round(put_isp_masses_curmz_data[isp_v, 1]) - round(as.numeric(mchemicaldata$MonoisotopicMass[m])))
+        isnum2 <- (round(put_isp_masses_curmz_data[isp_v, 1]) - round(as.numeric(as.character(mchemicaldata$MonoisotopicMass[m]))))
         isnum2 <- round(isnum2)
 
         isp_sign <- if (isnum2 <= 0) "-" else "+"
