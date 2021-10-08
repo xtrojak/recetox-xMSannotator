@@ -85,15 +85,6 @@ multilevelannotationstep5 <- function(outloc,
 
   write.csv(curated_res, file = "Stage5.csv", row.names = FALSE)
 
-  chemIDs <- curated_res$chemical_ID
-  htmllink <- switch(db_name,
-    "HMDB" = paste("<a href=http://www.hmdb.ca/metabolites/", chemIDs, ">", chemIDs, "</a>", sep = ""),
-    "KEGG" = paste("<a href=http://www.genome.jp/dbget-bin/www_bget?", chemIDs, ">", chemIDs, "</a>", sep = ""),
-    "LipidMaps" = paste("<a href=http://www.lipidmaps.org/data/LMSDRecord.php?LMID=", chemIDs, ">", chemIDs, "</a>", sep = ""),
-    "T3DB" = paste("<a href=http://www.t3db.ca/toxins/", chemIDs, ">", chemIDs, "</a>", sep = "")
-  )
-  curated_res$chemical_ID <- htmllink
-
   fname <- paste("Stage5_annotation_results", sep = "")
   unlink(fname)
 
@@ -107,9 +98,6 @@ multilevelannotationstep5 <- function(outloc,
   for (file in c("step1_results.Rda", "plot.pdf", "Rplots.pdf", "Rplots.pdf")) {
     try(unlink(file), silent = TRUE)
   }
-
-  curated_res <- as.data.frame(curated_res)
-  curated_res <- curated_res[order(curated_res$Confidence, decreasing = TRUE), ]
 
   return(curated_res)
 }
