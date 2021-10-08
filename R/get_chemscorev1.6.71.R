@@ -148,6 +148,7 @@ compute_score <- function(adduct_weights, cur_adducts_with_isotopes) {
   return(score[1])
 }
 
+#' @export
 remove_water_adducts <- function(curformula, mchemicaldata) {
   numoxygen <- check_element(curformula, "O")
   water_adducts <- c("M+H-H2O", "M+H-2H2O", "M-H2O-H")
@@ -162,36 +163,16 @@ remove_water_adducts <- function(curformula, mchemicaldata) {
   return(mchemicaldata)
 }
 
-#' @import tidyr
-#' @import dplyr
-#' @import plyr
-#' @importFrom magrittr %>%
-#' @importFrom Rdisop getMolecule
 #' @export
-get_chemscorev1.6.71 <- function(chemicalid,
-                                 mchemicaldata,
-                                 corthresh,
-                                 global_cor,
-                                 mzid, max_diff_rt = 10,
-                                 level_module_isop_annot,
-                                 adduct_table,
-                                 adduct_weights,
-                                 filter.by = c("M+H"),
-                                 max_isp = 100,
-                                 MplusH.abundance.ratio.check = TRUE,
-                                 mass_defect_window = 0.01,
-                                 mass_defect_mode = "pos",
-                                 outlocorig) {
-  setwd(outlocorig)
-
-  outloc1 <- paste(outlocorig, "/stage2/", sep = "")
-  suppressWarnings(dir.create(outloc1))
-  setwd(outloc1)
-
-  chemical_score <- (-100)
-
-  if (length(mchemicaldata$mz) < 1) stop("No mz data found!")
-
+add_isotopic_peaks <- function(mchemicaldata,
+                               adduct_weights,
+                               exp_isp,
+                               level_module_isop_annot,
+                               max_diff_rt,
+                               mass_defect_window,
+                               mass_defect_mode,
+                               max_isp,
+                               abund_ratio_vec) {
   mchemicaldata$Module_RTclust <- replace_with_module(mchemicaldata$Module_RTclust)
   mchemicaldata_orig <- mchemicaldata
 
@@ -225,16 +206,9 @@ get_chemscorev1.6.71 <- function(chemicalid,
 
   mchemicaldata$Adduct <- as.character(mchemicaldata$Adduct)
 
-  table_mod <- table(mchemicaldata$Module_RTclust)
-  table_mod <- table_mod[table_mod > 0]
-  table_mod <- table_mod[order(table_mod, decreasing = TRUE)]
-  top_mod <- names(table_mod)
-
-
   final_isp_annot_res_all <- mchemicaldata
   level_module_isop_annot <- as.data.frame(level_module_isop_annot)
   level_module_isop_annot$Module_RTclust <- gsub(level_module_isop_annot$Module_RTclust, pattern = "_[0-9]*", replacement = "")
-
 
   mchemicaldata_goodadducts_index <- which(mchemicaldata$Adduct %in% as.character(adduct_weights[, 1]))
   final_isp_annot_res_isp <- {}
@@ -269,18 +243,27 @@ get_chemscorev1.6.71 <- function(chemicalid,
     arrange(mz)
   mod_names <- unique(mchemicaldata$Module_RTclust)
 
-  mzid_cur <- paste(mchemicaldata$mz, mchemicaldata$time, sep = "_")
-
   diffmatB <- {}
   diffmatB <- lapply(1:length(mod_names), do_something_2, mod_names, mchemicaldata)
 
   mchemicaldata <- unique(ldply(diffmatB, rbind))
 
   rm(diffmatB)
-  #rm(final_isp_annot_res)
+  # rm(final_isp_annot_res)
 
   write.table(mchemicaldata, file = "../Stage2_withisotopes.txt", append = TRUE, sep = "\t", col.names = FALSE)
+  return(mchemicaldata)
+}
 
+#' @export
+compute_chemical_score <- function(mchemicaldata,
+                                   adduct_weights,
+                                   global_cor,
+                                   corthresh,
+                                   filter.by,
+                                   max_diff_rt,
+                                   chemicalid,
+                                   MplusH.abundance.ratio.check) {
   table_mod <- table(mchemicaldata$Module_RTclust)
   table_mod <- table_mod[table_mod > 0]
   table_mod <- table_mod[order(table_mod, decreasing = TRUE)]
@@ -952,8 +935,64 @@ get_chemscorev1.6.71 <- function(chemicalid,
     chemical_score <- 0
   }
 
+  result <- list("chemical_score" = chemical_score, "filtdata" = mchemicaldata)
+  return(result)
+}
+
+
+#' @import tidyr
+#' @import dplyr
+#' @import plyr
+#' @importFrom magrittr %>%
+#' @importFrom Rdisop getMolecule
+#' @export
+get_chemscorev1.6.71 <- function(chemicalid,
+                                 mchemicaldata,
+                                 corthresh,
+                                 global_cor,
+                                 mzid, max_diff_rt = 10,
+                                 level_module_isop_annot,
+                                 adduct_table,
+                                 adduct_weights,
+                                 filter.by = c("M+H"),
+                                 max_isp = 100,
+                                 MplusH.abundance.ratio.check = TRUE,
+                                 mass_defect_window = 0.01,
+                                 mass_defect_mode = "pos",
+                                 outlocorig) {
+  setwd(outlocorig)
+
+  outloc1 <- paste(outlocorig, "/stage2/", sep = "")
+  suppressWarnings(dir.create(outloc1))
+  setwd(outloc1)
+
+  if (length(mchemicaldata$mz) < 1) stop("No mz data found!")
+
+  mchemicaldata <- add_isotopic_peaks(
+    mchemicaldata,
+    adduct_weights,
+    exp_isp,
+    level_module_isop_annot,
+    max_diff_rt,
+    mass_defect_window,
+    mass_defect_mode,
+    max_isp,
+    abund_ratio_vec
+  )
+
+  result <- compute_chemical_score(
+    mchemicaldata,
+    adduct_weights,
+    global_cor,
+    corthresh,
+    filter.by,
+    max_diff_rt,
+    chemicalid,
+    MplusH.abundance.ratio.check
+  )
+
   #rm("mzid", "global_cor", "temp_global_cor")
   setwd("..")
 
-  return(list("chemical_score" = chemical_score, "filtdata" = mchemicaldata))
+  return(result)
 }
