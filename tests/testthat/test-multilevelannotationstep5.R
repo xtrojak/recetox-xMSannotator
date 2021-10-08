@@ -18,7 +18,6 @@ patrick::with_parameters_test_that(
     multilevelannotationstep5(
       outloc = outloc,
       adduct_weights = adduct_weights,
-      db_name = db_name,
       num_nodes = 16
     )
 

@@ -48,7 +48,6 @@ remove.tmp.files <- function(loc) {
 
 multilevelannotationstep5 <- function(outloc,
                                       adduct_weights = NA,
-                                      db_name = "HMDB",
                                       chemscoremat = NA,
                                       num_nodes = 2) {
   setwd(outloc)
