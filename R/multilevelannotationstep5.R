@@ -24,6 +24,23 @@ get.features <- function(mz, match) {
   features <- names(features)
 }
 
+remove.tmp.files <- function(loc) {
+  fname <- paste("Stage5_annotation_results", sep = "")
+  unlink(fname)
+  suppressWarnings(unlink("*.Rda"))
+
+  for (file in c("/stage2/", "/stage3/", "/stage4/", "/stage5/")) {
+    loc <- paste(loc, file, sep = "")
+    unlink(loc, force = TRUE, recursive = TRUE)
+  }
+
+  for (file in c("step1_results.Rda", "plot.pdf", "Rplots.pdf", "Rplots.pdf")) {
+    try(unlink(file), silent = TRUE)
+  }
+
+  return(1)
+}
+
 multilevelannotationstep5 <- function(outloc,
                                       adduct_weights = NA,
                                       db_name = "HMDB",
@@ -79,25 +96,10 @@ multilevelannotationstep5 <- function(outloc,
   }
 
   unique_features <- get.features(curated_res$mz, "unique")
-
   curated_res$MatchCategory <- rep("Multiple", dim(curated_res)[1])
   curated_res$MatchCategory[which(curated_res$mz %in% unique_features)] <- "Unique"
 
   write.csv(curated_res, file = "Stage5.csv", row.names = FALSE)
-
-  fname <- paste("Stage5_annotation_results", sep = "")
-  unlink(fname)
-
-  for (file in c("/stage2/", "/stage3/", "/stage4/", "/stage5/")) {
-    outloc2 <- paste(outloc, file, sep = "")
-    unlink(outloc2, force = TRUE, recursive = TRUE)
-  }
-
-  suppressWarnings(unlink("*.Rda"))
-
-  for (file in c("step1_results.Rda", "plot.pdf", "Rplots.pdf", "Rplots.pdf")) {
-    try(unlink(file), silent = TRUE)
-  }
-
+  remove.tmp.files(outloc)
   return(curated_res)
 }
