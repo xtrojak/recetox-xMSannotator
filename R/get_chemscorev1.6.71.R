@@ -366,15 +366,6 @@ get_data_and_score_for_chemical <- function(cor_mz,
     diff_rt <- abs(min(as.numeric(mchemicaldata$time)) - max(as.numeric(mchemicaldata$time)))
     diff_rt <- round(diff_rt)
 
-    if (length(which(is.na(mchemicaldata$time)) == TRUE) > 0) {
-      mchemicaldata <- mchemicaldata[-which(is.na(mchemicaldata$time) == TRUE), ]
-    }
-
-    if (nrow(mchemicaldata) < 2) {
-      #next
-      return(list("score" = chemical_score, "data" = mchemicaldata))
-    }
-
     if (diff_rt <= max_diff_rt) {
       dup_add <- which(duplicated(mchemicaldata$Adduct) == TRUE)
       if (length(dup_add) > 0) {
@@ -496,7 +487,7 @@ get_data_and_score_for_chemical <- function(cor_mz,
 
       if (group_ind_size < 2) {
         k_power <- 1.25
-        mchemicaldata <- mchemicaldata_orig[which(mchemicaldata_orig$Module_RTclust == top_mod[i]), ]
+        mchemicaldata <- mchemicaldata_module
         mchemicaldata <- mchemicaldata[order(mchemicaldata$mz), ]
 
         cur_adducts_with_isotopes <- mchemicaldata$Adduct
