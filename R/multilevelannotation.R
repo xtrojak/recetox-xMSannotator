@@ -1384,9 +1384,27 @@ multilevelannotation <- function(dataA,
 
             # if(allsteps==TRUE)
             {
+                # make sure num_sets exists
+                if (!is.na(num_sets)) {
+                    if (num_sets >= length(chemids_split)) {
+                        num_sets <- length(chemids_split)
+                    }
+                } else {
+                    num_sets <- length(chemids_split)
+                }
+                
+                load("chemCompMZ.Rda")
+                
                 print("Status 4: Pathway evaluation")
-                # suppressWarnings(annotres<-multilevelannotationstep3(outloc=outloc,adduct_weights=adduct_weights,boostIDs=boostIDs,pathwaycheckmode=pathwaycheckmode))
-                annotres <- multilevelannotationstep3(outloc = outloc, chemscoremat = chemscoremat, adduct_weights = adduct_weights, boostIDs = boostIDs, pathwaycheckmode = pathwaycheckmode)
+                annotres <- multilevelannotationstep3(
+                                chemCompMZ = chemCompMZ,
+                                chemscoremat = chemscoremat,
+                                adduct_weights = adduct_weights,
+                                num_sets = num_sets,
+                                db_name = db_name,
+                                max_diff_rt = max_diff_rt,
+                                pathwaycheckmode = pathwaycheckmode
+                )
 
                 # print("Memory used after step3")
                 # print(mem_used())
@@ -1402,20 +1420,25 @@ multilevelannotation <- function(dataA,
 
                 load("tempobjects.Rda")
 
-
-
-
+                chemscoremat <- read.csv("Stage3.csv")
+                
                 # 	size_objects<-sort(sapply(ls(), function(x) format(object.size(get(x)), unit = 'auto')))
                 # 	print(size_objects)
-
+                
                 print("Status 5: Assigning confidence levels")
                 # suppressWarnings(annotresstage4<-multilevelannotationstep4(outloc=outloc,max.rt.diff=max_diff_rt,filter.by=filter.by,adduct_weights=adduct_weights,min_ions_perchem=min_ions_perchem,boostIDs=boostIDs,max_isp=max_isp,max.mz.diff=max.mz.diff))
                 annotresstage4 <- multilevelannotationstep4(
-                    outloc = outloc, max.rt.diff = max_diff_rt, filter.by = filter.by, adduct_weights = adduct_weights,
-                    min_ions_perchem = min_ions_perchem, boostIDs = boostIDs, max_isp = max_isp,
+                    outloc = outloc,
+                    chemscoremat = chemscoremat,
+                    max.rt.diff = max_diff_rt,
+                    filter.by = filter.by,
+                    adduct_weights = adduct_weights,
+                    min_ions_perchem = min_ions_perchem,
+                    boostIDs = boostIDs,
+                    max_isp = max_isp,
                     max.mz.diff = max.mz.diff
                 )
-
+                
                 # print("Memory used after step4")
                 # print(mem_used())
 
@@ -1438,7 +1461,7 @@ multilevelannotation <- function(dataA,
                     load("tempobjects.Rda")
 
                     suppressWarnings(annotresstage5 <- multilevelannotationstep5(
-                        outloc = outloc, adduct_weights = adduct_weights
+                        outloc = outloc, adduct_weights = adduct_weights,
                     ))
 
                     # print("Stage 5 confidence level distribution for unique chemical/metabolite IDs")
