@@ -1,4 +1,4 @@
-init.chemscoremat <- function(chemscoremat) {
+init_chemscoremat <- function(chemscoremat) {
   if (is.na(chemscoremat)) {
     chemscoremat <- read.csv("Stage4.csv")
   }
@@ -7,7 +7,7 @@ init.chemscoremat <- function(chemscoremat) {
   chemscoremat
 }
 
-increase.multimatches.score <- function(multimatch_features, adduct_weights) {
+increase_multimatches_score <- function(multimatch_features, adduct_weights) {
   features_adducts <- which(multimatch_features$Adduct %in% adduct_weights[, 1])
   if (length(features_adducts) > 0) {
     multimatch_features$score[features_adducts] <- (multimatch_features$score[features_adducts]) * 100
@@ -15,12 +15,12 @@ increase.multimatches.score <- function(multimatch_features, adduct_weights) {
   multimatch_features
 }
 
-reevaluate.multimatches.score <- function(single_molecule_annotation) {
+reevaluate_multimatches_score <- function(single_molecule_annotation) {
   num_annotations <- nrow(single_molecule_annotation)
   score <- (num_annotations - 1) * max(single_molecule_annotation$score) / num_annotations
 }
 
-get.features <- function(mz, match) {
+get_features <- function(mz, match) {
   feature_count <- table(mz)
   features <- switch(match,
     "multiple" = feature_count[which(feature_count > 1)],
@@ -29,7 +29,7 @@ get.features <- function(mz, match) {
   features <- names(features)
 }
 
-remove.tmp.files <- function(loc) {
+remove_tmp_files <- function(loc) {
   fname <- paste("Stage5_annotation_results", sep = "")
   unlink(fname)
   suppressWarnings(unlink("*.Rda"))
@@ -51,7 +51,7 @@ multilevelannotationstep5 <- function(outloc,
                                       chemscoremat = NA,
                                       num_nodes = 2) {
   setwd(outloc)
-  curated_res <- init.chemscoremat(chemscoremat)
+  curated_res <- init_chemscoremat(chemscoremat)
 
   if (is.na(adduct_weights)) {
     adduct_weights <- data.frame(
@@ -67,20 +67,20 @@ multilevelannotationstep5 <- function(outloc,
     decreasing = TRUE
   ), ]
 
-  duplicated_features <- get.features(curated_res$mz, "multiple")
+  duplicated_features <- get_features(curated_res$mz, "multiple")
 
   cl <- makeSOCKcluster(num_nodes)
   lower_score_multimatches_idx <- {}
   lower_score_multimatches_idx <- foreach(mz = duplicated_features, .combine = rbind) %dopar% {
     multimatches_idx <- which(curated_res$mz %in% mz)
-    multimatch_features <- increase.multimatches.score(curated_res[multimatches_idx, ], adduct_weights)
+    multimatch_features <- increase_multimatches_score(curated_res[multimatches_idx, ], adduct_weights)
     max_score_idx <- which(multimatch_features$score == max(multimatch_features$score, na.rm = TRUE))
     multimatches_idx <- multimatches_idx[-max_score_idx]
 
     for (feature in 1:nrow(multimatch_features)) {
       if (multimatch_features$score[feature] != max(multimatch_features$score)) {
         same_molecule_idx <- which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[feature])
-        curated_res$score[same_molecule_idx] <- reevaluate.multimatches.score(curated_res[same_molecule_idx, ])
+        curated_res$score[same_molecule_idx] <- reevaluate_multimatches_score(curated_res[same_molecule_idx, ])
       }
     }
     return(multimatches_idx)
@@ -91,11 +91,11 @@ multilevelannotationstep5 <- function(outloc,
     curated_res <- curated_res[-c(lower_score_multimatches_idx), ]
   }
 
-  unique_features <- get.features(curated_res$mz, "unique")
+  unique_features <- get_features(curated_res$mz, "unique")
   curated_res$MatchCategory <- rep("Multiple", nrow(curated_res))
   curated_res$MatchCategory[which(curated_res$mz %in% unique_features)] <- "Unique"
 
   write.csv(curated_res, file = "Stage5.csv", row.names = FALSE)
-  remove.tmp.files(outloc)
+  remove_tmp_files(outloc)
   return(curated_res)
 }
