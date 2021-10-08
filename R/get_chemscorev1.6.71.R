@@ -766,6 +766,66 @@ get_data_and_score_for_chemical <- function(cor_mz,
   return(list("score" = chemical_score, "data" = mchemicaldata))
 }
 
+compute_cor_mz <- function(mzid_cur, global_cor) {
+  cor_mz <- round(global_cor[mzid_cur, mzid_cur], 1)
+
+  if (length(cor_mz) > 1) {
+    corrownamesA <- rownames(cor_mz)
+    mat_rownames <- strsplit(as.character(corrownamesA), split = "_")
+
+    m1 <- {}
+    for (i in 1:length(mat_rownames)) {
+      m1 <- rbind(m1, cbind(mat_rownames[[i]][1], mat_rownames[[i]][2]))
+    }
+
+    m1 <- as.data.frame(m1)
+    colnames(m1) <- c("mz", "time")
+    cor_mz2 <- cbind(m1, cor_mz)
+
+    mz_order <- order(cor_mz2$mz)
+    cor_mz2 <- cor_mz2[c(mz_order), ]
+
+    cor_mz <- cor_mz2[, -c(1:2)]
+    cor_mz <- cor_mz[, mz_order]
+  }
+}
+
+get_conf_level <- function(mchemicaldata, adduct_weights) {
+  conf_level <- 0
+  if (length(mchemicaldata) < 1) {
+    conf_level <- 0
+  } else {
+    if (nrow(mchemicaldata) > 0) {
+      conf_level <- get_confidence_stage2(curdata = mchemicaldata, adduct_weights = adduct_weights)
+      conf_level <- as.numeric(as.character(conf_level))
+    } else {
+      conf_level <- 0
+    }
+  }
+  return(conf_level)
+}
+
+get_min_chemscore <- function(corthresh, max_diff_rt) {
+  return(100 * 2 * (1 * (corthresh)) * (1 / ((max_diff_rt * 0.1) + 1)^3))
+}
+
+apply_rt_scaling <- function(mchemicaldata, max_diff_rt, chemical_score) {
+  if (length(mchemicaldata) > 0) {
+    if (nrow(mchemicaldata) > 1) {
+      diff_rt <- max(mchemicaldata$time) - min(mchemicaldata$time)
+
+      k_power <- 1
+      if (diff_rt > max_diff_rt) {
+        k_power <- 10
+      }
+      chemical_score <- chemical_score * (1 / ((diff_rt * 0.1) + 1)^k_power)
+    }
+  } else {
+    chemical_score <- 0
+  }
+  return(chemical_score)
+}
+
 compute_best_score <- function(table_mod,
                                top_mod,
                                mchemicaldata_orig,
@@ -814,27 +874,7 @@ compute_best_score <- function(table_mod,
     check2 <- gregexpr(text = cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[0-9]*\\])")
     mzid_cur <- paste(mchemicaldata$mz, mchemicaldata$time, sep = "_")
 
-    cor_mz <- round(global_cor[mzid_cur, mzid_cur], 1)
-
-    if (length(cor_mz) > 1) {
-      corrownamesA <- rownames(cor_mz)
-      mat_rownames <- strsplit(as.character(corrownamesA), split = "_")
-
-      m1 <- {}
-      for (i in 1:length(mat_rownames)) {
-        m1 <- rbind(m1, cbind(mat_rownames[[i]][1], mat_rownames[[i]][2]))
-      }
-
-      m1 <- as.data.frame(m1)
-      colnames(m1) <- c("mz", "time")
-      cor_mz2 <- cbind(m1, cor_mz)
-
-      mz_order <- order(cor_mz2$mz)
-      cor_mz2 <- cor_mz2[c(mz_order), ]
-
-      cor_mz <- cor_mz2[, -c(1:2)]
-      cor_mz <- cor_mz[, mz_order]
-    }
+    cor_mz <- compute_cor_mz(mzid_cur, global_cor)
 
     if (length(cor_mz) > 1) {
       intermediate_result <- get_data_and_score_for_chemical(
@@ -875,48 +915,13 @@ compute_best_score <- function(table_mod,
       }
     }
 
-    conf_level <- 0
-    if (length(mchemicaldata) < 1) {
-      conf_level <- 0
-    } else {
-      if (nrow(mchemicaldata) > 0) {
-        conf_level <- get_confidence_stage2(curdata = mchemicaldata, adduct_weights = adduct_weights)
-        conf_level <- as.numeric(as.character(conf_level))
-      } else {
-        conf_level <- 0
-      }
-    }
-
-    if (length(mchemicaldata) > 0) {
-      if (nrow(mchemicaldata) > 1) {
-        diff_rt <- max(mchemicaldata$time) - min(mchemicaldata$time)
-
-        k_power <- 1
-        if (diff_rt > max_diff_rt) {
-          k_power <- 10
-        }
-        chemical_score <- chemical_score * (1 / ((diff_rt * 0.1) + 1)^k_power)
-      }
-    } else {
-      chemical_score <- 0
-    }
-
-    min_chemical_score <- 100 * 2 * (1 * (corthresh)) * (1 / ((max_diff_rt * 0.1) + 1)^3)
-
-    if (chemical_score > min_chemical_score) {
-      chemical_score <- chemical_score * (conf_level^conf_level)
-    } else {
-      chemical_score <- 0
-    }
+    conf_level <- get_conf_level(mchemicaldata, adduct_weights)
+    chemical_score <- apply_rt_scaling(mchemicaldata, max_diff_rt, chemical_score)
+    min_chemical_score <- get_min_chemscore(corthresh, max_diff_rt)
+    chemical_score <- if (chemical_score > min_chemical_score) chemical_score * (conf_level^conf_level) else 0
+    
     if (length(dup_add) > 0) {
       mchemicaldata <- rbind(mchemicaldata, dup_data)
-    }
-
-    if (is.na(conf_level) == TRUE) {
-      conf_level <- 0
-    }
-    if (is.na(chemical_score) == TRUE) {
-      chemical_score <- 0
     }
 
     if (chemical_score > best_chemical_score & conf_level > 0) {
