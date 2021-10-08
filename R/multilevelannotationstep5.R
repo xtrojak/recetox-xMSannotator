@@ -43,7 +43,7 @@ remove.tmp.files <- function(loc) {
     try(unlink(file), silent = TRUE)
   }
 
-  return(1)
+  return(0)
 }
 
 multilevelannotationstep5 <- function(outloc,
@@ -93,7 +93,7 @@ multilevelannotationstep5 <- function(outloc,
   }
 
   unique_features <- get.features(curated_res$mz, "unique")
-  curated_res$MatchCategory <- rep("Multiple", dim(curated_res)[1])
+  curated_res$MatchCategory <- rep("Multiple", nrow(curated_res))
   curated_res$MatchCategory[which(curated_res$mz %in% unique_features)] <- "Unique"
 
   write.csv(curated_res, file = "Stage5.csv", row.names = FALSE)
