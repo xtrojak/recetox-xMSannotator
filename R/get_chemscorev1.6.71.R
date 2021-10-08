@@ -255,6 +255,49 @@ add_isotopic_peaks <- function(mchemicaldata,
   return(mchemicaldata)
 }
 
+compute_hub_mz_list <- function(check_cor, cur_adducts_with_isotopes, filter.by, check2, adduct_weights) {
+  hub_mz_list <- which(check_cor > 0 & (cur_adducts_with_isotopes %in% filter.by == TRUE))
+  
+  if (length(hub_mz_list) < 1) {
+    hub_mz_list <- which(check_cor > 0 & check2 < 0 & (cur_adducts_with_isotopes %in% adduct_weights[, 1] == TRUE))
+  }
+  
+  if (length(hub_mz_list) < 1) {
+    hub_mz_list <- which(check_cor > 0 & check2 < 0 & (cur_adducts_with_isotopes %in% adduct_weights[, 1] == TRUE))
+  }
+  
+  if (length(hub_mz_list) < 1) {
+    hub_mz_list <- which(check_cor > 0 & check2 < 0)
+  }
+  return(hub_mz_list)
+}
+
+compute_diff_rt_hubmz <- function(mchemicaldata, hub_mz) {
+  diff_rt_hubmz <- apply(mchemicaldata, 1, function(k) {
+    curtime <- as.numeric(as.character(k[3]))
+    return(abs(mchemicaldata$time[hub_mz] - curtime))
+  })
+  return(diff_rt_hubmz)
+}
+
+compute_hub_mz <- function(hub_mz_list, mchemicaldata, max_diff_rt) {
+  hub_mz <- hub_mz_list[which(mchemicaldata$mean_int_vec[hub_mz_list] == max(mchemicaldata$mean_int_vec[hub_mz_list]))[1]]
+
+  max_time_neighbors <- 0
+
+  for (h1 in hub_mz_list) {
+    diff_rt_hubmz <- compute_diff_rt_hubmz(mchemicaldata, h1)
+
+    num_time_neighbors <- length(which(diff_rt_hubmz <= max_diff_rt))
+
+    if (num_time_neighbors > max_time_neighbors) {
+      hub_mz <- h1
+      max_time_neighbors <- num_time_neighbors
+    }
+  }
+  return(hub_mz)
+}
+
 get_data_and_score_for_chemical <- function(cor_mz,
                                             corthresh,
                                             cur_adducts_with_isotopes,
@@ -281,45 +324,11 @@ get_data_and_score_for_chemical <- function(cor_mz,
   }
 
   if (length(which(check_cor > 0) == TRUE) > 0) {
-    hub_mz_list <- which(check_cor > 0 & (cur_adducts_with_isotopes %in% filter.by == TRUE))
+    hub_mz_list <- compute_hub_mz_list(check_cor, cur_adducts_with_isotopes, filter.by, check2, adduct_weights)
 
-    if (length(hub_mz_list) < 1) {
-      hub_mz_list <- which(check_cor > 0 & check2 < 0 & (cur_adducts_with_isotopes %in% adduct_weights[, 1] == TRUE))
-    }
+    hub_mz <- compute_hub_mz(hub_mz_list, mchemicaldata, max_diff_rt)
 
-    if (length(hub_mz_list) < 1) {
-      hub_mz_list <- which(check_cor > 0 & check2 < 0 & (cur_adducts_with_isotopes %in% adduct_weights[, 1] == TRUE))
-    }
-
-    if (length(hub_mz_list) < 1) {
-      hub_mz_list <- which(check_cor > 0 & check2 < 0)
-    }
-
-    hub_mz_int <- hub_mz_list[which(mchemicaldata$mean_int_vec[hub_mz_list] == max(mchemicaldata$mean_int_vec[hub_mz_list]))[1]]
-
-    max_time_neighbors <- 0
-    best_hub_time_mz <- hub_mz_int
-
-    for (h1 in hub_mz_list) {
-      diff_rt_hubmz <- apply(mchemicaldata, 1, function(k) {
-        curtime <- as.numeric(as.character(k[3]))
-        return(abs(mchemicaldata$time[h1] - curtime))
-      })
-
-      num_time_neighbors <- length(which(diff_rt_hubmz <= max_diff_rt))
-
-      if (num_time_neighbors > max_time_neighbors) {
-        best_hub_time_mz <- h1
-        max_time_neighbors <- num_time_neighbors
-      }
-    }
-
-    hub_mz <- best_hub_time_mz
-
-    diff_rt_hubmz <- apply(mchemicaldata, 1, function(k) {
-      curtime <- as.numeric(as.character(k[3]))
-      return(abs(mchemicaldata$time[hub_mz] - curtime))
-    })
+    diff_rt_hubmz <- compute_diff_rt_hubmz(mchemicaldata, hub_mz)
 
     if (MplusH.abundance.ratio.check == TRUE) {
       layer_one_associations <- which(cor_mz[hub_mz, ] >= corthresh & mchemicaldata$mean_int_vec < mchemicaldata$mean_int_vec[hub_mz] & diff_rt_hubmz <= max_diff_rt)
