@@ -71,8 +71,8 @@ multilevelannotationstep5 <- function(outloc,
   duplicated_features <- get.features(curated_res$mz, "multiple")
 
   cl <- makeSOCKcluster(num_nodes)
-  bad_ind <- {}
-  bad_ind <- foreach(mz = duplicated_features, .combine = rbind) %dopar% {
+  lower_score_multimatches_idx <- {}
+  lower_score_multimatches_idx <- foreach(mz = duplicated_features, .combine = rbind) %dopar% {
     multimatches_idx <- which(curated_res$mz %in% mz)
     multimatch_features <- increase.multimatches.score(curated_res[multimatches_idx, ], adduct_weights)
     max_score_idx <- which(multimatch_features$score == max(multimatch_features$score, na.rm = TRUE))
@@ -88,8 +88,8 @@ multilevelannotationstep5 <- function(outloc,
   }
   stopCluster(cl)
 
-  if (length(bad_ind) > 0) {
-    curated_res <- curated_res[-c(bad_ind), ]
+  if (!!length(lower_score_multimatches_idx)) {
+    curated_res <- curated_res[-c(lower_score_multimatches_idx), ]
   }
 
   unique_features <- get.features(curated_res$mz, "unique")
