@@ -78,10 +78,6 @@ multilevelannotationstep5 <- function(outloc,
     max_score_idx <- which(multimatch_features$score == max(multimatch_features$score, na.rm = TRUE))
     multimatches_idx <- multimatches_idx[-max_score_idx]
 
-    # For all features with the same 'mz' except those that have the highest scores
-    # Change the score of all annotations of a given molecule to:
-    # 'highest score among annotations of the given molecule * [num(annotations of the molecule) - 1] / num(annotations of the molecule)
-    # The purpose of this part of code appears to be increasing scores of isotopes.
     for (feature in 1:nrow(multimatch_features)) {
       if (multimatch_features$score[feature] != max(multimatch_features$score)) {
         same_molecule_idx <- which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[feature])
