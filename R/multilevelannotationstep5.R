@@ -67,27 +67,26 @@ multilevelannotationstep5 <- function(outloc,
 
   cl <- makeSOCKcluster(num_nodes)
   bad_ind <- {}
-  bad_ind <- foreach(mz_idx = 1:length(duplicated_features), .combine = rbind) %dopar% {
-    mz <- duplicated_features[mz_idx]
-    common_mz_idx <- which(curated_res$mz %in% mz)
-
-    multimatch_features <- reevaluate.multimatches.score(curated_res[common_mz_idx, ], adduct_weights)
-    good_idx <- which(multimatch_features$score == max(multimatch_features$score, na.rm = TRUE))
+  bad_ind <- foreach(mz = duplicated_features, .combine = rbind) %dopar% {
+    multimatches_idx <- which(curated_res$mz %in% mz)
+    multimatch_features <- reevaluate.multimatches.score(curated_res[multimatches_idx, ], adduct_weights)
+    max_score_idx <- which(multimatch_features$score == max(multimatch_features$score, na.rm = TRUE))
+    multimatches_idx <- multimatches_idx[-max_score_idx]
 
     # For all features with the same 'mz' except those that have the highest scores
     # Change the score of all annotations of a given molecule to:
     # 'highest score among annotations of the given molecule * [num(annotations of the molecule) - 1] / num(annotations of the molecule)
-    for (com_indval in 1:length(common_mz_idx)) {
-      if (!com_indval %in% good_idx) {
-        alike_annotations <- curated_res[which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[com_indval]), ]
-        scoreval <- ((dim(alike_annotations)[1]) - 1) * alike_annotations$score[1] / (dim(alike_annotations)[1])
-        scorevec <- c(rep(scoreval, length(which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[com_indval]))))
-        curated_res$score[which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[com_indval])] <- scorevec
+    # The purpose of this part of code appears to be increasing scores of isotopes.
+    for (feature in 1:nrow(multimatch_features)) {
+      if (multimatch_features$score[feature] != max(multimatch_features$score)) {
+        same_molecule_idx <- which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[feature])
+        same_molecule_annotation <- curated_res[same_molecule_idx, ]
+        num_annotations <- nrow(same_molecule_annotation)
+        score <- (num_annotations - 1) * max(same_molecule_annotation$score) / num_annotations
+        curated_res$score[same_molecule_idx] <- score
       }
     }
-    common_mz_idx <- common_mz_idx[-good_idx]
-
-    return(common_mz_idx)
+    return(multimatches_idx)
   }
   stopCluster(cl)
 
