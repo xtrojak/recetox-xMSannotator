@@ -7,7 +7,7 @@ init.chemscoremat <- function(chemscoremat) {
   chemscoremat
 }
 
-reevaluate.multimatches.score <- function(multimatch_features, adduct_weights) {
+increase.multimatches.score <- function(multimatch_features, adduct_weights) {
   features_adducts <- which(multimatch_features$Adduct %in% adduct_weights[, 1])
   if (length(features_adducts) > 0) {
     multimatch_features$score[features_adducts] <- (multimatch_features$score[features_adducts]) * 100
@@ -69,7 +69,7 @@ multilevelannotationstep5 <- function(outloc,
   bad_ind <- {}
   bad_ind <- foreach(mz = duplicated_features, .combine = rbind) %dopar% {
     multimatches_idx <- which(curated_res$mz %in% mz)
-    multimatch_features <- reevaluate.multimatches.score(curated_res[multimatches_idx, ], adduct_weights)
+    multimatch_features <- increase.multimatches.score(curated_res[multimatches_idx, ], adduct_weights)
     max_score_idx <- which(multimatch_features$score == max(multimatch_features$score, na.rm = TRUE))
     multimatches_idx <- multimatches_idx[-max_score_idx]
 
