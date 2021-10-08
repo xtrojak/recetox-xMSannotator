@@ -15,6 +15,11 @@ increase.multimatches.score <- function(multimatch_features, adduct_weights) {
   multimatch_features
 }
 
+reevaluate.multimatches.score <- function(single_molecule_annotation) {
+  num_annotations <- nrow(single_molecule_annotation)
+  score <- (num_annotations - 1) * max(single_molecule_annotation$score) / num_annotations
+}
+
 get.features <- function(mz, match) {
   feature_count <- table(mz)
   features <- switch(match,
@@ -80,10 +85,7 @@ multilevelannotationstep5 <- function(outloc,
     for (feature in 1:nrow(multimatch_features)) {
       if (multimatch_features$score[feature] != max(multimatch_features$score)) {
         same_molecule_idx <- which(curated_res$chemical_ID %in% multimatch_features$chemical_ID[feature])
-        same_molecule_annotation <- curated_res[same_molecule_idx, ]
-        num_annotations <- nrow(same_molecule_annotation)
-        score <- (num_annotations - 1) * max(same_molecule_annotation$score) / num_annotations
-        curated_res$score[same_molecule_idx] <- score
+        curated_res$score[same_molecule_idx] <- reevaluate.multimatches.score(curated_res[same_molecule_idx, ])
       }
     }
     return(multimatches_idx)
