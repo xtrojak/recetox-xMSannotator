@@ -484,6 +484,36 @@ compute_topquant_cor <- function(cor_mz) {
   return(topquant_cor)
 }
 
+subset_selected_mz <- function(check_cor,
+                               cur_adducts_with_isotopes,
+                               filter.by,
+                               check2,
+                               adduct_weights,
+                               mchemicaldata,
+                               MplusH.abundance.ratio.check,
+                               max_diff_rt,
+                               cor_mz,
+                               corthresh,
+                               check_cor2) {
+  hub_mz_list <- compute_hub_mz_list(check_cor, cur_adducts_with_isotopes, filter.by, check2, adduct_weights)
+  hub_mz <- compute_hub_mz(hub_mz_list, mchemicaldata, max_diff_rt)
+  diff_rt_hubmz <- compute_diff_rt_hubmz(mchemicaldata, hub_mz)
+
+  if (MplusH.abundance.ratio.check == TRUE) {
+    layer_one_associations <- which(cor_mz[hub_mz, ] >= corthresh & mchemicaldata$mean_int_vec < mchemicaldata$mean_int_vec[hub_mz] & diff_rt_hubmz <= max_diff_rt)
+  } else {
+    layer_one_associations <- which(cor_mz[hub_mz, ] >= corthresh & diff_rt_hubmz <= max_diff_rt)
+  }
+
+  if (length(which(check_cor2 >= 0.1)) > 0) {
+    selected_mz <- unique(c(hub_mz, layer_one_associations))
+    mchemicaldata <- mchemicaldata[selected_mz, ]
+  } else {
+    mchemicaldata <- mchemicaldata[which(cor_mz[hub_mz, ] >= corthresh), ]
+  }
+  return(mchemicaldata)
+}
+
 get_data_and_score_for_chemical <- function(cor_mz,
                                             corthresh,
                                             cur_adducts_with_isotopes,
@@ -508,25 +538,19 @@ get_data_and_score_for_chemical <- function(cor_mz,
   }
 
   if (length(which(check_cor > 0) == TRUE) > 0) {
-    hub_mz_list <- compute_hub_mz_list(check_cor, cur_adducts_with_isotopes, filter.by, check2, adduct_weights)
-    hub_mz <- compute_hub_mz(hub_mz_list, mchemicaldata, max_diff_rt)
-    diff_rt_hubmz <- compute_diff_rt_hubmz(mchemicaldata, hub_mz)
-
-    if (MplusH.abundance.ratio.check == TRUE) {
-      layer_one_associations <- which(cor_mz[hub_mz, ] >= corthresh & mchemicaldata$mean_int_vec < mchemicaldata$mean_int_vec[hub_mz] & diff_rt_hubmz <= max_diff_rt)
-    } else {
-      layer_one_associations <- which(cor_mz[hub_mz, ] >= corthresh & diff_rt_hubmz <= max_diff_rt)
-    }
-
-    selected_mz <- unique(c(hub_mz, layer_one_associations))
-
-    topquant_cor <- compute_topquant_cor(cor_mz)
-
-    if (length(which(check_cor2 >= 0.1)) > 0) {
-      mchemicaldata <- mchemicaldata[selected_mz, ]
-    } else {
-      mchemicaldata <- mchemicaldata[which(cor_mz[hub_mz, ] >= corthresh), ]
-    }
+    mchemicaldata <- subset_selected_mz(
+      check_cor,
+      cur_adducts_with_isotopes,
+      filter.by,
+      check2,
+      adduct_weights,
+      mchemicaldata,
+      MplusH.abundance.ratio.check,
+      max_diff_rt,
+      cor_mz,
+      corthresh,
+      check_cor2
+    )
 
     mchemicaldata <- na.omit(mchemicaldata)
     if (nrow(mchemicaldata) < 2) {
@@ -538,6 +562,8 @@ get_data_and_score_for_chemical <- function(cor_mz,
 
     diff_rt <- abs(min(as.numeric(mchemicaldata$time)) - max(as.numeric(mchemicaldata$time)))
     diff_rt <- round(diff_rt)
+
+    topquant_cor <- compute_topquant_cor(cor_mz)
 
     if (diff_rt <= max_diff_rt) {
       if (dim(mchemicaldata)[1] > 1) {
@@ -553,8 +579,12 @@ get_data_and_score_for_chemical <- function(cor_mz,
       mchemicaldata <- as.data.frame(mchemicaldata)
       mchemicaldata$time <- as.numeric(as.character(mchemicaldata$time))
 
-      groupnumA <- unique(mchemicaldata$Module_RTclust)
-      mchemicaldata <- group_by_rt_histv2(mchemicaldata, time_step = 1, max_diff_rt = max_diff_rt, groupnum = groupnumA)
+      mchemicaldata <- group_by_rt_histv2(
+        mchemicaldata,
+        time_step = 1,
+        max_diff_rt = max_diff_rt,
+        groupnum = unique(mchemicaldata$Module_RTclust)
+      )
 
       top_mod_sub <- table(mchemicaldata$Module_RTclust)
       top_mod_sub_names <- names(top_mod_sub)
@@ -585,10 +615,7 @@ get_data_and_score_for_chemical <- function(cor_mz,
       group_ind_size <- max(group_sizes)[1]
 
       if (group_ind_size < 2) {
-        k_power <- 1.25
-        mchemicaldata <- mchemicaldata_module
-        mchemicaldata <- mchemicaldata[order(mchemicaldata$mz), ]
-
+        mchemicaldata <- mchemicaldata_module[order(mchemicaldata_module$mz), ]
         chemical_score <- calc_base_score_v2(mchemicaldata, adduct_weights, topquant_cor)
       }
 
@@ -599,9 +626,7 @@ get_data_and_score_for_chemical <- function(cor_mz,
         check_reladd <- which(tempdata$Adduct %in% as.character(adduct_weights[, 1]))
         if (length(check_reladd) > 0) {
           good_temp <- c(good_temp, g1)
-          if (nrow(tempdata) > group_ind_size) {
-            group_ind_size <- nrow(tempdata)
-          }
+          group_ind_size <- min(group_ind_size, nrow(tempdata), na.rm = TRUE)
         }
       }
 
@@ -621,17 +646,14 @@ get_data_and_score_for_chemical <- function(cor_mz,
       }
       else {
         if (dim(mchemicaldata)[1] > 1) {
-          diff_rt <- abs(min(as.numeric(mchemicaldata$time)) - max(as.numeric(mchemicaldata$time)))
-
           basic <- compute_min_max_iqr_basic(mchemicaldata, max_diff_rt)
           min_val <- basic$min_val
           max_val <- basic$max_val
-          iqr1 <- basic$iqr1
 
           if (length(which(mchemicaldata$time >= min_val & mchemicaldata$time <= max_val)) > 1) {
             mchemicaldata <- mchemicaldata[which(mchemicaldata$time >= min_val & mchemicaldata$time <= max_val), ]
+            
             if (dim(mchemicaldata)[1] > 1) {
-              k_power <- 1
               mchemicaldata$time <- as.numeric(as.character(mchemicaldata$time))
 
                if (length(mchemicaldata) > 0) {
@@ -648,6 +670,7 @@ get_data_and_score_for_chemical <- function(cor_mz,
           } else {
             if (length(mchemicaldata) > 0) {
               if (nrow(mchemicaldata) > 1) {
+                diff_rt <- abs(min(as.numeric(mchemicaldata$time)) - max(as.numeric(mchemicaldata$time)))
                 if (diff_rt > max_diff_rt) {
                   chemical_score <- calc_base_score_v2(mchemicaldata, adduct_weights, topquant_cor)
                 }
@@ -662,23 +685,18 @@ get_data_and_score_for_chemical <- function(cor_mz,
         names(chemical_score) <- chemicalid[1]
       }
       names(chemical_score) <- chemicalid[1]
-      mchemicaldata <- mchemicaldata # [,c(1:11)]
       mchemicaldata <- na.omit(mchemicaldata)
     }
   }
   else {
     # no correlation between putative adducts
-    cur_adducts_with_isotopes <- mchemicaldata$Adduct
-    good_adducts_len <- length(which(cur_adducts_with_isotopes %in% adduct_weights[, 1]))
+    good_adducts_len <- length(which(mchemicaldata$Adduct %in% adduct_weights[, 1]))
     if (good_adducts_len > 0) {
-      cur_adducts_with_isotopes <- mchemicaldata$Adduct
+      max_adduct_weight <- max(as.numeric(as.character(adduct_weights[which(adduct_weights[, 1] %in% mchemicaldata$Adduct), 2])))[1]
+      chemical_score <- 10^max_adduct_weight
 
-      max_adduct_weight <- max(as.numeric(as.character(adduct_weights[which(adduct_weights[, 1] %in% cur_adducts_with_isotopes), 2])))[1]
-      chemical_score <- ((10^max_adduct_weight))
-      chemical_score <- chemical_score[1]
       good_adduct_index <- which(adduct_weights[, 2] == max_adduct_weight)
-      chemical_score <- chemical_score[1]
-      mchemicaldata <- mchemicaldata[which(cur_adducts_with_isotopes %in% adduct_weights[good_adduct_index, 1]), ]
+      mchemicaldata <- mchemicaldata[which(mchemicaldata$Adduct %in% adduct_weights[good_adduct_index, 1]), ]
     } else {
       chemical_score <- 0
       mchemicaldata <- mchemicaldata_module
