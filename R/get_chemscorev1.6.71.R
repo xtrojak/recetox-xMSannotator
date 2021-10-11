@@ -401,6 +401,33 @@ compute_temp_score_and_data <- function(group_sizes,
   return(list("data" = temp_best_data, "score" = temp_best_score))
 }
 
+compute_time_cor_groups <- function(mchemicaldata,
+                                max_diff_rt,
+                                min_val,
+                                max_val,
+                                iqr1) {
+  diff_rt <- abs(max(mchemicaldata$time) - min(mchemicaldata$time))
+
+  if (diff_rt > 2 * max_diff_rt) {
+    time_cor_groups <- sapply(list(myData1 = mchemicaldata), function(x) split(x, cut(mchemicaldata$time, breaks = seq(min_val - max_diff_rt, max_val + max_diff_rt, iqr1))))
+  } else {
+    max_val <- max(mchemicaldata$time)
+    min_val <- min(mchemicaldata$time)
+    diff_rt <- abs(max(mchemicaldata$time) - min(mchemicaldata$time))
+
+    if (min_val < max_diff_rt) {
+      time_cor_groups <- sapply(list(myData1 = mchemicaldata), function(x) split(x, cut(mchemicaldata$time, breaks = c(0, max_val + 1))))
+    } else {
+      if (diff_rt < max_diff_rt) {
+        time_cor_groups <- sapply(list(myData1 = mchemicaldata), function(x) split(x, cut(mchemicaldata$time, breaks = c(min_val - diff_rt, max_val + diff_rt, diff_rt * 2))))
+      } else {
+        time_cor_groups <- sapply(list(myData1 = mchemicaldata), function(x) split(x, cut(mchemicaldata$time, breaks = seq(min_val - diff_rt, max_val + diff_rt, 1 * max_diff_rt))))
+      }
+    }
+  }
+  return(time_cor_groups)
+}
+
 get_data_and_score_for_chemical <- function(cor_mz,
                                             corthresh,
                                             cur_adducts_with_isotopes,
@@ -524,31 +551,20 @@ get_data_and_score_for_chemical <- function(cor_mz,
       iqr1 <- max(iqr1, max_diff_rt)
 
 
-      diff_rt <- abs(max(mchemicaldata$time) - min(mchemicaldata$time))
 
       if (nrow(mchemicaldata) < 1) {
         #next
         return(list("score" = chemical_score, "data" = mchemicaldata))
       }
 
-      if (diff_rt > 2 * max_diff_rt) {
-        time_cor_groups <- sapply(list(myData1 = mchemicaldata), function(x) split(x, cut(mchemicaldata$time, breaks = seq(min_val - max_diff_rt, max_val + max_diff_rt, iqr1))))
-      } else {
-        max_val <- max(mchemicaldata$time)
-        min_val <- min(mchemicaldata$time)
-        diff_rt <- abs(max(mchemicaldata$time) - min(mchemicaldata$time))
-
-        if (min_val < max_diff_rt) {
-          time_cor_groups <- sapply(list(myData1 = mchemicaldata), function(x) split(x, cut(mchemicaldata$time, breaks = c(0, max_val + 1))))
-        } else {
-          if (diff_rt < max_diff_rt) {
-            time_cor_groups <- sapply(list(myData1 = mchemicaldata), function(x) split(x, cut(mchemicaldata$time, breaks = c(min_val - diff_rt, max_val + diff_rt, diff_rt * 2))))
-          } else {
-            time_cor_groups <- sapply(list(myData1 = mchemicaldata), function(x) split(x, cut(mchemicaldata$time, breaks = seq(min_val - diff_rt, max_val + diff_rt, 1 * max_diff_rt))))
-          }
-        }
-      }
-
+      time_cor_groups <- compute_time_cor_groups(
+        mchemicaldata,
+        max_diff_rt,
+        min_val,
+        max_val,
+        iqr1
+      )
+      
       group_sizes <- sapply(time_cor_groups, function(x) {
         dim(as.data.frame(x))[1]
       })
