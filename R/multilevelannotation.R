@@ -1305,6 +1305,11 @@ multilevelannotation <- function(dataA,
                 clusterExport(cl, "compute_min_max_iqr_basic")
                 clusterExport(cl, "compute_min_max_iqr_advanced")
                 clusterExport(cl, "compute_topquant_cor")
+                clusterExport(cl, "subset_selected_mz")
+                clusterExport(cl, "update_best_score_and_data")
+                clusterExport(cl, "compute_table_mod")
+                clusterExport(cl, "compute_check2")
+
 
 
                 # clusterExport(cl, "getMolecule")
