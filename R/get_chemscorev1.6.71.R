@@ -485,7 +485,6 @@ compute_topquant_cor <- function(cor_mz) {
 }
 
 subset_selected_mz <- function(check_cor,
-                               cur_adducts_with_isotopes,
                                filter.by,
                                check2,
                                adduct_weights,
@@ -495,7 +494,7 @@ subset_selected_mz <- function(check_cor,
                                cor_mz,
                                corthresh,
                                check_cor2) {
-  hub_mz_list <- compute_hub_mz_list(check_cor, cur_adducts_with_isotopes, filter.by, check2, adduct_weights)
+  hub_mz_list <- compute_hub_mz_list(check_cor, mchemicaldata$Adduct, filter.by, check2, adduct_weights)
   hub_mz <- compute_hub_mz(hub_mz_list, mchemicaldata, max_diff_rt)
   diff_rt_hubmz <- compute_diff_rt_hubmz(mchemicaldata, hub_mz)
 
@@ -516,9 +515,7 @@ subset_selected_mz <- function(check_cor,
 
 get_data_and_score_for_chemical <- function(cor_mz,
                                             corthresh,
-                                            cur_adducts_with_isotopes,
                                             adduct_weights,
-                                            check2,
                                             filter.by,
                                             mchemicaldata,
                                             max_diff_rt,
@@ -526,6 +523,10 @@ get_data_and_score_for_chemical <- function(cor_mz,
                                             MplusH.abundance.ratio.check,
                                             chemical_score,
                                             mchemicaldata_module) {
+
+  cur_adducts_with_isotopes <- mchemicaldata$Adduct
+  check2 <- compute_check2(cur_adducts_with_isotopes)
+
   check_cor <- sapply(1:dim(cor_mz)[1], function(k) {
     count_mz <- length(which(cor_mz[k, ] >= corthresh)) - 1
     return(count_mz)
@@ -540,7 +541,6 @@ get_data_and_score_for_chemical <- function(cor_mz,
   if (length(which(check_cor > 0) == TRUE) > 0) {
     mchemicaldata <- subset_selected_mz(
       check_cor,
-      cur_adducts_with_isotopes,
       filter.by,
       check2,
       adduct_weights,
@@ -772,6 +772,25 @@ compute_check2 <- function(cur_adducts_with_isotopes) {
   return(check2)
 }
 
+update_best_score_and_data <- function(chemical_score, best_chemical_score, mchemicaldata, best_data, conf_level = NA) {
+
+  condition <- chemical_score > best_chemical_score
+  if(!is.na(conf_level)) {
+    condition <- condition & conf_level > 0
+  }
+
+  if (condition) {
+    best_chemical_score <- chemical_score
+    best_data <- mchemicaldata
+  } else {
+    if (chemical_score == best_chemical_score) {
+      best_chemical_score <- chemical_score
+      best_data <- rbind(best_data, mchemicaldata)
+    }
+  }
+  return(list("score" = best_chemical_score, "data" = best_data))
+}
+
 compute_best_score <- function(table_mod,
                                mchemicaldata_orig,
                                adduct_weights,
@@ -793,41 +812,25 @@ compute_best_score <- function(table_mod,
       filter(Module_RTclust == top_mod[i]) %>%
       arrange(mz)
 
-    cur_adducts_with_isotopes <- mchemicaldata$Adduct
-    cur_adducts <- gsub(cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[0-9]*\\])", replacement = "")
-
     if (nrow(mchemicaldata) < 2) {
-      good_adducts_len <- length(which(cur_adducts_with_isotopes %in% adduct_weights[, 1]))
+      good_adducts_len <- length(which(mchemicaldata$Adduct %in% adduct_weights[, 1]))
       if (good_adducts_len > 0) {
-        chemical_score <- compute_score(adduct_weights, cur_adducts_with_isotopes)
-        if (chemical_score > best_chemical_score) {
-          best_chemical_score <- chemical_score
-
-          best_mod_ind <- i
-          best_data <- mchemicaldata
-        } else {
-          if (chemical_score == best_chemical_score) {
-            best_chemical_score <- chemical_score
-
-            best_mod_ind <- c(i, best_mod_ind)
-            best_data <- rbind(best_data, mchemicaldata)
-          }
-        }
+        chemical_score <- compute_score(adduct_weights, mchemicaldata$Adduct)
+        best <- update_best_score_and_data(chemical_score, best_chemical_score, mchemicaldata, best_data)
+        best_chemical_score <- best$score
+        best_data <- best$data
       }
       # next;
     }
-    check2 <- compute_check2(cur_adducts_with_isotopes)
-    mzid_cur <- paste(mchemicaldata$mz, mchemicaldata$time, sep = "_")
 
+    mzid_cur <- paste(mchemicaldata$mz, mchemicaldata$time, sep = "_")
     cor_mz <- compute_cor_mz(mzid_cur, global_cor)
 
     if (length(cor_mz) > 1) {
       intermediate_result <- get_data_and_score_for_chemical(
         cor_mz,
         corthresh,
-        cur_adducts_with_isotopes,
         adduct_weights,
-        check2,
         filter.by,
         mchemicaldata,
         max_diff_rt,
@@ -847,6 +850,7 @@ compute_best_score <- function(table_mod,
       for (a1 in 1:length(check2)) {
         strlength <- attr(check2[[a1]], "match.length")
         if (strlength[1] > (-1)) {
+          cur_adducts <- gsub(mchemicaldata$Adduct, pattern = "(_\\[(\\+|\\-)[0-9]*\\])", replacement = "")
           count_abundant_form <- length(which(cur_adducts %in% cur_adducts[a1]))
           if (count_abundant_form < 2) {
             mchemicaldata <- mchemicaldata[-a1, ]
@@ -860,17 +864,9 @@ compute_best_score <- function(table_mod,
     min_chemical_score <- get_min_chemscore(corthresh, max_diff_rt)
     chemical_score <- if (chemical_score > min_chemical_score) chemical_score * (conf_level^conf_level) else 0
 
-    if (chemical_score > best_chemical_score & conf_level > 0) {
-      best_chemical_score <- chemical_score
-      best_mod_ind <- i
-      best_data <- mchemicaldata
-    } else {
-      if (chemical_score == best_chemical_score) {
-        best_chemical_score <- chemical_score
-        best_mod_ind <- c(i, best_mod_ind)
-        best_data <- rbind(best_data, mchemicaldata)
-      }
-    }
+    best <- update_best_score_and_data(chemical_score, best_chemical_score, mchemicaldata, best_data, conf_level)
+    best_chemical_score <- best$score
+    best_data <- best$data
   }
   return(list("score" = best_chemical_score, "data" = best_data))
 }
