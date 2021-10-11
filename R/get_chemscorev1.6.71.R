@@ -509,11 +509,6 @@ get_data_and_score_for_chemical <- function(cor_mz,
     } else {
       layer_one_associations <- which(cor_mz[hub_mz, ] >= corthresh & diff_rt_hubmz <= max_diff_rt)
     }
-    second_level_associations <- {}
-
-    for (l in layer_one_associations) {
-      second_level_associations <- c(second_level_associations, which(cor_mz[l, ] >= 0.7))
-    }
 
     selected_mz <- unique(c(hub_mz, layer_one_associations))
 
