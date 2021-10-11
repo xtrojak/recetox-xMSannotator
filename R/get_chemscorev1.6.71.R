@@ -476,6 +476,14 @@ compute_min_max_iqr_advanced <- function(mchemicaldata, max_diff_rt) {
   return(list("min_val" = min_val, "max_val" = max_val, "iqr1" = iqr1))
 }
 
+compute_topquant_cor <- function(cor_mz) {
+  topquant_cor <- max(cor_mz[upper.tri(cor_mz)])
+  if (is.na(topquant_cor) == TRUE) {
+    topquant_cor <- 0
+  }
+  return(topquant_cor)
+}
+
 get_data_and_score_for_chemical <- function(cor_mz,
                                             corthresh,
                                             cur_adducts_with_isotopes,
@@ -512,11 +520,7 @@ get_data_and_score_for_chemical <- function(cor_mz,
 
     selected_mz <- unique(c(hub_mz, layer_one_associations))
 
-    topquant_cor <- max(cor_mz[upper.tri(cor_mz)])
-    if (is.na(topquant_cor) == TRUE) {
-      topquant_cor <- 0
-    }
-
+    topquant_cor <- compute_topquant_cor(cor_mz)
 
     if (length(which(check_cor2 >= 0.1)) > 0) {
       mchemicaldata <- mchemicaldata[selected_mz, ]
@@ -868,8 +872,6 @@ compute_chemical_score <- function(mchemicaldata,
 
   mchemicaldata_orig <- mchemicaldata
 
-  topquant_cor <- 0
-  k_power <- 1
   if (length(which(table_mod >= 1)) > 0) {
     best <- compute_best_score(
       table_mod,
