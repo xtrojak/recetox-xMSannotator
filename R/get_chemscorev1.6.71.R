@@ -652,7 +652,7 @@ get_data_and_score_for_chemical <- function(cor_mz,
 
           if (length(which(mchemicaldata$time >= min_val & mchemicaldata$time <= max_val)) > 1) {
             mchemicaldata <- mchemicaldata[which(mchemicaldata$time >= min_val & mchemicaldata$time <= max_val), ]
-            
+
             if (dim(mchemicaldata)[1] > 1) {
               mchemicaldata$time <- as.numeric(as.character(mchemicaldata$time))
 
@@ -728,6 +728,7 @@ compute_cor_mz <- function(mzid_cur, global_cor) {
     cor_mz <- cor_mz2[, -c(1:2)]
     cor_mz <- cor_mz[, mz_order]
   }
+  return(cor_mz)
 }
 
 get_conf_level <- function(mchemicaldata, adduct_weights) {
@@ -766,8 +767,12 @@ apply_rt_scaling <- function(mchemicaldata, max_diff_rt, chemical_score) {
   return(chemical_score)
 }
 
+compute_check2 <- function(cur_adducts_with_isotopes) {
+  check2 <- gregexpr(text = cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[0-9]*\\])")
+  return(check2)
+}
+
 compute_best_score <- function(table_mod,
-                               top_mod,
                                mchemicaldata_orig,
                                adduct_weights,
                                global_cor,
@@ -776,6 +781,8 @@ compute_best_score <- function(table_mod,
                                filter.by,
                                chemicalid,
                                MplusH.abundance.ratio.check) {
+  top_mod <- names(table_mod)
+
   best_chemical_score <- (-100)
   best_data <- mchemicaldata_orig
 
@@ -809,7 +816,7 @@ compute_best_score <- function(table_mod,
       }
       # next;
     }
-    check2 <- gregexpr(text = cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[0-9]*\\])")
+    check2 <- compute_check2(cur_adducts_with_isotopes)
     mzid_cur <- paste(mchemicaldata$mz, mchemicaldata$time, sep = "_")
 
     cor_mz <- compute_cor_mz(mzid_cur, global_cor)
@@ -834,18 +841,13 @@ compute_best_score <- function(table_mod,
       chemical_score <- intermediate_result$score
     }
 
-    cur_adducts_with_isotopes <- mchemicaldata$Adduct
-    cur_adducts <- gsub(cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[0-9]*\\])", replacement = "")
-    check2 <- gregexpr(text = cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[0-9]*\\])")
+    check2 <- compute_check2(mchemicaldata$Adduct)
 
     if (length(check2) > 0) {
       for (a1 in 1:length(check2)) {
         strlength <- attr(check2[[a1]], "match.length")
-
         if (strlength[1] > (-1)) {
           count_abundant_form <- length(which(cur_adducts %in% cur_adducts[a1]))
-
-
           if (count_abundant_form < 2) {
             mchemicaldata <- mchemicaldata[-a1, ]
           }
@@ -873,6 +875,13 @@ compute_best_score <- function(table_mod,
   return(list("score" = best_chemical_score, "data" = best_data))
 }
 
+compute_table_mod <- function(data) {
+  table_mod <- table(data)
+  table_mod <- table_mod[table_mod > 0]
+  table_mod <- table_mod[order(table_mod, decreasing = TRUE)]
+  return(table_mod)
+}
+
 #' @export
 compute_chemical_score <- function(mchemicaldata,
                                    adduct_weights,
@@ -882,18 +891,13 @@ compute_chemical_score <- function(mchemicaldata,
                                    max_diff_rt,
                                    chemicalid,
                                    MplusH.abundance.ratio.check) {
-  table_mod <- table(mchemicaldata$Module_RTclust)
-  table_mod <- table_mod[table_mod > 0]
-  table_mod <- table_mod[order(table_mod, decreasing = TRUE)]
-
-  top_mod <- names(table_mod)
+  table_mod <- compute_table_mod(mchemicaldata$Module_RTclust)
 
   mchemicaldata_orig <- mchemicaldata
 
   if (length(which(table_mod >= 1)) > 0) {
     best <- compute_best_score(
       table_mod,
-      top_mod,
       mchemicaldata_orig,
       adduct_weights,
       global_cor,
@@ -918,23 +922,21 @@ compute_chemical_score <- function(mchemicaldata,
   if (chemical_score <= 1) {
     mchemicaldata <- mchemicaldata_orig
     cur_adducts_with_isotopes <- mchemicaldata$Adduct
-    cur_adducts <- gsub(cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[1-2]*\\])", replacement = "")
-
     good_adducts_len <- length(which(cur_adducts_with_isotopes %in% adduct_weights[, 1]))
 
     if (good_adducts_len > 0) {
       max_adduct_weight <- max(as.numeric(as.character(adduct_weights[which(adduct_weights[, 1] %in% cur_adducts_with_isotopes), 2])))[1]
       chemical_score <- ((10^max_adduct_weight))
       chemical_score <- chemical_score[1] - 1
-      good_adduct_index <- which(adduct_weights[, 2] == max_adduct_weight)
       chemical_score <- chemical_score[1]
+
+      good_adduct_index <- which(adduct_weights[, 2] == max_adduct_weight)
       mchemicaldata <- mchemicaldata[which(cur_adducts_with_isotopes %in% adduct_weights[good_adduct_index, 1]), ]
     }
   }
 
   if (nrow(mchemicaldata) > 0) {
     mchemicaldata <- unique(mchemicaldata)
-    mzid_cur <- paste(mchemicaldata$mz, mchemicaldata$time, sep = "_")
   } else {
     chemical_score <- 0
   }
