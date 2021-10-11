@@ -428,6 +428,54 @@ compute_time_cor_groups <- function(mchemicaldata,
   return(time_cor_groups)
 }
 
+compute_iqr1 <- function(s1) {
+  return(min(abs(s1[3] - s1[2]), abs(s1[3] - s1[5])))
+}
+
+compute_min_max_iqr_basic <- function(mchemicaldata, max_diff_rt) {
+  d1 <- density(mchemicaldata$time, bw = max_diff_rt, from = min(mchemicaldata$time) - 0.001, to = (0.01 + max(mchemicaldata$time)), na.rm = TRUE)
+  s1 <- summary(d1$x)
+  iqr1 <- s1[5] - s1[2]
+
+  if (iqr1 > max_diff_rt / 2) {
+    iqr1 <- max_diff_rt / 2
+  }
+  min_val <- s1[2]
+  max_val <- s1[5]
+
+  return(list("min_val" = min_val, "max_val" = max_val, "iqr1" = iqr1))
+}
+
+compute_min_max_iqr_advanced <- function(mchemicaldata, max_diff_rt) {
+  basic <- compute_min_max_iqr_basic(mchemicaldata, max_diff_rt)
+  min_val <- basic$min_val
+  max_val <- basic$max_val
+  iqr1 <- basic$iqr1
+
+  s1 <- summary(mchemicaldata$time)
+  iqr1 <- s1[5] - s1[2]
+  min_val <- s1[2] - (1.5 * iqr1)
+  max_val <- s1[5] + (1.5 * iqr1)
+
+  if (min_val < s1[1] && max_val > s1[6]) {
+    iqr1 <- compute_iqr1(s1)
+    min_val <- s1[2] - (1.5 * iqr1)
+    max_val <- s1[5] + (1.5 * iqr1)
+  }
+
+  if (min_val < s1[1]) {
+    min_val <- s1[1]
+  }
+  if (max_val > s1[6]) {
+    max_val <- s1[6]
+  }
+
+  iqr1 <- compute_iqr1(s1)
+  iqr1 <- max(iqr1, max_diff_rt)
+
+  return(list("min_val" = min_val, "max_val" = max_val, "iqr1" = iqr1))
+}
+
 get_data_and_score_for_chemical <- function(cor_mz,
                                             corthresh,
                                             cur_adducts_with_isotopes,
@@ -516,41 +564,7 @@ get_data_and_score_for_chemical <- function(cor_mz,
       mchemicaldata <- mchemicaldata[which(mchemicaldata$Module_RTclust == top_mod_sub_names[max_top_mod]), ]
       mchemicaldata <- mchemicaldata[order(mchemicaldata$mz), ]
 
-      cur_adducts_with_isotopes <- mchemicaldata$Adduct
-      cur_adducts <- gsub(cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[0-9]*\\])", replacement = "")
-
-      d1 <- density(mchemicaldata$time, bw = max_diff_rt, from = min(mchemicaldata$time) - 0.001, to = (0.01 + max(mchemicaldata$time)), na.rm = TRUE)
-      s1 <- summary(d1$x)
-      iqr1 <- s1[5] - s1[2]
-
-      if (iqr1 > max_diff_rt / 2) {
-        iqr1 <- max_diff_rt / 2
-      }
-      min_val <- s1[2]
-      max_val <- s1[5]
-
-      s1 <- summary(mchemicaldata$time)
-      iqr1 <- s1[5] - s1[2]
-      min_val <- s1[2] - (1.5 * iqr1)
-      max_val <- s1[5] + (1.5 * iqr1)
-
-      if (min_val < s1[1] && max_val > s1[6]) {
-        iqr1 <- min(abs(s1[3] - s1[2]), abs(s1[3] - s1[5]))
-        min_val <- s1[2] - (1.5 * iqr1)
-        max_val <- s1[5] + (1.5 * iqr1)
-      }
-
-      if (min_val < s1[1]) {
-        min_val <- s1[1]
-      }
-      if (max_val > s1[6]) {
-        max_val <- s1[6]
-      }
-
-      iqr1 <- min(abs(s1[3] - s1[2]), abs(s1[3] - s1[5]))
-      iqr1 <- max(iqr1, max_diff_rt)
-
-
+      ranges <- compute_min_max_iqr_advanced(mchemicaldata, max_diff_rt)
 
       if (nrow(mchemicaldata) < 1) {
         #next
@@ -560,17 +574,14 @@ get_data_and_score_for_chemical <- function(cor_mz,
       time_cor_groups <- compute_time_cor_groups(
         mchemicaldata,
         max_diff_rt,
-        min_val,
-        max_val,
-        iqr1
+        ranges$min_val,
+        ranges$max_val,
+        ranges$iqr1
       )
-      
+
       group_sizes <- sapply(time_cor_groups, function(x) {
         dim(as.data.frame(x))[1]
       })
-
-      group_ind_size <- 1
-      check_reladd <- {}
 
       group_ind_size <- max(group_sizes)[1]
 
@@ -613,15 +624,10 @@ get_data_and_score_for_chemical <- function(cor_mz,
         if (dim(mchemicaldata)[1] > 1) {
           diff_rt <- abs(min(as.numeric(mchemicaldata$time)) - max(as.numeric(mchemicaldata$time)))
 
-          d1 <- density(mchemicaldata$time, bw = max_diff_rt, from = min(mchemicaldata$time) - 0.001, to = (0.01 + max(mchemicaldata$time)), na.rm = TRUE)
-          s1 <- summary(d1$x)
-          iqr1 <- s1[5] - s1[2]
-
-          if (iqr1 > max_diff_rt / 2) {
-            iqr1 <- max_diff_rt / 2
-          }
-          min_val <- s1[2]
-          max_val <- s1[5]
+          basic <- compute_min_max_iqr_basic(mchemicaldata, max_diff_rt)
+          min_val <- basic$min_val
+          max_val <- basic$max_val
+          iqr1 <- basic$iqr1
 
           if (length(which(mchemicaldata$time >= min_val & mchemicaldata$time <= max_val)) > 1) {
             mchemicaldata <- mchemicaldata[which(mchemicaldata$time >= min_val & mchemicaldata$time <= max_val), ]
