@@ -93,7 +93,7 @@ do_stepwise=0
     }else{ 
     n1<-unlist(netclassA$colors)
     n2<-as.data.frame(n1)
-    mod_list<-as.numeric(n2[,1])
+    mod_list<-as.numeric(factor(n2[,1]))
  
     Alldegrees1<-softConnectivity(datExpr=data_m,power=power_val,minNSamples=2)
     #Alldegrees1<-
@@ -208,7 +208,7 @@ if(is(m2,"try-error")){
 	mod_list<-colorhdataOne2 #as.numeric(m2$colors)
 }else{
 
-	mod_list<-as.numeric(m2$colors)
+	mod_list<-as.numeric(factor(m2$colors))
 }
 #m2=mergeCloseModules(data_m,colors=colorhdataOne2$labels,cutHeight=cutheight)
 
