@@ -1309,6 +1309,7 @@ multilevelannotation <- function(dataA,
                 clusterExport(cl, "update_best_score_and_data")
                 clusterExport(cl, "compute_table_mod")
                 clusterExport(cl, "compute_check2")
+                clusterExport(cl, "compute_diff_rt")
 
 
 

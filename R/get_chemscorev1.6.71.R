@@ -61,7 +61,6 @@ do_something <- function(i,
     bool_check <- 1
 
     isp_v <- ischeck[rnum]
-
     isp_v <- as.numeric(as.character(isp_v))
 
     diff_rt <- abs(put_isp_masses_curmz_data[isp_v, 2] - mchemicaldata[m, 2])
@@ -347,8 +346,7 @@ compute_temp_score_and_data <- function(group_sizes,
         next
       }
 
-      diff_rt <- compute_diff_rt(mchemicaldata$time)
-      diff_rt <- round(diff_rt)
+      diff_rt <- round(compute_diff_rt(mchemicaldata$time))
 
       if (diff_rt <= max_diff_rt) {
         if (dim(mchemicaldata)[1] > 1) {
