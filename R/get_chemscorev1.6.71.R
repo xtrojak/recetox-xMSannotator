@@ -249,7 +249,6 @@ add_isotopic_peaks <- function(mchemicaldata,
   mchemicaldata <- unique(ldply(diffmatB, rbind))
 
   rm(diffmatB)
-  # rm(final_isp_annot_res)
 
   write.table(mchemicaldata, file = "../Stage2_withisotopes.txt", append = TRUE, sep = "\t", col.names = FALSE)
   return(mchemicaldata)
@@ -257,15 +256,11 @@ add_isotopic_peaks <- function(mchemicaldata,
 
 compute_hub_mz_list <- function(check_cor, cur_adducts_with_isotopes, filter.by, check2, adduct_weights) {
   hub_mz_list <- which(check_cor > 0 & (cur_adducts_with_isotopes %in% filter.by == TRUE))
-  
+
   if (length(hub_mz_list) < 1) {
     hub_mz_list <- which(check_cor > 0 & check2 < 0 & (cur_adducts_with_isotopes %in% adduct_weights[, 1] == TRUE))
   }
-  
-  if (length(hub_mz_list) < 1) {
-    hub_mz_list <- which(check_cor > 0 & check2 < 0 & (cur_adducts_with_isotopes %in% adduct_weights[, 1] == TRUE))
-  }
-  
+
   if (length(hub_mz_list) < 1) {
     hub_mz_list <- which(check_cor > 0 & check2 < 0)
   }
@@ -287,7 +282,6 @@ compute_hub_mz <- function(hub_mz_list, mchemicaldata, max_diff_rt) {
 
   for (h1 in hub_mz_list) {
     diff_rt_hubmz <- compute_diff_rt_hubmz(mchemicaldata, h1)
-
     num_time_neighbors <- length(which(diff_rt_hubmz <= max_diff_rt))
 
     if (num_time_neighbors > max_time_neighbors) {
@@ -298,11 +292,8 @@ compute_hub_mz <- function(hub_mz_list, mchemicaldata, max_diff_rt) {
   return(hub_mz)
 }
 
-calc_base_score <- function(mchemicaldata, adduct_weights, topquant_cor) {
-  mchemicaldata$time <- as.numeric(as.character(mchemicaldata$time))
-  cur_adducts_with_isotopes <- mchemicaldata$Adduct
+calc_base_score <- function(cur_adducts_with_isotopes, adduct_weights, topquant_cor) {
   cur_adducts <- gsub(cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[1-2]*\\])", replacement = "")
-
   good_adducts_len <- length(which(cur_adducts_with_isotopes %in% adduct_weights[, 1]))
   chemical_score <- length(unique(cur_adducts)) * good_adducts_len * (1 * (topquant_cor))
 
@@ -319,8 +310,7 @@ calc_base_score <- function(mchemicaldata, adduct_weights, topquant_cor) {
   return(chemical_score)
 }
 
-calc_base_score_v2 <- function(mchemicaldata, adduct_weights, topquant_cor) {
-  cur_adducts_with_isotopes <- mchemicaldata$Adduct
+calc_base_score_v2 <- function(cur_adducts_with_isotopes, adduct_weights, topquant_cor) {
   cur_adducts <- gsub(cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[0-9]*\\])", replacement = "")
 
   good_adducts_len <- length(which(cur_adducts_with_isotopes %in% adduct_weights[, 1]))
@@ -330,6 +320,11 @@ calc_base_score_v2 <- function(mchemicaldata, adduct_weights, topquant_cor) {
     chemical_score <- sum(chemical_score * (as.numeric(adduct_weights[which(adduct_weights[, 1] %in% cur_adducts), 2])))
   }
   return(chemical_score)
+}
+
+compute_diff_rt <- function(time) {
+  diff_rt <- abs(min(as.numeric(time)) - max(as.numeric(time)))
+  return(diff_rt)
 }
 
 compute_temp_score_and_data <- function(group_sizes,
@@ -346,22 +341,18 @@ compute_temp_score_and_data <- function(group_sizes,
   for (g2 in 1:length(group_sizes)) {
     if (g2 %in% good_temp) {
       mchemicaldata <- {}
-      mchemicaldata <- rbind(mchemicaldata, time_cor_groups[[g2]])
-      mchemicaldata <- as.data.frame(mchemicaldata)
-
-      cur_adducts_with_isotopes <- mchemicaldata$Adduct
-      cur_adducts <- gsub(cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[0-9]*\\])", replacement = "")
+      mchemicaldata <- as.data.frame(rbind(mchemicaldata, time_cor_groups[[g2]]))
 
       if (length(mchemicaldata) < 1) {
         next
       }
 
-      diff_rt <- abs(min(as.numeric(mchemicaldata$time)) - max(as.numeric(mchemicaldata$time)))
+      diff_rt <- compute_diff_rt(mchemicaldata$time)
       diff_rt <- round(diff_rt)
 
       if (diff_rt <= max_diff_rt) {
         if (dim(mchemicaldata)[1] > 1) {
-          chemical_score <- calc_base_score(mchemicaldata, adduct_weights, topquant_cor)
+          chemical_score <- calc_base_score(mchemicaldata$Adduct, adduct_weights, topquant_cor)
         } else {
           chemical_score <- 0
         }
@@ -379,14 +370,11 @@ compute_temp_score_and_data <- function(group_sizes,
 
         if (length(which(mchemicaldata$time >= min_val & mchemicaldata$time <= max_val)) > 1) {
           mchemicaldata <- mchemicaldata[which(mchemicaldata$time >= (min_val - 1) & mchemicaldata$time <= (max_val - 1)), ]
-          cur_adducts_with_isotopes <- mchemicaldata$Adduct
-
-          cur_adducts <- gsub(cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[0-9]*\\])", replacement = "")
           if (dim(mchemicaldata)[1] > 1) {
-            chemical_score <- calc_base_score(mchemicaldata, adduct_weights, topquant_cor)
+            chemical_score <- calc_base_score(mchemicaldata$Adduct, adduct_weights, topquant_cor)
           }
         } else {
-          chemical_score <- calc_base_score_v2(mchemicaldata, adduct_weights, topquant_cor)
+          chemical_score <- calc_base_score_v2(mchemicaldata$Adduct, adduct_weights, topquant_cor)
         }
         names(chemical_score) <- chemicalid[1]
       }
@@ -406,25 +394,26 @@ compute_time_cor_groups <- function(mchemicaldata,
                                 min_val,
                                 max_val,
                                 iqr1) {
-  diff_rt <- abs(max(mchemicaldata$time) - min(mchemicaldata$time))
+  diff_rt <- compute_diff_rt(mchemicaldata$time)
+  breaks <- {}
 
   if (diff_rt > 2 * max_diff_rt) {
-    time_cor_groups <- sapply(list(myData1 = mchemicaldata), function(x) split(x, cut(mchemicaldata$time, breaks = seq(min_val - max_diff_rt, max_val + max_diff_rt, iqr1))))
+    breaks <- seq(min_val - max_diff_rt, max_val + max_diff_rt, iqr1)
   } else {
     max_val <- max(mchemicaldata$time)
     min_val <- min(mchemicaldata$time)
-    diff_rt <- abs(max(mchemicaldata$time) - min(mchemicaldata$time))
 
     if (min_val < max_diff_rt) {
-      time_cor_groups <- sapply(list(myData1 = mchemicaldata), function(x) split(x, cut(mchemicaldata$time, breaks = c(0, max_val + 1))))
+      breaks <- c(0, max_val + 1)
     } else {
       if (diff_rt < max_diff_rt) {
-        time_cor_groups <- sapply(list(myData1 = mchemicaldata), function(x) split(x, cut(mchemicaldata$time, breaks = c(min_val - diff_rt, max_val + diff_rt, diff_rt * 2))))
+        breaks <- c(min_val - diff_rt, max_val + diff_rt, diff_rt * 2)
       } else {
-        time_cor_groups <- sapply(list(myData1 = mchemicaldata), function(x) split(x, cut(mchemicaldata$time, breaks = seq(min_val - diff_rt, max_val + diff_rt, 1 * max_diff_rt))))
+        breaks <- seq(min_val - diff_rt, max_val + diff_rt, 1 * max_diff_rt)
       }
     }
   }
+  time_cor_groups <- sapply(list(myData1 = mchemicaldata), function(x) split(x, cut(mchemicaldata$time, breaks = breaks)))
   return(time_cor_groups)
 }
 
@@ -559,15 +548,13 @@ get_data_and_score_for_chemical <- function(cor_mz,
     }
 
     mchemicaldata <- as.data.frame(mchemicaldata)
-
-    diff_rt <- abs(min(as.numeric(mchemicaldata$time)) - max(as.numeric(mchemicaldata$time)))
+    diff_rt <- compute_diff_rt(mchemicaldata$time)
     diff_rt <- round(diff_rt)
-
     topquant_cor <- compute_topquant_cor(cor_mz)
 
     if (diff_rt <= max_diff_rt) {
       if (dim(mchemicaldata)[1] > 1) {
-        chemical_score <- calc_base_score(mchemicaldata, adduct_weights, topquant_cor)
+        chemical_score <- calc_base_score(mchemicaldata$Adduct, adduct_weights, topquant_cor)
         names(chemical_score) <- chemicalid[1]
       }
     }
@@ -616,7 +603,7 @@ get_data_and_score_for_chemical <- function(cor_mz,
 
       if (group_ind_size < 2) {
         mchemicaldata <- mchemicaldata_module[order(mchemicaldata_module$mz), ]
-        chemical_score <- calc_base_score_v2(mchemicaldata, adduct_weights, topquant_cor)
+        chemical_score <- calc_base_score_v2(mchemicaldata$Adduct, adduct_weights, topquant_cor)
       }
 
       good_temp <- {}
@@ -658,7 +645,7 @@ get_data_and_score_for_chemical <- function(cor_mz,
 
                if (length(mchemicaldata) > 0) {
                 if (nrow(mchemicaldata) > 1) {
-                  chemical_score <- calc_base_score(mchemicaldata, adduct_weights, topquant_cor)
+                  chemical_score <- calc_base_score(mchemicaldata$Adduct, adduct_weights, topquant_cor)
                 } else {
                   chemical_score <- 0
                 }
@@ -670,9 +657,9 @@ get_data_and_score_for_chemical <- function(cor_mz,
           } else {
             if (length(mchemicaldata) > 0) {
               if (nrow(mchemicaldata) > 1) {
-                diff_rt <- abs(min(as.numeric(mchemicaldata$time)) - max(as.numeric(mchemicaldata$time)))
+                diff_rt <- compute_diff_rt(mchemicaldata$time)
                 if (diff_rt > max_diff_rt) {
-                  chemical_score <- calc_base_score_v2(mchemicaldata, adduct_weights, topquant_cor)
+                  chemical_score <- calc_base_score_v2(mchemicaldata$Adduct, adduct_weights, topquant_cor)
                 }
               } else {
                 chemical_score <- 0
@@ -733,15 +720,9 @@ compute_cor_mz <- function(mzid_cur, global_cor) {
 
 get_conf_level <- function(mchemicaldata, adduct_weights) {
   conf_level <- 0
-  if (length(mchemicaldata) < 1) {
-    conf_level <- 0
-  } else {
-    if (nrow(mchemicaldata) > 0) {
-      conf_level <- get_confidence_stage2(curdata = mchemicaldata, adduct_weights = adduct_weights)
-      conf_level <- as.numeric(as.character(conf_level))
-    } else {
-      conf_level <- 0
-    }
+  if (length(mchemicaldata) > 0 && nrow(mchemicaldata) > 0) {
+    conf_level <- get_confidence_stage2(curdata = mchemicaldata, adduct_weights = adduct_weights)
+    conf_level <- as.numeric(as.character(conf_level))
   }
   return(conf_level)
 }
