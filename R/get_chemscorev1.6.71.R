@@ -641,29 +641,18 @@ get_data_and_score_for_chemical <- function(cor_mz,
             if (dim(mchemicaldata)[1] > 1) {
               mchemicaldata$time <- as.numeric(as.character(mchemicaldata$time))
 
-               if (length(mchemicaldata) > 0) {
-                if (nrow(mchemicaldata) > 1) {
-                  chemical_score <- calc_base_score(mchemicaldata$Adduct, adduct_weights, topquant_cor)
-                } else {
-                  chemical_score <- 0
-                }
-              } else {
-                chemical_score <- 0
+              chemical_score <- 0
+              if (length(mchemicaldata) > 0 & nrow(mchemicaldata) > 1) {
+                chemical_score <- calc_base_score(mchemicaldata$Adduct, adduct_weights, topquant_cor)
               }
             }
-            names(chemical_score) <- chemicalid[1]
           } else {
-            if (length(mchemicaldata) > 0) {
-              if (nrow(mchemicaldata) > 1) {
-                diff_rt <- compute_diff_rt(mchemicaldata$time)
-                if (diff_rt > max_diff_rt) {
-                  chemical_score <- calc_base_score_v2(mchemicaldata$Adduct, adduct_weights, topquant_cor)
-                }
-              } else {
-                chemical_score <- 0
+            chemical_score <- 0
+            if (length(mchemicaldata) > 0 & nrow(mchemicaldata) > 1) {
+              diff_rt <- compute_diff_rt(mchemicaldata$time)
+              if (diff_rt > max_diff_rt) {
+                chemical_score <- calc_base_score_v2(mchemicaldata$Adduct, adduct_weights, topquant_cor)
               }
-            } else {
-              chemical_score <- 0
             }
           }
         }
