@@ -87,7 +87,7 @@ multilevelannotationstep5 <- function(outloc,
   }
   stopCluster(cl)
 
-  if (!!length(lower_score_multimatches_idx)) {
+  if (length(lower_score_multimatches_idx) > 0) {
     curated_res <- curated_res[-c(lower_score_multimatches_idx), ]
   }
 
