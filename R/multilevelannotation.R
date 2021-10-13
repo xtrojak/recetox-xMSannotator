@@ -1286,6 +1286,32 @@ multilevelannotation <- function(dataA,
                 clusterExport(cl, "compute_score")
                 clusterExport(cl, "replace_with_module")
                 clusterExport(cl, "remove_water_adducts")
+                clusterExport(cl, "add_isotopic_peaks")
+                clusterExport(cl, "compute_hub_mz_list")
+                clusterExport(cl, "compute_diff_rt_hubmz")
+                clusterExport(cl, "compute_hub_mz")
+                clusterExport(cl, "calc_base_score")
+                clusterExport(cl, "calc_base_score_v2")
+                clusterExport(cl, "compute_temp_score_and_data")
+                clusterExport(cl, "get_data_and_score_for_chemical")
+                clusterExport(cl, "compute_cor_mz")
+                clusterExport(cl, "get_conf_level")
+                clusterExport(cl, "get_min_chemscore")
+                clusterExport(cl, "apply_rt_scaling")
+                clusterExport(cl, "compute_best_score")
+                clusterExport(cl, "compute_chemical_score")
+                clusterExport(cl, "compute_time_cor_groups")
+                clusterExport(cl, "compute_iqr1")
+                clusterExport(cl, "compute_min_max_iqr_basic")
+                clusterExport(cl, "compute_min_max_iqr_advanced")
+                clusterExport(cl, "compute_topquant_cor")
+                clusterExport(cl, "subset_selected_mz")
+                clusterExport(cl, "update_best_score_and_data")
+                clusterExport(cl, "compute_table_mod")
+                clusterExport(cl, "compute_check2")
+                clusterExport(cl, "compute_diff_rt")
+
+
 
                 # clusterExport(cl, "getMolecule")
                 # clusterExport(cl, "ldply")
@@ -1461,7 +1487,8 @@ multilevelannotation <- function(dataA,
                     load("tempobjects.Rda")
 
                     suppressWarnings(annotresstage5 <- multilevelannotationstep5(
-                        outloc = outloc, adduct_weights = adduct_weights
+                        outloc = outloc, max.rt.diff = max_diff_rt, filter.by = filter.by, adduct_weights = adduct_weights,
+                        min_ions_perchem = min_ions_perchem, boostIDs = boostIDs, max_isp = max_isp, db_name = db_name, max.mz.diff = max.mz.diff
                     ))
 
                     # print("Stage 5 confidence level distribution for unique chemical/metabolite IDs")
