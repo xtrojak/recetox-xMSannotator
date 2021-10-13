@@ -44,7 +44,7 @@ do_something <- function(i,
 
   max_isp_count <- max(exp_isp)
 
-  if (is.na(max_isp_count) == TRUE) {
+  if (is.na(max_isp_count)) {
     max_isp_count <- 1
   }
 
@@ -465,7 +465,7 @@ compute_min_max_iqr_advanced <- function(mchemicaldata, max_diff_rt) {
 
 compute_topquant_cor <- function(cor_mz) {
   topquant_cor <- max(cor_mz[upper.tri(cor_mz)])
-  if (is.na(topquant_cor) == TRUE) {
+  if (is.na(topquant_cor)) {
     topquant_cor <- 0
   }
   return(topquant_cor)
@@ -485,7 +485,7 @@ subset_selected_mz <- function(check_cor,
   hub_mz <- compute_hub_mz(hub_mz_list, mchemicaldata, max_diff_rt)
   diff_rt_hubmz <- compute_diff_rt_hubmz(mchemicaldata, hub_mz)
 
-  if (MplusH.abundance.ratio.check == TRUE) {
+  if (MplusH.abundance.ratio.check) {
     layer_one_associations <- which(cor_mz[hub_mz, ] >= corthresh & mchemicaldata$mean_int_vec < mchemicaldata$mean_int_vec[hub_mz] & diff_rt_hubmz <= max_diff_rt)
   } else {
     layer_one_associations <- which(cor_mz[hub_mz, ] >= corthresh & diff_rt_hubmz <= max_diff_rt)
