@@ -464,10 +464,7 @@ compute_min_max_iqr_advanced <- function(mchemicaldata, max_diff_rt) {
 }
 
 compute_topquant_cor <- function(cor_mz) {
-  topquant_cor <- max(cor_mz[upper.tri(cor_mz)])
-  if (is.na(topquant_cor)) {
-    topquant_cor <- 0
-  }
+  topquant_cor <- max(0, cor_mz[upper.tri(cor_mz)], na.rm = TRUE)
   return(topquant_cor)
 }
 
