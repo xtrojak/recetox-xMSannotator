@@ -422,7 +422,7 @@ compute_iqr1 <- function(s1) {
 compute_min_max_iqr_basic <- function(mchemicaldata, max_diff_rt) {
   d1 <- density(mchemicaldata$time, bw = max_diff_rt, from = min(mchemicaldata$time) - 0.001, to = (0.01 + max(mchemicaldata$time)), na.rm = TRUE)
   s1 <- summary(d1$x)
-  iqr1 <- s1[5] - s1[2]
+  iqr1 <- IQR(d1$x)
 
   if (iqr1 > max_diff_rt / 2) {
     iqr1 <- max_diff_rt / 2
@@ -434,13 +434,8 @@ compute_min_max_iqr_basic <- function(mchemicaldata, max_diff_rt) {
 }
 
 compute_min_max_iqr_advanced <- function(mchemicaldata, max_diff_rt) {
-  basic <- compute_min_max_iqr_basic(mchemicaldata, max_diff_rt)
-  min_val <- basic$min_val
-  max_val <- basic$max_val
-  iqr1 <- basic$iqr1
-
   s1 <- summary(mchemicaldata$time)
-  iqr1 <- s1[5] - s1[2]
+  iqr1 <- IQR(mchemicaldata$time)
   min_val <- s1[2] - (1.5 * iqr1)
   max_val <- s1[5] + (1.5 * iqr1)
 
