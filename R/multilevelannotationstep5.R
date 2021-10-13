@@ -4,7 +4,7 @@ init_chemscoremat <- function(chemscoremat) {
   }
   chemscoremat <- as.data.frame(chemscoremat)
   chemscoremat$mz <- as.numeric(chemscoremat$mz)
-  chemscoremat
+  return(chemscoremat)
 }
 
 increase_multimatches_score <- function(multimatch_features, adduct_weights) {
@@ -12,12 +12,13 @@ increase_multimatches_score <- function(multimatch_features, adduct_weights) {
   if (length(features_adducts) > 0) {
     multimatch_features$score[features_adducts] <- (multimatch_features$score[features_adducts]) * 100
   }
-  multimatch_features
+  return(multimatch_features)
 }
 
 reevaluate_multimatches_score <- function(single_molecule_annotation) {
   num_annotations <- nrow(single_molecule_annotation)
   score <- (num_annotations - 1) * max(single_molecule_annotation$score) / num_annotations
+  return(score)
 }
 
 get_features <- function(mz, match) {
@@ -27,6 +28,7 @@ get_features <- function(mz, match) {
     "unique" = feature_count[which(feature_count == 1)]
   )
   features <- names(features)
+  return(features)
 }
 
 remove_tmp_files <- function(loc) {
@@ -42,8 +44,6 @@ remove_tmp_files <- function(loc) {
   for (file in c("step1_results.Rda", "plot.pdf", "Rplots.pdf", "Rplots.pdf")) {
     try(unlink(file), silent = TRUE)
   }
-
-  return(0)
 }
 
 multilevelannotationstep5 <- function(outloc,
