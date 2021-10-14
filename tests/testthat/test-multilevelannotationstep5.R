@@ -17,16 +17,7 @@ patrick::with_parameters_test_that(
 
     multilevelannotationstep5(
       outloc = outloc,
-      max.rt.diff = max_diff_rt,
-      filter.by = filter.by,
-      adduct_weights = adduct_weights,
-      min_ions_perchem = min_ions_perchem,
-      boostIDs = boostIDs,
-      max_isp = max_isp,
-      db_name = db_name,
-      max.mz.diff = max.mz.diff,
-      num_nodes = 16
-    )
+      adduct_weights = adduct_weights)
 
     actual <- read.csv(file.path(outloc, "Stage5.csv"))
     setwd(testthat_wd)
