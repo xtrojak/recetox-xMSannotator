@@ -17,9 +17,7 @@ patrick::with_parameters_test_that(
 
     multilevelannotationstep5(
       outloc = outloc,
-      adduct_weights = adduct_weights,
-      num_nodes = 16
-    )
+      adduct_weights = adduct_weights)
 
     actual <- read.csv(file.path(outloc, "Stage5.csv"))
     setwd(testthat_wd)

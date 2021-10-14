@@ -48,8 +48,7 @@ remove_tmp_files <- function(loc) {
 
 multilevelannotationstep5 <- function(outloc,
                                       adduct_weights = NA,
-                                      chemscoremat = NA,
-                                      num_nodes = 2) {
+                                      chemscoremat = NA) {
   setwd(outloc)
   curated_res <- init_chemscoremat(chemscoremat)
 
@@ -69,7 +68,6 @@ multilevelannotationstep5 <- function(outloc,
 
   duplicated_features <- get_features(curated_res$mz, "multiple")
 
-  cl <- makeSOCKcluster(num_nodes)
   lower_score_multimatches_idx <- {}
   lower_score_multimatches_idx <- foreach(mz = duplicated_features, .combine = rbind) %dopar% {
     multimatches_idx <- which(curated_res$mz %in% mz)
@@ -85,7 +83,6 @@ multilevelannotationstep5 <- function(outloc,
     }
     return(multimatches_idx)
   }
-  stopCluster(cl)
 
   if (length(lower_score_multimatches_idx) > 0) {
     curated_res <- curated_res[-c(lower_score_multimatches_idx), ]
