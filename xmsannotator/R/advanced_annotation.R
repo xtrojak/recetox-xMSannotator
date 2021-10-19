@@ -92,7 +92,7 @@ advanced_annotation <- function(peak_table,
   )
 
   supplementary_data <- annotation %>%
-    select(mz, rt, Name, expected_mass, monoisotopic_mass, multiple_match)
+    select(mz, rt, expected_mass, monoisotopic_mass, multiple_match)
 
   peak_modules <- compute_peak_modules(
     peak_intensity_matrix = peak_intensity_matrix,

@@ -24,7 +24,7 @@ reformat_annotation_table <- function(annotation, supplementary_data) {
                                 !isTRUE(annotation$multiple_match) ~ "Unique"),
       theoretical.mz = annotation$expected_mass,
       chemical_ID = paste("Formula", annotation$compound, sep = "_"),
-      Name = annotation$Name,
+      Name = "-",
       Formula = annotation$molecular_formula,
       MonoisotopicMass = annotation$monoisotopic_mass,
       Adduct = if_else(annotation$mass_number_difference == 0, annotation$adduct, construct_adduct_formula(annotation$adduct, annotation$mass_number_difference)),
@@ -33,11 +33,6 @@ reformat_annotation_table <- function(annotation, supplementary_data) {
       mean_int_vec = annotation$mean_intensity,
       MD = as.numeric(sprintf("0.%1.0f", annotation$mass_defect))
     )
-
-  master_annotation <- master_annotation %>%
-    group_by(chemical_ID) %>%
-    mutate(Name = filter(master_annotation, !is.na(Name))$Name[1]) %>%
-    ungroup()
 
   return(master_annotation)
 }
