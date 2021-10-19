@@ -10,8 +10,7 @@ construct_adduct_formula <- function(formula, mass_number_difference) {
 #' @importFrom magittr %>%
 #' @importFrom rlang .data
 #' @export
-reformat_annotation_table <- function(annotation, supplementary_data) {
-  annotation <- left_join(annotation, supplementary_data, by = c("mz", "rt"))
+reformat_annotation_table <- function(annotation) {
   master_annotation <- tibble(.rows = nrow(annotation))
 
   master_annotation <- master_annotation %>%
