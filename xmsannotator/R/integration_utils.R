@@ -18,9 +18,11 @@ reformat_annotation_table <- function(annotation) {
       Module_RTclust = paste(annotation$module, annotation$rt_cluster, sep = "_"),
       mz = annotation$mz,
       time = annotation$rt,
-      MatchCategory = case_when(is.na(annotation$multiple_match) ~ "-",
-                                isTRUE(annotation$multiple_match) ~ "Multiple",
-                                !isTRUE(annotation$multiple_match) ~ "Unique"),
+      MatchCategory = case_when(
+        is.na(annotation$multiple_match) ~ "-",
+        isTRUE(annotation$multiple_match) ~ "Multiple",
+        !isTRUE(annotation$multiple_match) ~ "Unique"
+      ),
       theoretical.mz = annotation$expected_mass,
       chemical_ID = paste("Formula", annotation$compound, sep = "_"),
       Name = "-",
