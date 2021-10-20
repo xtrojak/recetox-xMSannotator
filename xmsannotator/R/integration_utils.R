@@ -1,3 +1,7 @@
+#' Recombine adduct formula and mass number difference.
+#' @param formula Adduct formula, e.g 'M+H'
+#' @param mass_number_difference Difference from monoisotopic mass.
+#' @return Combined formula, e.g 'M+H_[+1]'.
 construct_adduct_formula <- function(formula, mass_number_difference) {
   suffix <- sprintf("[%+1.0f]", mass_number_difference)
   formula <- paste(formula, suffix, sep = "_")
@@ -5,7 +9,11 @@ construct_adduct_formula <- function(formula, mass_number_difference) {
 }
 
 #' Reformat annotation table with isotopes from `main` to be compatible with `master's` chemical score computing.
-#'
+#'@param annotation Annotation table after [compute_isotopes()] with columns 
+#' ['mz', 'rt', 'rt_cluster', 'module', 'multiple_match', 'expected_mass',
+#' 'molecular_formula', 'adduct', 'mass_number_difference', 'monoisotopic_mass',
+#' 'mean_intensity', 'mass_defect']
+#' @return Reformatted annotation table for use with the `master` branch.
 #' @import dplyr
 #' @importFrom magittr %>%
 #' @importFrom rlang .data
