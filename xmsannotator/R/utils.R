@@ -37,13 +37,12 @@ as_adduct_table <- function(data) {
 
 #' Select columns from compound table and ensure data types.
 #' @param data Compound database.
-#' @param optional Optional columns to load.
-#' @return Compound table with required and present optional columns.
+#' @return Compound table with required columns and expected types.
 #' @import dplyr
-as_compound_table <- function(data, optional = NULL) {
+as_compound_table <- function(data) {
   required <- c("monoisotopic_mass", "molecular_formula", "compound", "name")
 
-  data <- select(data, any_of(optional), all_of(required))
+  data <- select(data, all_of(required))
 
   stopifnot(anyDuplicated(data$compound) == 0)
   stopifnot(is.numeric(data$compound))
