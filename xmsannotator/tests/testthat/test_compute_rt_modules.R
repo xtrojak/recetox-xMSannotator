@@ -84,7 +84,7 @@ patrick::with_parameters_test_that("compute_cluster_assignments can handle vario
     ),
     vector_1d = list(
         clusters = c(1, 4),
-        data = as.vector(c(1.2, 4.2)),
-        expected = c(1, 2)
+        data = as.vector(c(1.2, 0.9)),
+        expected = c(1, 1)
     )
 ))
