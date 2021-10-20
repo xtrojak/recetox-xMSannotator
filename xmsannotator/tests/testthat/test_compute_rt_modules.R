@@ -1,4 +1,5 @@
 test_that("RT_clust: Integration test: RT based clustering works.", {
+    skip("currently excluded")
     peaks <- readRDS("test-data/rt_modules/qc_solvent.rda")
     peaks <- dplyr::rename(peaks, peak = feature)
     peaks <- dplyr::rename_with(
@@ -67,3 +68,24 @@ test_that("RT_clust: Cluster assignments are comparable.", {
     expected <- readRDS("test-data/rt_modules/expected.rds")
     expect_equal(actual, expected)
 })
+
+patrick::with_parameters_test_that("compute_cluster_assignments can handle various 1d data:",{
+    actual <- compute_cluster_assignments(clusters, data)
+    expect_equal(actual, expected)
+}, patrick::cases(
+    list_1d = list(
+        clusters = c(1, 4),
+        data = list(1.2, 4.2),
+        expected = c(1, 2)
+    ),
+    array_1d = list(
+        clusters = c(1, 4),
+        data = array(c(1.2, 4.2)),
+        expected = c(1, 2)
+    ),
+    vector_1d = list(
+        clusters = c(1, 4),
+        data = as.vector(c(1.2, 4.2)),
+        expected = c(1, 2)
+    )
+))

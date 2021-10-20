@@ -91,7 +91,9 @@ compute_cluster_positions <- function(data, width = 1, kernel = "gaussian", show
 #' 
 #' @importFrom RANN nn2
 compute_cluster_assignments <- function(clusters, data) {
-    nn2(clusters, data, k = 1)$nn.idx[, 1]
+    query <- as.vector(data)
+    model <- nn2(clusters, query, k = 1)
+    return(model$nn.idx[, 1])
 }
 
 #' Compute RT modules based on intensity modules and chromatographic peak width.
