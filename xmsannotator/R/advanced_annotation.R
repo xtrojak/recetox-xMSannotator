@@ -126,8 +126,6 @@ advanced_annotation <- function(peak_table,
     rt_tolerance = time_tolerance
   )
 
-  annotation <- reformat_annotation_table(annotation, supplementary_data)
-
   annotation <- compute_scores(
     annotation = annotation,
     adduct_weights = adduct_weights,
