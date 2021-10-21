@@ -6,10 +6,12 @@ lexicographic_rank <- function(...) {
 
 #' @import dplyr
 as_peak_table <- function(data, intensities = FALSE) {
-  optional <- rlang::quo(any_of('peak'))
+  optional <- rlang::quo('peak')
   required <- rlang::quo(any_of(c('mz', 'rt')))
-  additional <- rlang::quo(starts_with('intensity'))
-  data <- select(data, !!optional, !!required, if (intensities) !!additional else NULL)
+
+  if (!intensities) {
+    data <- select(data, !!optional, !!required)
+  }
 
   if (!is.element('peak', colnames(data))) {
     data$peak <- lexicographic_rank(data$mz, data$rt)
@@ -17,8 +19,9 @@ as_peak_table <- function(data, intensities = FALSE) {
 
   stopifnot(anyDuplicated(data$peak) == 0)
   stopifnot(is.integer(data$peak))
-  stopifnot(is.numeric(data$mz))
-  stopifnot(is.numeric(data$rt))
+  for (column in colnames(data)) {
+    stopifnot(is.numeric(data[[column]]))
+  }
 
   return(data)
 }
