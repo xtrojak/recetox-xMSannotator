@@ -80,7 +80,7 @@ advanced_annotation <- function(peak_table,
   adduct_table <- as_adduct_table(adduct_table)
   compound_table <- as_compound_table(compound_table)
 
-  peak_intensity_matrix <- t(select(peak_table, starts_with("intensity")))
+  peak_intensity_matrix <- t(select(peak_table, -any_of(c("peak", "mz", "rt"))))
   peak_intensity_matrix <- magrittr::set_colnames(peak_intensity_matrix, peak_table$peak)
   peak_correlation_matrix <- WGCNA::cor(peak_intensity_matrix, use = "p", method = "p")
 
@@ -125,6 +125,8 @@ advanced_annotation <- function(peak_table,
     peak_table = peak_table,
     rt_tolerance = time_tolerance
   )
+
+  annotation <- reformat_annotation_table(annotation, supplementary_data)
 
   annotation <- compute_scores(
     annotation = annotation,

@@ -6,7 +6,7 @@ lexicographic_rank <- function(...) {
 
 #' @import dplyr
 as_peak_table <- function(data, intensities = FALSE) {
-  optional <- rlang::quo('peak')
+  optional <- rlang::quo(any_of('peak'))
   required <- rlang::quo(any_of(c('mz', 'rt')))
 
   if (!intensities) {
