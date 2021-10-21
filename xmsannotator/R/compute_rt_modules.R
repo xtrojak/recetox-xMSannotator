@@ -7,11 +7,11 @@
 #' Red circles & lines.
 #'
 plot_clustering <- function(pdf, data, peak_indices, plot_lines = FALSE) {
-    plot(pdf, type = "l", xaxt = "n")
-    axis(1, at = data, las = 2)
-    points(pdf$x[peak_indices], pdf$y[peak_indices], col = "red")
+  plot(pdf, type = "l", xaxt = "n")
+  axis(1, at = data, las = 2)
+  points(pdf$x[peak_indices], pdf$y[peak_indices], col = "red")
 
-    if (plot_lines) abline(v = pdf$x[peak_indices], col = "red")
+  if (plot_lines) abline(v = pdf$x[peak_indices], col = "red")
 }
 
 
@@ -23,10 +23,10 @@ plot_clustering <- function(pdf, data, peak_indices, plot_lines = FALSE) {
 #' @importFrom pastecs turnpoints
 #' @importFrom rlist list.filter
 compute_peak_indices <- function(density) {
-    turning_points <- turnpoints(ts(density), calc.proba = FALSE)
-    peak_indices <- turning_points$pos[turning_points$peaks]
-    filtered <- list.filter(peak_indices, density[.] > .Machine$double.eps)
-    return(filtered)
+  turning_points <- turnpoints(ts(density), calc.proba = FALSE)
+  peak_indices <- turning_points$pos[turning_points$peaks]
+  filtered <- list.filter(peak_indices, density[.] > .Machine$double.eps)
+  return(filtered)
 }
 
 
@@ -36,9 +36,9 @@ compute_peak_indices <- function(density) {
 #'
 #' @return Nearest power of 2 to length(data), but at least 2048.
 compute_num_kernel_points <- function(data) {
-    num_points <- length(data)
-    nearest_power_of_two <- 2**ceiling(log2(num_points))
-    max(nearest_power_of_two, 2048)
+  num_points <- length(data)
+  nearest_power_of_two <- 2**ceiling(log2(num_points))
+  max(nearest_power_of_two, 2048)
 }
 
 
@@ -51,17 +51,17 @@ compute_num_kernel_points <- function(data) {
 #'
 #' @return Kernel density estimate [stats::density()].
 estimate_kernel_density <- function(data, width = 1, kernel = "gaussian") {
-    start <- max(min(data) - 1, 0)
-    end <- max(data) + 1
+  start <- max(min(data) - 1, 0)
+  end <- max(data) + 1
 
-    pdf <- density(
-        data,
-        from = start,
-        to = end,
-        n = compute_num_kernel_points(data),
-        width = width,
-        kernel = kernel
-    )
+  pdf <- density(
+    data,
+    from = start,
+    to = end,
+    n = compute_num_kernel_points(data),
+    width = width,
+    kernel = kernel
+  )
 }
 
 #' Compute cluster positions in data
@@ -69,17 +69,17 @@ estimate_kernel_density <- function(data, width = 1, kernel = "gaussian") {
 #' @param data Data for which to compute the clustering.
 #' @param width Bandwidth of the clustering.
 #' @param kernel Kernel to use. See [stats::density()] for details.
-#' @param show If TRUE, plot the resulting clustering. 
+#' @param show If TRUE, plot the resulting clustering.
 #' Scan rate should be consulted to optimize clustering. [0.5;2.0]
 #'
 #' @return Positions of dense clusters.
 compute_cluster_positions <- function(data, width = 1, kernel = "gaussian", show = FALSE) {
-    pdf <- estimate_kernel_density(data, width = width, kernel = kernel)
-    peak_indices <- compute_peak_indices(pdf$y)
-    if (show) plot_clustering(pdf, data, peak_indices)
+  pdf <- estimate_kernel_density(data, width = width, kernel = kernel)
+  peak_indices <- compute_peak_indices(pdf$y)
+  if (show) plot_clustering(pdf, data, peak_indices)
 
-    peak_positions <- pdf$x[peak_indices]
-    return(peak_positions)
+  peak_positions <- pdf$x[peak_indices]
+  return(peak_positions)
 }
 
 #' Compute the assignment of cluster ID based on nn-algorithm.
@@ -88,10 +88,12 @@ compute_cluster_positions <- function(data, width = 1, kernel = "gaussian", show
 #' @param data Data to assign to clusters
 #'
 #' @return Indices of closest cluster for each query point computed using [RANN::nn2()].
-#' 
+#'
 #' @importFrom RANN nn2
 compute_cluster_assignments <- function(clusters, data) {
-    nn2(clusters, data, k = 1)$nn.idx[, 1]
+  query <- as.vector(data)
+  model <- nn2(clusters, query, k = 1)
+  return(model$nn.idx[, 1])
 }
 
 #' Compute RT modules based on intensity modules and chromatographic peak width.
@@ -105,19 +107,20 @@ compute_cluster_assignments <- function(clusters, data) {
 #' @export
 #' @import dplyr
 compute_rt_modules <- function(peak_table, peak_width = 1, show = FALSE) {
-    rt_cluster <- {}
+  rt_cluster <- {}
 
-    for (subdata in peak_table %>% group_split(module)) {
-        cluster_positions <- compute_cluster_positions(subdata$rt, width = peak_width, show = show)
-        subdata$rt_cluster <- compute_cluster_assignments(cluster_positions, subdata$rt)
-        rt_cluster <- bind_rows(rt_cluster, subdata %>% select(peak, rt_cluster))
-    }
-    peaks_without_sample_intensities <- peak_table %>%
-        select(any_of(c("peak", "mean_intensity", "module")))
+  for (subdata in peak_table %>% group_split(module)) {
+    cluster_positions <- compute_cluster_positions(subdata$rt, width = peak_width, show = show)
+    subdata$rt_cluster <- compute_cluster_assignments(cluster_positions, subdata$rt)
+    rt_cluster <- bind_rows(rt_cluster, subdata %>% select(peak, rt_cluster))
+  }
+  peaks_without_sample_intensities <- peak_table %>%
+    select(any_of(c("peak", "mean_intensity", "module")))
 
-    output_table <- left_join(
-        peaks_without_sample_intensities,
-        rt_cluster,
-        by = "peak")
-    return(output_table)
+  output_table <- left_join(
+    peaks_without_sample_intensities,
+    rt_cluster,
+    by = "peak"
+  )
+  return(output_table)
 }
