@@ -12,7 +12,7 @@ The recetox-aplcms tool outputs the peak table in a format which is not directly
 
 ### recetox-xMSannotator Example Input
 
-| peak      | mz   | rt | intensity_Tribrid_201005_001-MeOH_NEG_MU | intensity_Tribrid_201005_002-Norman_NEG_MU |
+| peak      | mz   | rt | Tribrid_201005_001-MeOH_NEG_MU | Tribrid_201005_002-Norman_NEG_MU |
 |-----------|------|----|------------------------------------------|--------------------------------------------|
 | 1 |110.034534364169 | 246.052915606977 | 0 | 256906.674516574 |
 | ... | ... | ... | ... | ... |
