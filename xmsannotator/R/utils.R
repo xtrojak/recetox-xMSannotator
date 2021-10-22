@@ -35,21 +35,20 @@ as_adduct_table <- function(data) {
   return(data)
 }
 
+#' Select columns from compound table and ensure data types.
+#' @param data Compound database.
+#' @return Compound table with required columns and expected types.
 #' @import dplyr
 as_compound_table <- function(data) {
-  optional <- c('recetox_cid', 'Name')
-  required <- c('monoisotopic_mass', 'molecular_formula', 'compound')
-  data <- select(data, any_of(optional), all_of(required))
+  required <- c("monoisotopic_mass", "molecular_formula", "compound", "name")
 
-  if ('recetox_cid' %in% colnames(data)) {
-    data <- mutate(data, compound = .data$recetox_cid)
-  }
+  data <- select(data, all_of(required))
 
-  stopifnot('compound' %in% colnames(data))
   stopifnot(anyDuplicated(data$compound) == 0)
   stopifnot(is.numeric(data$compound))
   stopifnot(is.numeric(data$monoisotopic_mass))
   stopifnot(is.character(data$molecular_formula))
+  stopifnot(is.character(data$name))
 
   return(data)
 }
@@ -97,7 +96,7 @@ load_adduct_table_parquet <- function(file) {
 
 #' @export
 load_compound_table_parquet <- function(file) {
-  data <- load_parquet(file, columns = c("compound", "recetox_cid", "monoisotopic_mass", "molecular_formula"))
+  data <- load_parquet(file, columns = c("compound", "monoisotopic_mass", "molecular_formula", "name"))
   as_compound_table(data)
 }
 
