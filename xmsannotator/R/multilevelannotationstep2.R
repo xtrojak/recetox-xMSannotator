@@ -29,6 +29,21 @@ compute_something <- function(m, curmchemdata, mass_defect_window, isop_res_md) 
   as.data.frame(isop_res_md[extract_indices, ])
 }
 
+compute_filtered_peak_table <- function(isop_res_md, curmchemdata, mass_defect_window) {
+  isop_res_md$Module_RTclust <- replace_with_module(isop_res_md$Module_RTclust)
+
+  isp_masses_mz_data <- lapply(
+    1:length(curmchemdata$mz),
+    compute_something,
+    curmchemdata,
+    mass_defect_window,
+    isop_res_md
+  )
+  isp_masses_mz_data <- plyr::ldply(isp_masses_mz_data, rbind)
+  colnames(isp_masses_mz_data)[5] <- "AvgIntensity"
+  return(isp_masses_mz_data)
+}
+
 #' @import plyr
 #' @export
 compute_chemscore <- function(chemid,
@@ -47,19 +62,8 @@ compute_chemscore <- function(chemid,
   chemscoremat <- {}
   curmchemdata <- mchemdata[which(mchemdata$chemical_ID == chemid), ]
 
-  curmchemdata$Module_RTclust <- replace_with_module(curmchemdata$Module_RTclust)
-  isop_res_md$Module_RTclust <- replace_with_module(isop_res_md$Module_RTclust)
-
-  isp_masses_mz_data <- {}
-  isp_masses_mz_data <- lapply(
-    1:length(curmchemdata$mz),
-    compute_something,
-    curmchemdata,
-    mass_defect_window,
-    isop_res_md
-  )
-  isp_masses_mz_data <- plyr::ldply(isp_masses_mz_data, rbind)
-  colnames(isp_masses_mz_data)[5] <- "AvgIntensity"
+  #curmchemdata$Module_RTclust <- replace_with_module(curmchemdata$Module_RTclust)
+  isp_masses_mz_data <- compute_filtered_peak_table(isop_res_md, curmchemdata, mass_defect_window)
 
   if (is.na(mass_defect_mode) == TRUE) {
     mass_defect_mode <- "pos"
