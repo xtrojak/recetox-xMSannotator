@@ -15,31 +15,34 @@ load_adduct_weights <- function() {
 }
 
 #' @export
-compute_something <- function(m, curmchemdata, mass_defect_window, isop_res_md) {
+extract_possible_isotopes_from_module <- function(...,
+                                                  mass_defect_window,
+                                                  isop_res_md) {
+  query <- tibble(...)
+
   # Get Module ID
-  module_rt_group <- replace_with_module(curmchemdata$Module_RTclust[m])
+  module_rt_group <- replace_with_module(query$Module_RTclust)
+  query_md <- query$mz - round(query$mz)
 
-  # Get mass defect
-  query_md <- curmchemdata$mz[m] - round(curmchemdata$mz[m])
-
-  md_diff_smaller_window <- abs((isop_res_md$MD) - (query_md)) < mass_defect_window
+  md_diff_smaller_window <- abs(isop_res_md$MD - query_md) < mass_defect_window
   is_in_module <- isop_res_md$Module_RTclust == module_rt_group
   extract_indices <- which(md_diff_smaller_window & is_in_module)
 
-  as.data.frame(isop_res_md[extract_indices, ])
+  isop_res_md[extract_indices, ]
 }
 
 compute_filtered_peak_table <- function(isop_res_md, curmchemdata, mass_defect_window) {
   isop_res_md$Module_RTclust <- replace_with_module(isop_res_md$Module_RTclust)
 
-  isp_masses_mz_data <- lapply(
-    1:length(curmchemdata$mz),
-    compute_something,
+  isp_masses_mz_data <- purrr::pmap_dfr(
     curmchemdata,
-    mass_defect_window,
-    isop_res_md
+    ~ extract_possible_isotopes_from_module(
+      ...,
+      mass_defect_window = mass_defect_window,
+      isop_res_md = isop_res_md
+    )
   )
-  isp_masses_mz_data <- plyr::ldply(isp_masses_mz_data, rbind)
+
   colnames(isp_masses_mz_data)[5] <- "AvgIntensity"
   return(isp_masses_mz_data)
 }
@@ -62,7 +65,6 @@ compute_chemscore <- function(chemid,
   chemscoremat <- {}
   curmchemdata <- mchemdata[which(mchemdata$chemical_ID == chemid), ]
 
-  #curmchemdata$Module_RTclust <- replace_with_module(curmchemdata$Module_RTclust)
   isp_masses_mz_data <- compute_filtered_peak_table(isop_res_md, curmchemdata, mass_defect_window)
 
   if (is.na(mass_defect_mode) == TRUE) {
