@@ -1,6 +1,6 @@
 lexicographic_rank <- function(...) {
   .o <- order(...)
-  .x <- cbind(...)[.o, ]
+  .x <- cbind(...)[.o,]
   cumsum(!duplicated(.x))[order(.o)]
 }
 
@@ -28,7 +28,7 @@ as_peak_table <- function(data, intensities = FALSE) {
 
 #' @import dplyr
 as_adduct_table <- function(data) {
-  data <- select(data, "adduct", "charge", "factor", "mass")
+  data <- select(data, 'adduct', 'charge', 'factor', 'mass')
 
   stopifnot(anyDuplicated(data$adduct) == 0)
   stopifnot(is.integer(data$charge))
@@ -38,34 +38,33 @@ as_adduct_table <- function(data) {
   return(data)
 }
 
+#' Select columns from compound table and ensure data types.
+#' @param data Compound database.
+#' @return Compound table with required columns and expected types.
 #' @import dplyr
 as_compound_table <- function(data) {
-  optional <- c("recetox_cid", "Name")
-  required <- c("monoisotopic_mass", "molecular_formula", "compound")
-  data <- select(data, any_of(optional), all_of(required))
+  required <- c("monoisotopic_mass", "molecular_formula", "compound", "name")
 
-  if ("recetox_cid" %in% colnames(data)) {
-    data <- mutate(data, compound = .data$recetox_cid)
-  }
+  data <- select(data, all_of(required))
 
-  stopifnot("compound" %in% colnames(data))
   stopifnot(anyDuplicated(data$compound) == 0)
   stopifnot(is.numeric(data$compound))
   stopifnot(is.numeric(data$monoisotopic_mass))
   stopifnot(is.character(data$molecular_formula))
+  stopifnot(is.character(data$name))
 
   return(data)
 }
 
 #' @import dplyr
-as_expected_adducts_table <- function(data) {
-  data <- select(data, "adduct")
+as_expected_adducts_table <- function (data) {
+  data <- select(data, 'adduct')
   return(data)
 }
 
 #' @import dplyr
-as_boosted_compounds_table <- function(data) {
-  data <- select(data, all_of("compound"), any_of(c("mz", "rt")))
+as_boosted_compounds_table <- function (data) {
+  data <- select(data, all_of('compound'), any_of(c('mz', 'rt')))
 
   stopifnot(is.numeric(data$mz))
   stopifnot(is.numeric(data$rt))
@@ -74,14 +73,14 @@ as_boosted_compounds_table <- function(data) {
 }
 
 #' @import dplyr
-load_parquet <- function(file, columns) {
+load_parquet <- function (file, columns) {
   rlang::with_handlers(
     arrow::read_parquet(file, col_select = any_of(columns)),
     error = ~ rlang::abort(paste("The file", toString(file), "seams not to be a valid Parquet file."), parent = .)
   )
 }
 
-load_csv <- function(file, columns) {
+load_csv <- function (file, columns) {
   data <- readr::read_csv(file)
   data <- select(data, any_of(columns))
 }
@@ -100,18 +99,18 @@ load_adduct_table_parquet <- function(file) {
 
 #' @export
 load_compound_table_parquet <- function(file) {
-  data <- load_parquet(file, columns = c("compound", "recetox_cid", "monoisotopic_mass", "molecular_formula"))
+  data <- load_parquet(file, columns = c("compound", "monoisotopic_mass", "molecular_formula", "name"))
   as_compound_table(data)
 }
 
 #' @export
-load_expected_adducts_csv <- function(file) {
+load_expected_adducts_csv <- function (file) {
   data <- load_csv(file, columns = "adduct")
   as_expected_adducts_table(data)
 }
 
 #' @export
-load_boost_compounds_csv <- function(file) {
+load_boost_compounds_csv <- function (file) {
   data <- load_csv(file, columns = c("compound", "mz", "rt"))
   as_boosted_compounds_table(data)
 }
