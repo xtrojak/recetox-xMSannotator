@@ -25,8 +25,8 @@ patrick::with_parameters_test_that(
     actual <- lapply(
       1:num_sets,
       multilevelannotationstep2,
-      outloc1 = outloc,
-      max.rt.diff = max.rt.diff,
+      outloc = outloc,
+      max_diff_rt = max.rt.diff,
       chemids_split = chemids_split,
       num_sets = num_sets,
       mchemdata = mchemdata,

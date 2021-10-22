@@ -20,8 +20,7 @@ compute_something <- function(m, curmchemdata, mass_defect_window, isop_res_md) 
 
 #' @import plyr
 #' @export
-compute_chemscore <- function(j,
-                              chemids,
+compute_chemscore <- function(chemid,
                               mchemdata,
                               isop_res_md,
                               mass_defect_window,
@@ -34,7 +33,6 @@ compute_chemscore <- function(j,
                               MplusH.abundance.ratio.check,
                               mass_defect_mode,
                               outloc) {
-  chemid <- chemids[j]
   chemscoremat <- {}
   curmchemdata <- mchemdata[which(mchemdata$chemical_ID == chemid), ]
 
@@ -84,8 +82,8 @@ compute_chemscore <- function(j,
 #' @import plyr
 #' @export
 multilevelannotationstep2 <- function(list_number,
-                                      outloc1,
-                                      max.rt.diff,
+                                      outloc,
+                                      max_diff_rt,
                                       chemids_split,
                                       num_sets,
                                       mchemdata,
@@ -101,15 +99,7 @@ multilevelannotationstep2 <- function(list_number,
                                       chemids,
                                       isop_res_md,
                                       filter.by) {
-  setwd(outloc1)
-
-  outloc <- outloc1
-  if (is.na(max.rt.diff) == FALSE) {
-    max_diff_rt <- max.rt.diff
-  }
-
   if (list_number > length(chemids_split) | list_number > num_sets) {
-    list_number <- length(chemids_split)
     return(0)
   }
 
@@ -123,21 +113,11 @@ multilevelannotationstep2 <- function(list_number,
     colnames(adduct_weights) <- c("Adduct", "Weight")
   }
 
-  outloc1 <- paste(outloc, "/stage2/", sep = "")
-  suppressWarnings(dir.create(outloc1))
-  setwd(outloc1)
-
-
-  cnames <- colnames(mchemdata)
-  cnames[2] <- "time"
-  colnames(mchemdata) <- as.character(cnames)
-  mchemdata$mz <- as.numeric(as.character(mchemdata$mz))
-  mchemdata$time <- as.numeric(as.character(mchemdata$time))
+  chemids <- chemids[chemids_split[[list_number]]]
 
   chem_score <- lapply(
-    chemids_split[[list_number]],
+    chemids,
     compute_chemscore,
-    chemids = chemids,
     mchemdata = mchemdata,
     isop_res_md = isop_res_md,
     mass_defect_window = mass_defect_window,
@@ -152,10 +132,6 @@ multilevelannotationstep2 <- function(list_number,
     outloc = outloc
   )
 
-  chem_score2 <- chem_score[which(chem_score != "NULL")]
-
-  rm(chem_score)
-
-  curchemscoremat <- plyr::ldply(chem_score2, rbind)
+  curchemscoremat <- plyr::ldply(chem_score, rbind)
   return(curchemscoremat)
 }
