@@ -3,6 +3,17 @@ replace_with_module <- function(module_rt_clust) {
   gsub(as.character(module_rt_clust), pattern = "_[0-9]*", replacement = "")
 }
 
+load_adduct_weights <- function() {
+  data(adduct_weights)
+
+  adduct_weights1 <- matrix(nrow = 2, ncol = 2, 0)
+  adduct_weights1[1, ] <- c("M+H", 1)
+  adduct_weights1[2, ] <- c("M-H", 1)
+  adduct_weights <- as.data.frame(adduct_weights1)
+  colnames(adduct_weights) <- c("Adduct", "Weight")
+  return(adduct_weights)
+}
+
 #' @export
 compute_something <- function(m, curmchemdata, mass_defect_window, isop_res_md) {
   # Get Module ID
@@ -81,17 +92,12 @@ compute_chemscore <- function(chemid,
 
 #' @import plyr
 #' @export
-multilevelannotationstep2 <- function(list_number,
-                                      outloc,
+multilevelannotationstep2 <- function(outloc,
                                       max_diff_rt,
-                                      chemids_split,
-                                      num_sets,
                                       mchemdata,
                                       mass_defect_window,
                                       corthresh,
                                       global_cor,
-                                      mzid,
-                                      adduct_table,
                                       adduct_weights,
                                       max_isp,
                                       MplusH.abundance.ratio.check,
@@ -99,21 +105,10 @@ multilevelannotationstep2 <- function(list_number,
                                       chemids,
                                       isop_res_md,
                                       filter.by) {
-  if (list_number > length(chemids_split) | list_number > num_sets) {
-    return(0)
-  }
 
   if (anyNA(adduct_weights)) {
-    data(adduct_weights)
-
-    adduct_weights1 <- matrix(nrow = 2, ncol = 2, 0)
-    adduct_weights1[1, ] <- c("M+H", 1)
-    adduct_weights1[2, ] <- c("M-H", 1)
-    adduct_weights <- as.data.frame(adduct_weights1)
-    colnames(adduct_weights) <- c("Adduct", "Weight")
+    adduct_weights <- load_adduct_weights()
   }
-
-  chemids <- chemids[chemids_split[[list_number]]]
 
   chem_score <- lapply(
     chemids,
