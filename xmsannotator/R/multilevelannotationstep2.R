@@ -60,16 +60,12 @@ compute_chemscore <- function(chemid,
                               filter.by,
                               max_isp,
                               MplusH.abundance.ratio.check,
-                              mass_defect_mode,
+                              mass_defect_mode = "pos",
                               outloc) {
   chemscoremat <- {}
   curmchemdata <- mchemdata[which(mchemdata$chemical_ID == chemid), ]
 
   isp_masses_mz_data <- compute_filtered_peak_table(isop_res_md, curmchemdata, mass_defect_window)
-
-  if (is.na(mass_defect_mode) == TRUE) {
-    mass_defect_mode <- "pos"
-  }
 
   chem_score <- get_chemscorev1.6.71(
     chemicalid = chemid,
