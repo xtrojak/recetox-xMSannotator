@@ -405,7 +405,10 @@ compute_time_cor_groups <- function(mchemicaldata,
       }
     }
   }
-  time_cor_groups <- sapply(list(myData1 = mchemicaldata), function(x) split(x, cut(mchemicaldata$time, breaks = breaks)))
+  time_cor_groups <- sapply(
+    list(myData1 = mchemicaldata),
+    function(x) split(x, cut(mchemicaldata$time, breaks = breaks))
+  )
   return(time_cor_groups)
 }
 
@@ -543,13 +546,6 @@ get_data_and_score_for_chemical <- function(cor_mz,
       }
     }
     else {
-      mchemicaldata$Module_RTclust <- gsub(mchemicaldata$Module_RTclust, pattern = "_[0-9]*", replacement = "")
-      mchemicaldata <- cbind(mchemicaldata[, c(2:11)], mchemicaldata[, 1], mchemicaldata[, c(12:14)])
-      colnames(mchemicaldata) <- c("mz", "time", "MatchCategory", "theoretical.mz", "chemical_ID", "Name", "Formula", "MonoisotopicMass", "Adduct", "ISgroup", "Module_RTclust", "time.y", "mean_int_vec", "MD")
-
-      mchemicaldata <- as.data.frame(mchemicaldata)
-      mchemicaldata$time <- as.numeric(as.character(mchemicaldata$time))
-
       mchemicaldata <- group_by_rt_histv2(
         mchemicaldata,
         time_step = 1,
