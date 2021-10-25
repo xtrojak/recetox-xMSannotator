@@ -21,6 +21,31 @@ extract_isototopic_peak_candidates <- function(m,
   put_isp_masses_curmz_data <- put_isp_masses_curmz_data[order(put_isp_masses_curmz_data$mz), ]
 }
 
+construct_isotope_table <- function(put_isp_masses_curmz_data,
+                                    isp_v,
+                                    mchemicaldata,
+                                    isnum2,
+                                    isnum,
+                                    m,
+                                    i) {
+  other_inf <- cbind(rep("-", 7))
+  
+  temp_var <- cbind(put_isp_masses_curmz_data[isp_v, c(1:2)], t(other_inf), put_isp_masses_curmz_data[isp_v, c(3:4)], put_isp_masses_curmz_data[isp_v, c(2, 5:6)])
+  temp_var <- as.data.frame(temp_var)
+
+  colnames(temp_var) <- colnames(mchemicaldata)
+  isp_sign <- if (isnum2 <= 0) "-" else "+"
+
+  temp_var$Formula <- as.character(paste(mchemicaldata[m, "Formula"], "_[", isp_sign, (abs(isnum2)), "]", sep = ""))
+  temp_var$Name <- as.character(mchemicaldata[m, "Name"])
+  temp_var$chemical_ID <- as.character(mchemicaldata[m, "chemical_ID"])
+  temp_var$Adduct <- paste(mchemicaldata[m, 9], "_[", isp_sign, (abs(isnum)), "]", sep = "")
+
+  temp_var <- as.data.frame(temp_var)
+  temp_var <- cbind(paste("group", i, sep = ""), temp_var)
+  return(temp_var)
+}
+
 #' @export
 do_something <- function(i,
                          mchemicaldata_goodadducts_index,
@@ -29,7 +54,6 @@ do_something <- function(i,
                          max_diff_rt,
                          mass_defect_window,
                          mass_defect_mode,
-                         exp_isp,
                          max_isp,
                          abund_ratio_vec) {
   m <- mchemicaldata_goodadducts_index[i]
@@ -46,14 +70,8 @@ do_something <- function(i,
   if (length(put_isp_masses_curmz_data) < 1) {
     return(final_isp_annot_res)
   }
-  int_vec <- put_isp_masses_curmz_data[, c(5)]
-  int_vec <- int_vec / mchemicaldata[m, 13]
 
-  max_isp_count <- max(exp_isp)
-
-  if (is.na(max_isp_count)) {
-    max_isp_count <- 1
-  }
+  int_vec <- put_isp_masses_curmz_data[, "AvgIntensity"] / mchemicaldata[m, "mean_int_vec"]
 
   ischeck <- which(int_vec <= max(abund_ratio_vec[-c(1)] + 0.10))
 
@@ -70,8 +88,8 @@ do_something <- function(i,
     isp_v <- ischeck[rnum]
     isp_v <- as.numeric(as.character(isp_v))
 
-    diff_rt <- abs(put_isp_masses_curmz_data[isp_v, 2] - mchemicaldata[m, 2])
-    isnum <- (round(put_isp_masses_curmz_data[isp_v, 1]) - round(mchemicaldata[m, 1]))
+    diff_rt <- abs(put_isp_masses_curmz_data[isp_v, "time"] - mchemicaldata[m, "time"])
+    isnum <- (round(put_isp_masses_curmz_data[isp_v, "mz"]) - round(mchemicaldata[m, "mz"]))
     bool_check <- 1
 
     if (mass_defect_mode == "neg" | mass_defect_mode == "both") {
@@ -84,44 +102,27 @@ do_something <- function(i,
       }
     }
 
-    if (diff_rt < max_diff_rt & isnum <= max_isp) {
-      max_isp_count <- max_isp
+    if (diff_rt < max_diff_rt & isnum <= max_isp & max_isp > 0 & bool_check > 0) {
+      isnum2 <- (round(put_isp_masses_curmz_data[isp_v, "mz"]) - round(as.numeric(as.character(mchemicaldata$MonoisotopicMass[m]))))
 
-      if (max_isp_count > 0 && isnum <= max_isp_count && bool_check > 0) {
-        isnum2 <- (round(put_isp_masses_curmz_data[isp_v, 1]) - round(as.numeric(as.character(mchemicaldata$MonoisotopicMass[m]))))
-        isnum2 <- round(isnum2)
-
-        isp_sign <- if (isnum2 <= 0) "-" else "+"
-
-        isnum2 <- abs(isnum2)
-        if (isnum2 <= max_isp) {
-          form_name <- as.character(paste(mchemicaldata[m, 7], "_[", isp_sign, (isnum2), "]", sep = ""))
-          other_inf <- cbind(rep("-", 7))
-          temp_var <- cbind(put_isp_masses_curmz_data[isp_v, c(1:2)], t(other_inf), put_isp_masses_curmz_data[isp_v, c(3:4)], put_isp_masses_curmz_data[isp_v, c(2, 5:6)])
-
-          temp_var <- as.data.frame(temp_var)
-
-          colnames(temp_var) <- colnames(mchemicaldata)
-
-          temp_var$Formula <- form_name
-          temp_var$Name <- as.character(mchemicaldata[m, 6])
-          temp_var$chemical_ID <- as.character(mchemicaldata[m, 5])
-
-          temp_var$Adduct <- paste(mchemicaldata[m, 9], "_[", isp_sign, (abs(isnum)), "]", sep = "")
-
-          temp_var <- as.data.frame(temp_var)
-          temp_var <- cbind(paste("group", i, sep = ""), temp_var)
-          final_isp_annot_res <- as.data.frame(final_isp_annot_res)
-
+      if (abs(isnum2) <= max_isp) {
+        temp_var <- construct_isotope_table(
+          put_isp_masses_curmz_data,
+          isp_v,
+          mchemicaldata,
+          isnum2,
+          isnum,
+          m,
+          i
+        )
+        final_isp_annot_res <- as.data.frame(final_isp_annot_res)
+        if (nrow(temp_var) > 0) {
+          check_mz <- which(temp_var$mz %in% final_isp_annot_res)
+          if (length(check_mz) > 0) {
+            temp_var <- temp_var[-c(check_mz), ]
+          }
           if (nrow(temp_var) > 0) {
-            check_mz <- which(temp_var$mz %in% final_isp_annot_res)
-
-            if (length(check_mz) > 0) {
-              temp_var <- temp_var[-c(check_mz), ]
-            }
-            if (nrow(temp_var) > 0) {
-              final_isp_annot_res <- rbind(final_isp_annot_res, temp_var)
-            }
+            final_isp_annot_res <- rbind(final_isp_annot_res, temp_var)
           }
         }
       }
@@ -160,7 +161,7 @@ remove_water_adducts <- function(curformula, mchemicaldata) {
   water_adducts <- c("M+H-H2O", "M+H-2H2O", "M-H2O-H")
   water_adduct_ind <- which(mchemicaldata$Adduct %in% water_adducts)
 
-  if (numoxygen < 1) {
+  if (all(numoxygen < 1)) {
     if (length(water_adduct_ind) > 0) {
       return(mchemicaldata[-water_adduct_ind, ])
     }
@@ -224,7 +225,6 @@ add_isotopic_peaks <- function(mchemicaldata,
       max_diff_rt,
       mass_defect_window,
       mass_defect_mode,
-      exp_isp,
       max_isp,
       abund_ratio_vec
     )
@@ -244,7 +244,12 @@ add_isotopic_peaks <- function(mchemicaldata,
   mod_names <- unique(mchemicaldata$Module_RTclust)
 
   diffmatB <- {}
-  diffmatB <- lapply(1:length(mod_names), do_something_2, mod_names, mchemicaldata)
+  diffmatB <- lapply(
+    1:length(mod_names),
+    do_something_2,
+    mod_names,
+    mchemicaldata
+  )
 
   mchemicaldata <- unique(plyr::ldply(diffmatB, rbind))
 
