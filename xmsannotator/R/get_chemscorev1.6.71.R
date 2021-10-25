@@ -182,17 +182,14 @@ add_isotopic_peaks <- function(mchemicaldata,
                                max_isp,
                                abund_ratio_vec) {
   mchemicaldata$Module_RTclust <- replace_with_module(mchemicaldata$Module_RTclust)
-  mchemicaldata_orig <- mchemicaldata
 
   adduct_weights_strings <- as.character(adduct_weights[, 1])
-  selected_adduct_weights <- which(mchemicaldata_orig$Adduct %in% adduct_weights_strings)
+  selected_adduct_weights <- which(mchemicaldata$Adduct %in% adduct_weights_strings)
 
   if (length(selected_adduct_weights) > 0) {
     rel_adduct_module <- mchemicaldata[selected_adduct_weights, "Module_RTclust"]
     mchemicaldata <- mchemicaldata[which(mchemicaldata$Module_RTclust %in% rel_adduct_module), ]
   }
-
-  mchemicaldata <- unique(mchemicaldata)
 
   curformula <- as.character(mchemicaldata$Formula)
 
@@ -208,11 +205,9 @@ add_isotopic_peaks <- function(mchemicaldata,
     browser()
     return(list("chemical_score" = chemical_score, "filtdata" = mchemicaldata))
   }
-
   mchemicaldata$Adduct <- as.character(mchemicaldata$Adduct)
 
   level_module_isop_annot$Module_RTclust <- replace_with_module(level_module_isop_annot$Module_RTclust)
-
   mchemicaldata_goodadducts_index <- which(mchemicaldata$Adduct %in% adduct_weights_strings)
 
   if (length(mchemicaldata_goodadducts_index) > 0) {
@@ -229,11 +224,7 @@ add_isotopic_peaks <- function(mchemicaldata,
       abund_ratio_vec
     )
 
-    rm(level_module_isop_annot)
-
     final_isp_annot_res2 <- plyr::ldply(final_isp_annot_res_isp, rbind)[, -c(1)]
-
-    rm(final_isp_annot_res_isp)
     mchemicaldata <- rbind(mchemicaldata, final_isp_annot_res2) # [,-c(12)]
   }
 
@@ -243,7 +234,6 @@ add_isotopic_peaks <- function(mchemicaldata,
     arrange(mz)
   mod_names <- unique(mchemicaldata$Module_RTclust)
 
-  diffmatB <- {}
   diffmatB <- lapply(
     1:length(mod_names),
     do_something_2,
@@ -252,8 +242,6 @@ add_isotopic_peaks <- function(mchemicaldata,
   )
 
   mchemicaldata <- unique(plyr::ldply(diffmatB, rbind))
-
-  rm(diffmatB)
 
   write.table(mchemicaldata, file = "../Stage2_withisotopes.txt", append = TRUE, sep = "\t", col.names = FALSE)
   return(mchemicaldata)
