@@ -1,3 +1,26 @@
+extract_isototopic_peak_candidates <- function(m,
+                                               mchemicaldata,
+                                               level_module_isop_annot,
+                                               max_diff_rt,
+                                               mass_defect_window) {
+  query_md <- mchemicaldata$mz[m] - round(mchemicaldata$mz[m])
+  query_rt <- mchemicaldata$time[m]
+  query_int <- 1 * (mchemicaldata$mean_int_vec[m])
+  module_rt_group <- replace_with_module(mchemicaldata$Module_RTclust[m])
+  isp_mat_module_rt_group <- as.character(level_module_isop_annot$Module_RTclust)
+
+  put_isp_masses_curmz_data <- level_module_isop_annot[
+    which(
+      abs(level_module_isop_annot$time - query_rt) < max_diff_rt &
+      abs((level_module_isop_annot$MD) - (query_md)) < mass_defect_window &
+      isp_mat_module_rt_group == module_rt_group &
+      level_module_isop_annot$AvgIntensity < query_int
+    ),
+  ]
+  put_isp_masses_curmz_data <- unique(put_isp_masses_curmz_data)
+  put_isp_masses_curmz_data <- put_isp_masses_curmz_data[order(put_isp_masses_curmz_data$mz), ]
+}
+
 #' @export
 do_something <- function(i,
                          mchemicaldata_goodadducts_index,
@@ -12,18 +35,13 @@ do_something <- function(i,
   m <- mchemicaldata_goodadducts_index[i]
   final_isp_annot_res <- cbind(paste("group", i, sep = ""), mchemicaldata[m, ])
 
-  module_rt_group <- replace_with_module(mchemicaldata$Module_RTclust[m])
-
-  isp_mat_module_rt_group <- as.character(level_module_isop_annot$Module_RTclust)
-
-  query_md <- mchemicaldata$mz[m] - round(mchemicaldata$mz[m])
-  query_rt <- mchemicaldata$time[m]
-  query_int <- 1 * (mchemicaldata$mean_int_vec[m])
-
-  put_isp_masses_curmz_data <- level_module_isop_annot[which(abs(level_module_isop_annot$time - query_rt) < max_diff_rt & abs((level_module_isop_annot$MD) - (query_md)) < mass_defect_window & isp_mat_module_rt_group == module_rt_group & level_module_isop_annot$AvgIntensity < query_int), ]
-  
-  put_isp_masses_curmz_data <- unique(put_isp_masses_curmz_data)
-  put_isp_masses_curmz_data <- put_isp_masses_curmz_data[order(put_isp_masses_curmz_data$mz), ]
+  put_isp_masses_curmz_data <- extract_isototopic_peak_candidates(
+    m,
+    mchemicaldata,
+    level_module_isop_annot,
+    max_diff_rt,
+    mass_defect_window
+  )
 
   if (length(put_isp_masses_curmz_data) < 1) {
     return(final_isp_annot_res)
