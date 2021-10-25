@@ -6,7 +6,6 @@ do_something <- function(i,
                          max_diff_rt,
                          mass_defect_window,
                          mass_defect_mode,
-                         curformula,
                          exp_isp,
                          max_isp,
                          abund_ratio_vec) {
@@ -22,11 +21,7 @@ do_something <- function(i,
   query_int <- 1 * (mchemicaldata$mean_int_vec[m])
 
   put_isp_masses_curmz_data <- level_module_isop_annot[which(abs(level_module_isop_annot$time - query_rt) < max_diff_rt & abs((level_module_isop_annot$MD) - (query_md)) < mass_defect_window & isp_mat_module_rt_group == module_rt_group & level_module_isop_annot$AvgIntensity < query_int), ]
-  put_isp_masses_curmz_data <- as.data.frame(put_isp_masses_curmz_data)
-  put_isp_masses_curmz_data$mz <- as.numeric(as.character(put_isp_masses_curmz_data$mz))
-  put_isp_masses_curmz_data$time <- as.numeric(as.character(put_isp_masses_curmz_data$time))
-  mchemicaldata <- as.data.frame(mchemicaldata)
-
+  
   put_isp_masses_curmz_data <- unique(put_isp_masses_curmz_data)
   put_isp_masses_curmz_data <- put_isp_masses_curmz_data[order(put_isp_masses_curmz_data$mz), ]
 
@@ -35,12 +30,6 @@ do_something <- function(i,
   }
   int_vec <- put_isp_masses_curmz_data[, c(5)]
   int_vec <- int_vec / mchemicaldata[m, 13]
-
-  curformula <- gsub(curformula, pattern = "Sr", replacement = "")
-  curformula <- gsub(curformula, pattern = "Sn", replacement = "")
-  curformula <- gsub(curformula, pattern = "Se", replacement = "")
-  curformula <- gsub(curformula, pattern = "Sc", replacement = "")
-  curformula <- gsub(curformula, pattern = "Sm", replacement = "")
 
   max_isp_count <- max(exp_isp)
 
@@ -180,12 +169,8 @@ add_isotopic_peaks <- function(mchemicaldata,
   selected_adduct_weights <- which(mchemicaldata_orig$Adduct %in% adduct_weights_strings)
 
   if (length(selected_adduct_weights) > 0) {
-    rel_adduct_data <- mchemicaldata[selected_adduct_weights, ]
-
-    rel_adduct_module <- gsub(rel_adduct_data$Module_RTclust, pattern = "_[0-9]*", replacement = "")
-    module_rt_group <- gsub(mchemicaldata$Module_RTclust, pattern = "_[0-9]*", replacement = "")
-
-    mchemicaldata <- mchemicaldata[which(module_rt_group %in% rel_adduct_module), ]
+    rel_adduct_module <- mchemicaldata[selected_adduct_weights, "Module_RTclust"]
+    mchemicaldata <- mchemicaldata[which(mchemicaldata$Module_RTclust %in% rel_adduct_module), ]
   }
 
   mchemicaldata <- unique(mchemicaldata)
@@ -201,17 +186,15 @@ add_isotopic_peaks <- function(mchemicaldata,
   # water check
   if (nrow(mchemicaldata) < 1) {
     chemical_score <- (-100)
+    browser()
     return(list("chemical_score" = chemical_score, "filtdata" = mchemicaldata))
   }
 
   mchemicaldata$Adduct <- as.character(mchemicaldata$Adduct)
 
-  final_isp_annot_res_all <- mchemicaldata
-  level_module_isop_annot <- as.data.frame(level_module_isop_annot)
-  level_module_isop_annot$Module_RTclust <- gsub(level_module_isop_annot$Module_RTclust, pattern = "_[0-9]*", replacement = "")
+  level_module_isop_annot$Module_RTclust <- replace_with_module(level_module_isop_annot$Module_RTclust)
 
-  mchemicaldata_goodadducts_index <- which(mchemicaldata$Adduct %in% as.character(adduct_weights[, 1]))
-  final_isp_annot_res_isp <- {}
+  mchemicaldata_goodadducts_index <- which(mchemicaldata$Adduct %in% adduct_weights_strings)
 
   if (length(mchemicaldata_goodadducts_index) > 0) {
     final_isp_annot_res_isp <- lapply(
@@ -223,7 +206,6 @@ add_isotopic_peaks <- function(mchemicaldata,
       max_diff_rt,
       mass_defect_window,
       mass_defect_mode,
-      curformula,
       exp_isp,
       max_isp,
       abund_ratio_vec
@@ -234,7 +216,7 @@ add_isotopic_peaks <- function(mchemicaldata,
     final_isp_annot_res2 <- plyr::ldply(final_isp_annot_res_isp, rbind)[, -c(1)]
 
     rm(final_isp_annot_res_isp)
-    mchemicaldata <- rbind(final_isp_annot_res_all, final_isp_annot_res2) # [,-c(12)]
+    mchemicaldata <- rbind(mchemicaldata, final_isp_annot_res2) # [,-c(12)]
   }
 
   # filter for na and sort in ascending mz
