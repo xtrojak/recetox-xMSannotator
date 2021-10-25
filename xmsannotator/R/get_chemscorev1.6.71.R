@@ -874,17 +874,15 @@ compute_chemical_score <- function(mchemicaldata,
   ####### add code for only correlation criteria here
   if (chemical_score <= 1) {
     mchemicaldata <- mchemicaldata_orig
-    cur_adducts_with_isotopes <- mchemicaldata$Adduct
-    good_adducts_len <- length(which(cur_adducts_with_isotopes %in% adduct_weights[, 1]))
+
+    good_adducts_len <- length(which(mchemicaldata$Adduct %in% adduct_weights[, 1]))
 
     if (good_adducts_len > 0) {
-      max_adduct_weight <- max(as.numeric(as.character(adduct_weights[which(adduct_weights[, 1] %in% cur_adducts_with_isotopes), 2])))[1]
-      chemical_score <- ((10^max_adduct_weight))
-      chemical_score <- chemical_score[1] - 1
-      chemical_score <- chemical_score[1]
+      max_adduct_weight <- max(as.numeric(as.character(adduct_weights[which(adduct_weights[, 1] %in% mchemicaldata$Adduct), 2])))[1]
+      chemical_score <- 10^max_adduct_weight - 1
 
       good_adduct_index <- which(adduct_weights[, 2] == max_adduct_weight)
-      mchemicaldata <- mchemicaldata[which(cur_adducts_with_isotopes %in% adduct_weights[good_adduct_index, 1]), ]
+      mchemicaldata <- mchemicaldata[which(mchemicaldata$Adduct %in% adduct_weights[good_adduct_index, 1]), ]
     }
   }
 
