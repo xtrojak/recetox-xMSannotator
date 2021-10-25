@@ -190,7 +190,7 @@ add_isotopic_peaks <- function(mchemicaldata,
 
   mchemicaldata <- unique(mchemicaldata)
 
-  curformula <- as.character(mchemicaldata[, 7])
+  curformula <- as.character(mchemicaldata$Formula)
 
   formula_check <- Rdisop::getMolecule(as.character(curformula[1]))
   exp_isp <- which(formula_check$isotopes[[1]][2, ] >= 0.001)

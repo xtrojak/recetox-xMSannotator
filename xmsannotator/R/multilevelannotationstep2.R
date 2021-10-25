@@ -18,7 +18,7 @@ load_adduct_weights <- function() {
 extract_possible_isotopes_from_module <- function(...,
                                                   mass_defect_window,
                                                   isop_res_md) {
-  query <- tibble(...)
+  query <- tibble::tibble(...)
 
   # Get Module ID
   module_rt_group <- replace_with_module(query$Module_RTclust)
@@ -43,7 +43,7 @@ compute_filtered_peak_table <- function(isop_res_md, curmchemdata, mass_defect_w
     )
   )
 
-  colnames(isp_masses_mz_data)[5] <- "AvgIntensity"
+  #colnames(isp_masses_mz_data)[5] <- "AvgIntensity"
   return(isp_masses_mz_data)
 }
 
@@ -65,7 +65,11 @@ compute_chemscore <- function(chemid,
   chemscoremat <- {}
   curmchemdata <- mchemdata[which(mchemdata$chemical_ID == chemid), ]
 
-  isp_masses_mz_data <- compute_filtered_peak_table(isop_res_md, curmchemdata, mass_defect_window)
+  isp_masses_mz_data <- compute_filtered_peak_table(
+    isop_res_md,
+    curmchemdata,
+    mass_defect_window
+  )
 
   chem_score <- get_chemscorev1.6.71(
     chemicalid = chemid,
