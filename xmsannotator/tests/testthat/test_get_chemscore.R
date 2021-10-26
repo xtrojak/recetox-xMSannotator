@@ -40,12 +40,12 @@ patrick::with_parameters_test_that("Compute chemscore can be called isolated", {
 
     outloc <- file.path(tempdir(), "get_chemscore", test_identifier)
 
-    # expected <- readRDS(file.path(test_path, "chemscoremat.Rds"))
     if(!dir.exists(outloc)) {
       dir.create(outloc, recursive = TRUE)
     }
 
-    expected <- load_expected(test_path)
+    # expected <- readRDS(file.path(test_path, "chemscoremat.Rds"))
+    expected <- unique(load_expected(test_path))
 
     setwd(testthat_wd)
 
@@ -62,9 +62,9 @@ patrick::with_parameters_test_that("Compute chemscore can be called isolated", {
         isotopes,
         ~get_chemscore(...,
           annotation = isotopes,
-          mass_defect_window = 0.01,
+          mass_defect_window = mass_defect_window,
           adduct_weights = adduct_weights,
-          corthresh = 0.7,
+          corthresh = corthresh,
           global_cor = global_cor,
           max_diff_rt = max_diff_rt,
           outlocorig = outloc
