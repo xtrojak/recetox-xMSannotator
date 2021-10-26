@@ -39,7 +39,7 @@ construct_isotope_table <- function(put_isp_masses_curmz_data,
   temp_var$Formula <- as.character(paste(mchemicaldata[m, "Formula"], "_[", isp_sign, (abs(isnum2)), "]", sep = ""))
   temp_var$Name <- as.character(mchemicaldata[m, "Name"])
   temp_var$chemical_ID <- as.character(mchemicaldata[m, "chemical_ID"])
-  temp_var$Adduct <- paste(mchemicaldata[m, 9], "_[", isp_sign, (abs(isnum)), "]", sep = "")
+  temp_var$Adduct <- paste(mchemicaldata[m, "Adduct"], "_[", isp_sign, (abs(isnum)), "]", sep = "")
 
   temp_var <- as.data.frame(temp_var)
   temp_var <- cbind(paste("group", i, sep = ""), temp_var)
@@ -134,14 +134,15 @@ do_something <- function(i,
 #' @export
 do_something_2 <- function(i,
                            mod_names,
-                           mchemicaldata) {
+                           mchemicaldata,
+                           max_diff_rt) {
   groupA_num <- mod_names[i]
 
   subdata <- mchemicaldata[which(mchemicaldata$Module_RTclust == groupA_num), ]
   subdata <- subdata[order(subdata$time), ]
 
   if (nrow(subdata) > 0) {
-    groupB <- group_by_rt_histv2(subdata, time_step = 1, max_diff_rt = 10, groupnum = groupA_num)
+    groupB <- group_by_rt_histv2(subdata, time_step = 1, max_diff_rt = max_diff_rt, groupnum = groupA_num)
   } else {
     groupB <- subdata
   }
@@ -238,7 +239,8 @@ add_isotopic_peaks <- function(mchemicaldata,
     1:length(mod_names),
     do_something_2,
     mod_names,
-    mchemicaldata
+    mchemicaldata,
+    10
   )
 
   mchemicaldata <- unique(plyr::ldply(diffmatB, rbind))
@@ -304,6 +306,7 @@ calc_base_score <- function(cur_adducts_with_isotopes, adduct_weights, topquant_
 }
 
 calc_base_score_v2 <- function(cur_adducts_with_isotopes, adduct_weights, topquant_cor) {
+  browser()
   cur_adducts <- gsub(cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[0-9]*\\])", replacement = "")
 
   good_adducts_len <- length(which(cur_adducts_with_isotopes %in% adduct_weights[, 1]))
@@ -546,7 +549,7 @@ get_data_and_score_for_chemical <- function(cor_mz,
       }
     }
     else {
-      mchemicaldata$Module_RTclust <- gsub(mchemicaldata$Module_RTclust, pattern = "_[0-9]*", replacement = "")
+      mchemicaldata$Module_RTclust <- replace_with_module(mchemicaldata$Module_RTclust)
       mchemicaldata <- cbind(mchemicaldata[, c(2:11)], mchemicaldata[, 1], mchemicaldata[, c(12:14)])
       colnames(mchemicaldata) <- c("mz", "time", "MatchCategory", "theoretical.mz", "chemical_ID", "Name", "Formula", "MonoisotopicMass", "Adduct", "ISgroup", "Module_RTclust", "time.y", "mean_int_vec", "MD")
 

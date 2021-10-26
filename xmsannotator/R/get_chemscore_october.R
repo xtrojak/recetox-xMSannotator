@@ -25,7 +25,7 @@ get_chemscore <- function(...,
   curmchemdata <- dplyr::filter(
     annotation,
     chemical_ID == query$chemical_ID &
-    abs(time - query$time) <= 5
+    abs(time - query$time) <= 10
   )
 
   if (length(curmchemdata$mz) < 1) stop("No mz data found!")
