@@ -1,3 +1,33 @@
+load_expected <- function(test_path) {
+  load(file = file.path(test_path, "step1_results.Rda"))
+  load(file = file.path(test_path, "global_cor.Rda"))
+  load(file = file.path(test_path, "tempobjects.Rda"))
+
+  outloc <- file.path(tempdir(), "get_chemscore", basename(test_path))
+
+  if(!dir.exists(outloc)) {
+      dir.create(outloc, recursive = TRUE)
+  }
+
+  expected <- multilevelannotationstep2(
+      outloc = outloc,
+      max_diff_rt = max.rt.diff,
+      mchemdata = mchemdata,
+      mass_defect_window = mass_defect_window,
+      corthresh = corthresh,
+      global_cor = global_cor,
+      adduct_weights = adduct_weights,
+      max_isp = max_isp,
+      MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
+      mass_defect_mode = mass_defect_mode,
+      chemids = chemids,
+      isop_res_md = isop_res_md,
+      filter.by = filter.by
+    )
+
+    return(expected)
+}
+
 patrick::with_parameters_test_that("Compute chemscore can be called isolated", {
     # Arrange
     testthat_wd <- getwd()
@@ -10,10 +40,14 @@ patrick::with_parameters_test_that("Compute chemscore can be called isolated", {
 
     outloc <- file.path(tempdir(), "get_chemscore", test_identifier)
 
-    expected <- readRDS(file.path(test_path, "chemscoremat.Rds"))
+    # expected <- readRDS(file.path(test_path, "chemscoremat.Rds"))
     if(!dir.exists(outloc)) {
-        dir.create(outloc, recursive = TRUE)
+      dir.create(outloc, recursive = TRUE)
     }
+
+    expected <- load_expected(test_path)
+
+    setwd(testthat_wd)
 
     annotation_file <- file.path("test-data", "get_chemscore",paste0(test_identifier, "_annotation.Rds"))
     isotopes <- readRDS(annotation_file)
@@ -36,10 +70,9 @@ patrick::with_parameters_test_that("Compute chemscore can be called isolated", {
           outlocorig = outloc
         )
     )
-
     actual <- unique(actual)
 
-    actual$Formula <- gsub(actual$Formula, pattern = "_.*", replacement = "")
+    #actual$Formula <- gsub(actual$Formula, pattern = "_.*", replacement = "")
     keys <- c("mz", "time", "Name", "Adduct", "Formula", "chemical_ID", "cur_chem_score")
 
     actual$MonoisotopicMass[is.na(actual$MonoisotopicMass)] <- "-"
