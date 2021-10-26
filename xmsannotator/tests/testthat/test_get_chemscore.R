@@ -73,7 +73,7 @@ patrick::with_parameters_test_that("Compute chemscore can be called isolated", {
     actual <- unique(actual)
 
     #actual$Formula <- gsub(actual$Formula, pattern = "_.*", replacement = "")
-    keys <- c("mz", "time", "Name", "Adduct", "Formula", "chemical_ID", "cur_chem_score")
+    keys <- c("mz", "time", "Name", "Adduct", "Formula", "chemical_ID", "cur_chem_score", "MatchCategory")
 
     actual$MonoisotopicMass[is.na(actual$MonoisotopicMass)] <- "-"
     actual$theoretical.mz[is.na(actual$theoretical.mz)] <- "-"
