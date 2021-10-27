@@ -33,7 +33,7 @@ reformat_annotation_table <- function(annotation) {
       ),
       theoretical.mz = annotation$expected_mass,
       chemical_ID = paste("Formula", annotation$compound, sep = "_"),
-      Name = "-",
+      Name = annotation$name,
       Formula = annotation$molecular_formula,
       MonoisotopicMass = annotation$monoisotopic_mass,
       Adduct = if_else(annotation$mass_number_difference == 0, annotation$adduct, construct_adduct_formula(annotation$adduct, annotation$mass_number_difference)),
@@ -44,4 +44,17 @@ reformat_annotation_table <- function(annotation) {
     )
 
   return(master_annotation)
+}
+
+#' Reformat the peak correlation table row and column names to fit with `master` branch.
+#' @param peak_table Table from which to take the mz & rt values.
+#' @param peak_correlation_matrix Peak correlation table.
+#' @return Peak correlation table where `peak` indices are replaced by `mz_rt`.
+#' @importFrom magittr set_colnames set_rownames
+#' @export
+reformat_correlation_matrix <- function(peak_table, peak_correlation_matrix) {
+  peak_table$mz_rt <- paste0(peak_table[, "mz"], "_", peak_table[, "rt"])
+  global_cor <- magrittr::set_colnames(peak_correlation_matrix, peak_table[as.integer(colnames(peak_correlation_matrix)), "mz_rt"])
+  global_cor <- magrittr::set_rownames(global_cor, peak_table[as.integer(rownames(peak_correlation_matrix)), "mz_rt"])
+  return(global_cor)
 }
