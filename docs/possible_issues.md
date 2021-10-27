@@ -9,3 +9,5 @@ This list contains potential bugs & problems detected in the original code while
   the loop is executed _in parallel_ (`%dopar%`) or _sequentially_ (`%do%`). The results may differ in **chemical scores** or the **number 
   of annotations**. When chemical scores differ, _sequential_ execution will systematically output lower scores.
 * in [multilevelannotationstep4](https://github.com/RECETOX/recetox-xMSannotator/blob/master/R/multilevelannotationstep4.R) (and functions called by it) are some suspicious conditions where they check for `curdata$score < 10` and `curdata$score > 10`, but never for actual value `10`
+* in [get_chemscorev1.6.71](https://github.com/RECETOX/recetox-xMSannotator/blob/d1f454cd4f4b0f6640965cd17aebc19f3217ef95/R/get_chemscorev1.6.71.R#L136) in the isotope detection, the RT clustering is recomputed with a fixed RT diff of 10 seconds, changing the whole previous RT clustering.
+* in [get_chemscorev1.5.71](https://github.com/RECETOX/recetox-xMSannotator/blob/d1f454cd4f4b0f6640965cd17aebc19f3217ef95/R/get_chemscorev1.6.71.R#L312-L327) this part for the calculation is never called under current tests.
