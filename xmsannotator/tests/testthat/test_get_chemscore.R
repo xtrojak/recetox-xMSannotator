@@ -44,7 +44,6 @@ patrick::with_parameters_test_that("Compute chemscore can be called isolated", {
       dir.create(outloc, recursive = TRUE)
     }
 
-    # expected <- readRDS(file.path(test_path, "chemscoremat.Rds"))
     expected <- unique(load_expected(test_path))
 
     setwd(testthat_wd)
@@ -67,12 +66,12 @@ patrick::with_parameters_test_that("Compute chemscore can be called isolated", {
           corthresh = corthresh,
           global_cor = global_cor,
           max_diff_rt = max_diff_rt,
-          outlocorig = outloc
+          outlocorig = outloc,
+          filter.by = c("M-H", "M+H")
         )
     )
     actual <- unique(actual)
 
-    #actual$Formula <- gsub(actual$Formula, pattern = "_.*", replacement = "")
     keys <- c("mz", "time", "Name", "Adduct", "Formula", "chemical_ID", "cur_chem_score", "MatchCategory")
 
     actual$MonoisotopicMass[is.na(actual$MonoisotopicMass)] <- "-"
@@ -116,3 +115,43 @@ patrick::with_parameters_test_that("Compute chemscore can be called isolated", {
     qc_matrix = list(test_identifier = "qc_matrix", max_diff_rt = 0.5)
   )
 )
+
+
+test_that("Chemscores range from 0 to Inf", {
+  test_identifier <- "batch1_neg"
+
+  testthat_wd <- getwd()
+  test_path <- file.path(
+    testthat_wd,
+    "test-data",
+    test_identifier
+  )
+
+  outloc <- file.path(tempdir(), "get_chemscore_2", test_identifier)
+
+  if(!dir.exists(outloc)) {
+    dir.create(outloc, recursive = TRUE)
+  }
+
+  annotation <- readRDS(file.path("test-data", "get_chemscore", "annotation_with_isotopes_v3.Rds"))
+  global_cor <- as.data.frame(readRDS(file.path("test-data", "get_chemscore", "global_cor.Rds")))
+
+  adduct_names <- c("M-H", "2M-H")
+  adduct_weights <- as.data.frame(tibble(adduct = adduct_names, weight = rep_len(5, length(adduct_names))))
+
+  actual <- purrr::pmap_dfr(
+    annotation,
+    ~ get_chemscore(...,
+      annotation = annotation,
+      mass_defect_window = 0.01,
+      adduct_weights = adduct_weights,
+      corthresh = 0.7,
+      global_cor = global_cor,
+      max_diff_rt = 15,
+      outlocorig = outloc,
+      filter.by = c("M-H")
+    )
+  )
+  expect_equal(min(actual$cur_chem_score), 0)
+  expect_gt(max(actual$cur_chem_score), 10^5)
+})

@@ -10,12 +10,12 @@ get_chemscore <- function(...,
                           global_cor,
                           max_diff_rt = 10,
                           adduct_weights,
-                          filter.by = c("M+H"),
+                          filter.by,
                           mass_defect_window = 0.01,
                           MplusH.abundance.ratio.check = TRUE,
                           outlocorig) {
 
-  query <- tibble(...)
+  query <- tibble::tibble(...)
   setwd(outlocorig)
 
   outloc1 <- paste(outlocorig, "/stage2/", sep = "")
@@ -45,7 +45,7 @@ get_chemscore <- function(...,
 
   if (result$chemical_score >= (-100)) {
     result$filtdata <- result$filtdata[order(result$filtdata$mz), ]
-    cur_chem_score <- result$chemical_score
+    cur_chem_score <- rep_len(result$chemical_score, nrow(result$filtdata))
     chemscoremat <- cbind(cur_chem_score, result$filtdata)
     chemscoremat <- as.data.frame(na.omit(chemscoremat))
   }
