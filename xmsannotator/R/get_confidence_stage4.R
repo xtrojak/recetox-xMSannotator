@@ -101,10 +101,10 @@ get_confidence_stage4 <-function(curdata,
       groupB <- group_by_rt(curdata, time_step = 3, max.rt.diff = max_diff_rt, groupnum = "")
       groupB <- groupB[order(groupB$mz), ]
       
-      cname1 <- paste(groupB$mz, groupB$time, sep = "_")
-      if (length(which(duplicated(cname1) == TRUE)) > 0) {
-        groupB <- groupB[-which(duplicated(cname1) == TRUE), ]
-      }
+      # cname1 <- paste(groupB$mz, groupB$time, sep = "_")
+      # if (length(which(duplicated(cname1) == TRUE)) > 0) {
+      #   groupB <- groupB[-which(duplicated(cname1) == TRUE), ]
+      # }
       curdata <- curdata[order(curdata$mz), ]
 
       module_clust <- groupB[, 1]
