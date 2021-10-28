@@ -76,14 +76,17 @@ advanced_annotation <- function(peak_table,
                                 intensity_deviation_tolerance = 0.1,
                                 mass_tolerance = 5e-6,
                                 mass_defect_tolerance = 0.1,
+                                mass_defect_precision = 0.01,
                                 time_tolerance = 10,
                                 peak_rt_width = 1,
                                 correlation_threshold = 0.7,
                                 deep_split = 2,
                                 min_cluster_size = 10,
+                                maximum_isotopes = 10,
+                                min_ions_per_chemical = 2,
                                 network_type = "unsigned",
                                 redundancy_filtering = TRUE,
-                                outloc,
+                                outloc = tempdir(),
                                 n_workers = parallel::detectCores()) {
   if (is.null(adduct_table)) {
     adduct_table <- sample_adduct_table
@@ -129,10 +132,10 @@ advanced_annotation <- function(peak_table,
   peak_table <- peak_table %>%
     select(peak, mz, rt) %>%
     inner_join(peak_rt_clusters, on = "peak") %>%
-    compute_mass_defect(precision = 0.01)
+    compute_mass_defect(precision = mass_defect_precision)
 
   annotation <- filter(annotation, forms_valid_adduct_pair(.data$molecular_formula, .data$adduct))
-  annotation <- compute_mass_defect(annotation, precision = 0.01)
+  annotation <- compute_mass_defect(annotation, precision = mass_defect_precision)
   annotation <- inner_join(annotation,
     select(peak_rt_clusters, "peak", "mean_intensity", "module", "rt_cluster"),
     by = "peak"
@@ -153,24 +156,22 @@ advanced_annotation <- function(peak_table,
 
 
   global_cor <- reformat_correlation_matrix(peak_table, peak_correlation_matrix)
-  filter.by <- c("M-H")
 
   annotation <- purrr::pmap_dfr(
     annotation,
     ~ get_chemscore(...,
                     annotation = annotation,
                     adduct_weights = adduct_weights,
-                    corthresh = 0.7,
+                    corthresh = correlation_threshold,
                     global_cor = global_cor,
                     max_diff_rt = time_tolerance,
-                    filter.by = filter.by,
+                    filter.by = filter_by,
                     outlocorig = outloc
     )
   )
 
   data(hmdbCompMZ)
   chemCompMZ <- dplyr::rename(hmdbCompMZ, chemical_ID = HMDBID)
-  #annotation <- readRDS("annotation_with_scores.Rds")
 
   annotation <- multilevelannotationstep3(
     chemCompMZ = chemCompMZ,
@@ -186,10 +187,10 @@ advanced_annotation <- function(peak_table,
     chemscoremat = annotation,
     max.mz.diff = mass_tolerance,
     max.rt.diff = time_tolerance,
-    filter.by = filter.by,
+    filter.by = filter_by,
     adduct_weights = adduct_weights,
-    max_isp = 10,
-    min_ions_perchem = 1
+    max_isp = maximum_isotopes,
+    min_ions_perchem = min_ions_per_chemical
   )
 
   print_confidence_distribution(annotation)
