@@ -71,9 +71,6 @@ print_confidence_distribution <- function(annotation) {
 #' @importFrom magrittr %>%
 advanced_annotation <- function(peak_table,
                                 compound_table,
-                                pathway_mapping = NULL,
-                                exluded_pathways = NULL,
-                                exluded_pathway_compounds = NULL,
                                 adduct_table = NULL,
                                 adduct_weights = NULL,
                                 intensity_deviation_tolerance = 0.1,
@@ -85,8 +82,6 @@ advanced_annotation <- function(peak_table,
                                 deep_split = 2,
                                 min_cluster_size = 10,
                                 network_type = "unsigned",
-                                expected_adducts = NULL,
-                                boosted_compounds = NULL,
                                 redundancy_filtering = TRUE,
                                 outloc,
                                 n_workers = parallel::detectCores()) {
