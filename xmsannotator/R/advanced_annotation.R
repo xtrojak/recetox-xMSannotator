@@ -88,6 +88,7 @@ advanced_annotation <- function(peak_table,
                                 expected_adducts = NULL,
                                 boosted_compounds = NULL,
                                 redundancy_filtering = TRUE,
+                                outloc,
                                 n_workers = parallel::detectCores()) {
   if (is.null(adduct_table)) {
     adduct_table <- sample_adduct_table
@@ -105,7 +106,6 @@ advanced_annotation <- function(peak_table,
   adduct_table <- as_adduct_table(adduct_table)
   compound_table <- as_compound_table(compound_table)
 
-  outloc <- "."
   peak_intensity_matrix <- t(select(peak_table, -any_of(c("peak", "mz", "rt"))))
   peak_intensity_matrix <- magrittr::set_colnames(peak_intensity_matrix, peak_table$peak)
   peak_correlation_matrix <- WGCNA::cor(peak_intensity_matrix, use = "p", method = "p")

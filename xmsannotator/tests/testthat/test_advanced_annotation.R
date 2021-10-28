@@ -1,4 +1,9 @@
 test_that("basic advanced_annotation functionality", {
+  outloc <- file.path(tempdir(), "advanced_annotation")
+  dir.create(outloc, recursive = TRUE)
+
+  expected <- read.csv("test-data/advanced_annotation/expected.csv")
+
   peaks <- arrow::read_parquet("test-data/advanced_annotation/batch1_neg.parquet")
   DB <- arrow::read_parquet("test-data/advanced_annotation/hmdb.parquet")
   adduct_names <- c("M-H", "2M-H", "M-2H")
@@ -11,7 +16,11 @@ test_that("basic advanced_annotation functionality", {
     peak_rt_width = 15,
     time_tolerance = 15,
     min_cluster_size = 10,
-    intensity_deviation_tolerance = 0.2
+    intensity_deviation_tolerance = 0.2,
+    outloc = outloc
   )
-  expect_success(annotation)
+
+  actual <- read.csv(file.path(outloc, "Stage5.csv"))
+
+  expect_equal(actual, expected)
 })
