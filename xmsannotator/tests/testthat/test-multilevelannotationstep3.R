@@ -27,7 +27,6 @@ patrick::with_parameters_test_that(
       chemCompMZ = chemCompMZ,
       chemscoremat = chemscoremat,
       adduct_weights = adduct_weights,
-      num_sets = num_sets,
       db_name = db_name,
       max_diff_rt = max_diff_rt,
       pathwaycheckmode = pathwaycheckmode

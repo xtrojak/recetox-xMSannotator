@@ -76,9 +76,9 @@ compute_score_pathways <- function(chemscoremat, db, pathwaycheckmode, scorethre
           all_notcurpath_numchem
         ))
 
-        if (p_value <= pthresh) {         
+        if (p_value <= pthresh) {
           pathway_chemicals_to_iterate <- pathway_chemicals
-          
+
 
           for (chemname in pathway_chemicals_to_iterate) {
             pathway_indices <- which(as.character(curmchemical_in_pathway$chemical_ID) == chemname)
@@ -227,7 +227,6 @@ sanitize_chemscoremat <- function(chemscoremat, chemCompMZ, column_names) {
 multilevelannotationstep3 <- function(chemCompMZ,
                                       chemscoremat,
                                       adduct_weights = NA,
-                                      num_sets,
                                       db_name,
                                       max_diff_rt,
                                       pathwaycheckmode = "p",
@@ -290,16 +289,6 @@ multilevelannotationstep3 <- function(chemCompMZ,
   }
 
   write.csv(chemscoremat, file = "Stage3.csv", row.names = FALSE)
-
-  rm(
-    "num_sets",
-    "db_name",
-    "num_sets",
-    "adduct_weights",
-    "chemCompMZ",
-    "hmdbAllinf",
-    "hmdbAllinfv3.6"
-  )
 
   return(chemscoremat)
 }
