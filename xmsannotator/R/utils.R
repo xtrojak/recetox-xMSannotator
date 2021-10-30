@@ -93,7 +93,7 @@ load_peak_table_parquet <- function(file) {
 
 #' @export
 load_adduct_table_parquet <- function(file) {
-  data <- load_parquet(file, columns = c("adduct", "charge", "mass", "n_molecules"))
+  data <- load_parquet(file, columns = c("adduct", "charge", "mass", "factor"))
   as_adduct_table(data)
 }
 
