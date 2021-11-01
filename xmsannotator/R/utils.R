@@ -80,7 +80,7 @@ load_csv <- function (file, columns) {
 #' @export
 load_peak_table_parquet <- function(file) {
   data <- arrow::read_parquet(file)
-  as_peak_table(data)
+  as_peak_table(data, intensities = TRUE)
 }
 
 #' @export
