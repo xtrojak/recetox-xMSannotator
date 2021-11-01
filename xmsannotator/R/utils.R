@@ -4,6 +4,11 @@ lexicographic_rank <- function(...) {
   cumsum(!duplicated(.x))[order(.o)]
 }
 
+get_peak_intensity_matrix <- function(peak_table) {
+  peak_intensity_matrix <- t(select(peak_table, -any_of(c("peak", "mz", "rt"))))
+  peak_intensity_matrix <- magrittr::set_colnames(peak_intensity_matrix, peak_table$peak)
+}
+
 #' @import dplyr
 as_peak_table <- function(data, intensities = FALSE) {
   optional <- rlang::quo(any_of("peak"))
