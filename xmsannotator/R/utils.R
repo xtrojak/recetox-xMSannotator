@@ -72,14 +72,6 @@ as_boosted_compounds_table <- function (data) {
   return(data)
 }
 
-#' @import dplyr
-load_parquet <- function (file, columns) {
-  rlang::with_handlers(
-    arrow::read_parquet(file, col_select = any_of(columns)),
-    error = ~ rlang::abort(paste("The file", toString(file), "seams not to be a valid Parquet file."), parent = .)
-  )
-}
-
 load_csv <- function (file, columns) {
   data <- readr::read_csv(file)
   data <- select(data, any_of(columns))
@@ -87,19 +79,19 @@ load_csv <- function (file, columns) {
 
 #' @export
 load_peak_table_parquet <- function(file) {
-  data <- load_parquet(file, columns = c("peak", "mz", "rt"))
+  data <- arrow::read_parquet(file)
   as_peak_table(data)
 }
 
 #' @export
 load_adduct_table_parquet <- function(file) {
-  data <- load_parquet(file, columns = c("adduct", "charge", "mass", "factor"))
+  data <- arrow::read_parquet(file)
   as_adduct_table(data)
 }
 
 #' @export
 load_compound_table_parquet <- function(file) {
-  data <- load_parquet(file, columns = c("compound", "monoisotopic_mass", "molecular_formula", "name"))
+  data <- arrow::read_parquet(file)
   as_compound_table(data)
 }
 
