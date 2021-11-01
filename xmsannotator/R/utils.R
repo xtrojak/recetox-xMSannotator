@@ -4,6 +4,9 @@ lexicographic_rank <- function(...) {
   cumsum(!duplicated(.x))[order(.o)]
 }
 
+#' Get only intensity part of peak table with peaks as columns and samples on rows.
+#' @param peak_table Peak table from which to extract the intensities.
+#' @return Intensities with samples on rows and peaks on columns.
 get_peak_intensity_matrix <- function(peak_table) {
   peak_intensity_matrix <- t(select(peak_table, -any_of(c("peak", "mz", "rt"))))
   peak_intensity_matrix <- magrittr::set_colnames(peak_intensity_matrix, peak_table$peak)
