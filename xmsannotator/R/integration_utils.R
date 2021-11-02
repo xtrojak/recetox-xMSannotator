@@ -52,9 +52,13 @@ reformat_annotation_table <- function(annotation) {
 #' @return Peak correlation table where `peak` indices are replaced by `mz_rt`.
 #' @importFrom magittr set_colnames set_rownames
 #' @export
-reformat_correlation_matrix <- function(peak_table, peak_correlation_matrix) {
-  peak_table$mz_rt <- paste0(peak_table[, "mz"], "_", peak_table[, "rt"])
-  global_cor <- magrittr::set_colnames(peak_correlation_matrix, peak_table[as.integer(colnames(peak_correlation_matrix)), "mz_rt"])
-  global_cor <- magrittr::set_rownames(global_cor, peak_table[as.integer(rownames(peak_correlation_matrix)), "mz_rt"])
+reformat_correlation_matrix <- function(peak_table, peak_correlation_matrix, truncate = FALSE) {
+  mz <- if(truncate) round(peak_table[, "mz"], 5) else peak_table[, "mz"]
+  rt <- if(truncate) round(peak_table[, "rt"], 1) else peak_table[, "rt"]
+  mz_rt <- paste0(mz, "_", rt)
+  global_cor <- round(peak_correlation_matrix[,], 2)
+
+  global_cor <- magrittr::set_colnames(global_cor, mz_rt)
+  global_cor <- magrittr::set_rownames(global_cor, mz_rt)
   return(global_cor)
 }
