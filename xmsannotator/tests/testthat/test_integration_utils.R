@@ -27,7 +27,7 @@ patrick::with_parameters_test_that("Global cor adapter works", {
   peak_intensity_matrix <- get_peak_intensity_matrix(peak_table)
   peak_correlation_matrix <- compute_peak_correlations(peak_intensity_matrix)
 
-  actual <- reformat_correlation_matrix(peak_table, peak_correlation_matrix)
+  actual <- reformat_correlation_matrix(peak_table, peak_correlation_matrix, truncate = TRUE)
 
   expect_true(all.equal(actual, global_cor, check.names = TRUE, countEQ = TRUE))
 },

@@ -52,9 +52,9 @@ reformat_annotation_table <- function(annotation) {
 #' @return Peak correlation table where `peak` indices are replaced by `mz_rt`.
 #' @importFrom magittr set_colnames set_rownames
 #' @export
-reformat_correlation_matrix <- function(peak_table, peak_correlation_matrix) {
-  mz <- round(peak_table[, "mz"], 5)
-  rt <- round(peak_table[, "rt"], 1)
+reformat_correlation_matrix <- function(peak_table, peak_correlation_matrix, truncate = FALSE) {
+  mz <- if(truncate) round(peak_table[, "mz"], 5) else peak_table[, "mz"]
+  rt <- if(truncate) round(peak_table[, "rt"], 1) else peak_table[, "rt"]
   mz_rt <- paste0(mz, "_", rt)
   global_cor <- round(peak_correlation_matrix[,], 2)
 
