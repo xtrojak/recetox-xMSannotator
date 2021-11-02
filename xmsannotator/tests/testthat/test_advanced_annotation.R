@@ -4,7 +4,7 @@ test_that("basic advanced_annotation functionality", {
 
   expected <- read.csv("test-data/advanced_annotation/expected.csv")
 
-  peaks <- arrow::read_parquet("test-data/advanced_annotation/batch1_neg.parquet")
+  peaks <- arrow::read_parquet("test-data/batch1_neg.parquet")
   DB <- arrow::read_parquet("test-data/advanced_annotation/hmdb.parquet")
   adduct_names <- c("M-H", "2M-H", "M-2H")
   adduct_table <- sample_adduct_table %>% filter(adduct %in% adduct_names)
