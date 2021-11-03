@@ -3,6 +3,7 @@
 #' @param peak_intensity_matrix Intensity matrix.
 #' @param correlation_method Correlation method, default "p" -> pearson
 #' @return Peak correlation matrix.
+#' @export
 compute_peak_correlations <- function(peak_intensity_matrix, correlation_method = "p") {
   peak_correlation_matrix <- WGCNA::cor(
     peak_intensity_matrix,

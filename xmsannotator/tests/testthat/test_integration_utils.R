@@ -25,7 +25,7 @@ patrick::with_parameters_test_that("Global cor adapter works", {
   peaks_filename <- file.path(test_path, paste0(test_identifier, ".parquet"))
   peak_table <- load_peak_table_parquet(peaks_filename)
   peak_intensity_matrix <- get_peak_intensity_matrix(peak_table)
-  peak_correlation_matrix <- compute_peak_correlations(peak_intensity_matrix)
+  peak_correlation_matrix <- compute_peak_correlations(peak_intensity_matrix, correlation_method = "p")
 
   actual <- reformat_correlation_matrix(peak_table, peak_correlation_matrix, truncate = TRUE)
 
