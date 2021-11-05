@@ -139,7 +139,7 @@ detect_isotopic_peaks <- function(...,
 #' @return Annotation table expanded by annotated isotopic peaks.
 #'
 #' @import dplyr
-#' @importFrom purrr pmap_drf
+#' @importFrom purrr pmap_dfr
 compute_isotopes <- function(annotation,
                              adduct_weights,
                              intensity_deviation_tolerance = 0.1,

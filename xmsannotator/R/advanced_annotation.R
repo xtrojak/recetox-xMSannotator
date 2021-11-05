@@ -151,10 +151,6 @@ advanced_annotation <- function(peak_table,
   )
 
   annotation <- reformat_annotation_table(annotation)
-  # annotation <- readRDS("annotation_with_isotopes.Rds")
-  # peak_correlation_matrix <- readRDS("peak_correlation_matrix.Rds")
-
-
   global_cor <- reformat_correlation_matrix(peak_table, peak_correlation_matrix)
 
   annotation <- purrr::pmap_dfr(

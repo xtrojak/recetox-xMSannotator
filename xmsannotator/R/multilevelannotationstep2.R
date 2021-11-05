@@ -47,7 +47,6 @@ compute_filtered_peak_table <- function(isop_res_md, curmchemdata, mass_defect_w
   return(isp_masses_mz_data)
 }
 
-#' @import plyr
 #' @export
 compute_chemscore <- function(chemid,
                               mchemdata,
@@ -96,7 +95,6 @@ compute_chemscore <- function(chemid,
   return(chemscoremat)
 }
 
-#' @import plyr
 #' @export
 multilevelannotationstep2 <- function(outloc,
                                       max_diff_rt,

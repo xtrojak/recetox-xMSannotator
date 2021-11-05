@@ -13,6 +13,7 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Imports: 
+    plyr,
     dplyr (>= 1.0.0),
     rlang,
     WGCNA,
@@ -27,7 +28,6 @@ Imports:
     gplots,
     entropy,
     rlist,
-    plyr,
     Rdisop
 Suggests:
     testthat (>= 3.0.0),

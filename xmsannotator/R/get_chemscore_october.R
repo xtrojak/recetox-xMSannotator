@@ -1,7 +1,6 @@
 
 #' @import tidyr
 #' @import dplyr
-#' @import plyr
 #' @importFrom magrittr %>%
 #' @export
 get_chemscore <- function(...,

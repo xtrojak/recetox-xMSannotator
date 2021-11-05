@@ -15,7 +15,7 @@ construct_adduct_formula <- function(formula, mass_number_difference) {
 #' 'mean_intensity', 'mass_defect']
 #' @return Reformatted annotation table for use with the `master` branch.
 #' @import dplyr
-#' @importFrom magittr %>%
+#' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @export
 reformat_annotation_table <- function(annotation) {
@@ -50,7 +50,7 @@ reformat_annotation_table <- function(annotation) {
 #' @param peak_table Table from which to take the mz & rt values.
 #' @param peak_correlation_matrix Peak correlation table.
 #' @return Peak correlation table where `peak` indices are replaced by `mz_rt`.
-#' @importFrom magittr set_colnames set_rownames
+#' @importFrom magrittr set_colnames set_rownames
 #' @export
 reformat_correlation_matrix <- function(peak_table, peak_correlation_matrix, truncate = FALSE) {
   mz <- if(truncate) round(peak_table[, "mz"], 5) else peak_table[, "mz"]

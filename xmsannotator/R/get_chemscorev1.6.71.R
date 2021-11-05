@@ -902,7 +902,6 @@ compute_chemical_score <- function(mchemicaldata,
 
 #' @import tidyr
 #' @import dplyr
-#' @import plyr
 #' @importFrom magrittr %>%
 #' @export
 get_chemscorev1.6.71 <- function(chemicalid,
