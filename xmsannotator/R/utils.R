@@ -76,7 +76,7 @@ as_boosted_compounds_table <- function (data) {
 load_parquet <- function (file, columns) {
   rlang::with_handlers(
     arrow::read_parquet(file, col_select = any_of(columns)),
-    error = ~ rlang::abort(paste("The file", toString(file), "seams not to be a valid Parquet file."), parent = .)
+    error = ~ rlang::abort(paste("The file", toString(file), "does not seem to be a valid Parquet file."), parent = .)
   )
 }
 
