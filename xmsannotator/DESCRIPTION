@@ -28,7 +28,8 @@ Imports:
     gplots,
     entropy,
     rlist,
-    Rdisop
+    Rdisop,
+    foreach
 Suggests:
     testthat (>= 3.0.0),
     arrow (>= 3.0.0),

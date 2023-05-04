@@ -1,4 +1,4 @@
-name: recetox-xmsannotator-october
+name: recetox-xmsannotator-dev
 channels:
   - conda-forge
   - bioconda
