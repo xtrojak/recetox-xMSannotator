@@ -81,6 +81,14 @@ as_boosted_compounds_table <- function (data) {
   return(data)
 }
 
+#' @import dplyr
+load_parquet <- function (file, columns) {
+  rlang::with_handlers(
+    arrow::read_parquet(file, col_select = any_of(columns)),
+    error = ~ rlang::abort(paste("The file", toString(file), "does not seem to be a valid Parquet file."), parent = .)
+  )
+}
+
 load_csv <- function (file, columns) {
   data <- readr::read_csv(file)
   data <- select(data, any_of(columns))
