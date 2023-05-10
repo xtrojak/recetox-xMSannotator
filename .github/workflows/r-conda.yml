@@ -26,7 +26,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Create conda environment
         uses: conda-incubator/setup-miniconda@v2
@@ -39,13 +39,13 @@ jobs:
           conda init bash
           conda env list
       - name: Fetch batch1_neg test data
-        run: wget -P xmsannotator/tests/testthat/testdata/batch1_neg -i xmsannotator/tests/remote-files/fetch_batch1_neg.txt
+        run: wget -P xmsannotator/tests/testthat/tes-data/batch1_neg -i xmsannotator/tests/remote-files/fetch_batch1_neg.txt
       - name: Fetch qc_solvent test data
-        run: wget -P xmsannotator/tests/testthat/testdata/qc_solvent -i xmsannotator/tests/remote-files/fetch_qc_solvent.txt
+        run: wget -P xmsannotator/tests/testthat/test-data/qc_solvent -i xmsannotator/tests/remote-files/fetch_qc_solvent.txt
       - name: Fetch sourceforge test data
-        run: wget -P xmsannotator/tests/testthat/testdata/sourceforge -i xmsannotator/tests/remote-files/fetch_sourceforge.txt
+        run: wget -P xmsannotator/tests/testthat/test-data/sourceforge -i xmsannotator/tests/remote-files/fetch_sourceforge.txt
       - name: Fetch qc_matrix test data
-        run: wget -P xmsannotator/tests/testthat/testdata/qc_matrix -i xmsannotator/tests/remote-files/fetch_qc_matrix.txt
+        run: wget -P xmsannotator/tests/testthat/test-data/qc_matrix -i xmsannotator/tests/remote-files/fetch_qc_matrix.txt
       - name: Run devtools::check()
         run: |
           conda activate recetox-xmsannotator-dev
