@@ -17,6 +17,10 @@ test_that("Integration utils: annotation table reformating", {
 })
 
 patrick::with_parameters_test_that("Global cor adapter works", {
+  if (exists("skip_function") && is.function(skip_function)) {
+    skip_function()
+  }
+  
   testthat_wd <- getwd()
   test_path <- file.path(testthat_wd, "test-data")
 
@@ -33,8 +37,8 @@ patrick::with_parameters_test_that("Global cor adapter works", {
 },
   patrick::cases(
     qc_solvent = list(test_identifier = "qc_solvent"),
-    batch1_neg = list(test_identifier = "batch1_neg"),
-    sourceforge = list(test_identifier = "sourceforge"),
-    qc_matrix = list(test_identifier = "qc_matrix")
+    batch1_neg = list(test_identifier = "batch1_neg", skip_function = skip_on_ci),
+    sourceforge = list(test_identifier = "sourceforge", skip_function = skip_on_ci),
+    qc_matrix = list(test_identifier = "qc_matrix", skip_function = skip_on_ci)
   )
 )

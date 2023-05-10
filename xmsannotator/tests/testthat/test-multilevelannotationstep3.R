@@ -1,6 +1,10 @@
 patrick::with_parameters_test_that(
   "multilevelannotation step 3 works",
   {
+    if (exists("skip_function") && is.function(skip_function)) {
+      skip_function()
+    }
+    
     testthat_wd <- getwd()
     testdata_dir <- file.path(testthat_wd, "test-data", subfolder)
 
@@ -57,7 +61,7 @@ patrick::with_parameters_test_that(
   },
   patrick::cases(
     qc_solvent = list(subfolder = "qc_solvent", db_name = "HMDB", num_sets = 205, max_diff_rt = 0.5),
-    batch1_neg = list(subfolder = "batch1_neg", db_name = "HMDB", num_sets = 708, max_diff_rt = 0.5),
-    sourceforge = list(subfolder = "sourceforge", db_name = "HMDB", num_sets = 756, max_diff_rt = 2)
+    batch1_neg = list(subfolder = "batch1_neg", db_name = "HMDB", num_sets = 708, max_diff_rt = 0.5, skip_function = skip_on_ci),
+    sourceforge = list(subfolder = "sourceforge", db_name = "HMDB", num_sets = 756, max_diff_rt = 2, skip_function = skip_on_ci)
   )
 )

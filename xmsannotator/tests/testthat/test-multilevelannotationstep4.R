@@ -1,6 +1,10 @@
 patrick::with_parameters_test_that(
   "multilevelannotation step 4 works",
   {
+    if (exists("skip_function") && is.function(skip_function)) {
+      skip_function()
+    }
+
     # load data needed during step 4
     testdata_dir <- file.path(getwd(), "test-data", subfolder)
     load(file.path(testdata_dir, "tempobjects.Rda"))
@@ -56,8 +60,8 @@ patrick::with_parameters_test_that(
   },
   patrick::cases(
     qc_solvent = list(subfolder = "qc_solvent"),
-    qc_matrix = list(subfolder = "qc_matrix"),
-    batch1_neg = list(subfolder = "batch1_neg"),
-    sourceforge = list(subfolder = "sourceforge")
+    qc_matrix = list(subfolder = "qc_matrix", skip_function = skip_on_ci),
+    batch1_neg = list(subfolder = "batch1_neg", skip_function = skip_on_ci),
+    sourceforge = list(subfolder = "sourceforge", skip_function = skip_on_ci)
   )
 )

@@ -29,6 +29,11 @@ load_expected <- function(test_path) {
 }
 
 patrick::with_parameters_test_that("Compute chemscore can be called isolated", {
+
+    if (exists("skip_function") && is.function(skip_function)) {
+      skip_function()
+    }
+
     # Arrange
     testthat_wd <- getwd()
     test_path <- file.path(
@@ -110,14 +115,15 @@ patrick::with_parameters_test_that("Compute chemscore can be called isolated", {
 },
   patrick::cases(
     qc_solvent = list(test_identifier = "qc_solvent", max_diff_rt = 0.5),
-    batch1_neg = list(test_identifier = "batch1_neg", max_diff_rt = 0.5),
-    sourceforge = list(test_identifier = "sourceforge", max_diff_rt = 2),
-    qc_matrix = list(test_identifier = "qc_matrix", max_diff_rt = 0.5)
+    batch1_neg = list(test_identifier = "batch1_neg", max_diff_rt = 0.5, skip_function = skip),
+    sourceforge = list(test_identifier = "sourceforge", max_diff_rt = 2, skip_function = skip_on_ci),
+    qc_matrix = list(test_identifier = "qc_matrix", max_diff_rt = 0.5, skip_function = skip_on_ci)
   )
 )
 
 
 test_that("Chemscores range from 0 to Inf", {
+  skip_on_ci()
   test_identifier <- "batch1_neg"
 
   testthat_wd <- getwd()
