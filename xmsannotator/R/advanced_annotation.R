@@ -66,6 +66,7 @@ print_confidence_distribution <- function(annotation) {
   invisible(annotation)
 }
 
+#' Wrapper for the advanced annotation steps.
 #' @export
 #' @import dplyr
 #' @importFrom magrittr %>%
