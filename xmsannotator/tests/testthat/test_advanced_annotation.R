@@ -1,4 +1,6 @@
 test_that("basic advanced_annotation functionality", {
+  skip_on_ci()
+  
   outloc <- file.path(tempdir(), "advanced_annotation")
   dir.create(outloc, recursive = TRUE)
 

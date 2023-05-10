@@ -131,7 +131,7 @@ advanced_annotation <- function(peak_table,
 
   peak_table <- peak_table %>%
     select(peak, mz, rt) %>%
-    inner_join(peak_rt_clusters, on = "peak") %>%
+    inner_join(peak_rt_clusters, by = "peak") %>%
     compute_mass_defect(precision = mass_defect_precision)
 
   annotation <- filter(annotation, forms_valid_adduct_pair(.data$molecular_formula, .data$adduct))

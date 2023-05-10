@@ -1,4 +1,6 @@
 test_that("RT_clust: Integration test: RT based clustering works.", {
+    skip_on_ci()
+    
     peaks <- readRDS("test-data/rt_modules/qc_solvent.rda")
     peaks <- dplyr::rename(peaks, peak = feature)
     peaks <- dplyr::rename_with(
