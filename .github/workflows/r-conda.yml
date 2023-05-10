@@ -19,6 +19,8 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     defaults:
       run:
         shell: bash -l {0}
@@ -50,3 +52,7 @@ jobs:
         run: |
           conda activate recetox-xmsannotator-dev
           Rscript -e "devtools::check('xmsannotator', error_on = 'error')"
+      - name: Test coverage
+        run: |
+          conda activate recetox-xmsannotator-dev
+          Rscript -e "covr::codecov('xmsannotator', quiet = FALSE)"
