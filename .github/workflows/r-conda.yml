@@ -52,7 +52,7 @@ jobs:
         run: |
           conda activate recetox-xmsannotator-dev
           Rscript -e "devtools::check('xmsannotator', error_on = 'error')"
-      - name: Test coverage
-        run: |
-          conda activate recetox-xmsannotator-dev
-          Rscript -e "covr::codecov('xmsannotator', quiet = FALSE)"
+      # - name: Test coverage
+      #   run: |
+      #     conda activate recetox-xmsannotator-dev
+      #     Rscript -e "covr::codecov('xmsannotator', quiet = FALSE)"
