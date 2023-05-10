@@ -125,12 +125,6 @@ load_boost_compounds_csv <- function (file) {
 }
 
 #' @export
-load_peak_table_hdf <- function(file, intensities = FALSE) {
-  data <- rhdf5::h5read(file, "peaks")
-  as_peak_table(data, intensities = intensities)
-}
-
-#' @export
 save_parquet <- function(data, file) {
   invisible(arrow::write_parquet(data, file))
 }
