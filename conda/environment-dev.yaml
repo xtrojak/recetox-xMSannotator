@@ -30,4 +30,5 @@ dependencies:
   - r-datacomparer >= 0.1.3
   - bioconductor-rdisop
   - r-stringi
+  - r-covr
 

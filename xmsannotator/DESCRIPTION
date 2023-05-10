@@ -41,7 +41,8 @@ Suggests:
     gplots,
     readr,
     patrick,
-    dataCompareR
+    dataCompareR,
+    covr
 Config/testthat/edition: 3
 SystemRequirements: C++11
 LinkingTo: 
