@@ -5,6 +5,7 @@ channels:
   - defaults
 dependencies:
   - r-base >= 4.1.1
+  - icu <=70.1
   - r-devtools >= 2.4.2
   - boost-cpp
   - r-biocmanager >= 1.30.16
