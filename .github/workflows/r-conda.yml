@@ -48,11 +48,7 @@ jobs:
         run: wget -P xmsannotator/tests/testthat/test-data/sourceforge -i xmsannotator/tests/remote-files/fetch_sourceforge.txt
       - name: Fetch qc_matrix test data
         run: wget -P xmsannotator/tests/testthat/test-data/qc_matrix -i xmsannotator/tests/remote-files/fetch_qc_matrix.txt
-      - name: Run devtools::check()
+      - name: Test coverage
         run: |
           conda activate recetox-xmsannotator-dev
-          Rscript -e "devtools::check('xmsannotator', error_on = 'error')"
-      # - name: Test coverage
-      #   run: |
-      #     conda activate recetox-xmsannotator-dev
-      #     Rscript -e "covr::codecov('xmsannotator', quiet = FALSE)"
+          Rscript -e "covr::codecov('xmsannotator', quiet = FALSE)"
