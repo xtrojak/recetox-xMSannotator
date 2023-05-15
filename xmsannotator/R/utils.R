@@ -4,6 +4,15 @@ lexicographic_rank <- function(...) {
   cumsum(!duplicated(.x))[order(.o)]
 }
 
+#' Get only intensity part of peak table with peaks as columns and samples on rows.
+#' @param peak_table Peak table from which to extract the intensities.
+#' @return Intensities with samples on rows and peaks on columns.
+#' @export
+get_peak_intensity_matrix <- function(peak_table) {
+  peak_intensity_matrix <- t(select(peak_table, -any_of(c("peak", "mz", "rt"))))
+  peak_intensity_matrix <- magrittr::set_colnames(peak_intensity_matrix, peak_table$peak)
+}
+
 #' @import dplyr
 as_peak_table <- function(data, intensities = FALSE) {
   optional <- rlang::quo(any_of("peak"))
@@ -87,19 +96,19 @@ load_csv <- function (file, columns) {
 
 #' @export
 load_peak_table_parquet <- function(file) {
-  data <- load_parquet(file, columns = c("peak", "mz", "rt"))
-  as_peak_table(data)
+  data <- arrow::read_parquet(file)
+  as_peak_table(data, intensities = TRUE)
 }
 
 #' @export
 load_adduct_table_parquet <- function(file) {
-  data <- load_parquet(file, columns = c("adduct", "charge", "mass", "n_molecules"))
+  data <- arrow::read_parquet(file)
   as_adduct_table(data)
 }
 
 #' @export
 load_compound_table_parquet <- function(file) {
-  data <- load_parquet(file, columns = c("compound", "monoisotopic_mass", "molecular_formula", "name"))
+  data <- arrow::read_parquet(file)
   as_compound_table(data)
 }
 
@@ -113,12 +122,6 @@ load_expected_adducts_csv <- function (file) {
 load_boost_compounds_csv <- function (file) {
   data <- load_csv(file, columns = c("compound", "mz", "rt"))
   as_boosted_compounds_table(data)
-}
-
-#' @export
-load_peak_table_hdf <- function(file, intensities = FALSE) {
-  data <- rhdf5::h5read(file, "peaks")
-  as_peak_table(data, intensities = intensities)
 }
 
 #' @export

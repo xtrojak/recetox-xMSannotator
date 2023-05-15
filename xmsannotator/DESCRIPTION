@@ -10,9 +10,15 @@ Description: This is a customized fork of the original work from Karan Uppal.
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
+LazyDataCompression: bzip2
+LazyLoad: yes
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
+Depends: 
+    R (>= 4.1.1),
+    Rcpp (>= 0.11.0)
 Imports: 
+    plyr,
     dplyr (>= 1.0.0),
     rlang,
     WGCNA,
@@ -24,19 +30,21 @@ Imports:
     purrr,
     rcdk,
     magrittr,
-    gplots,
-    entropy,
-    rlist
+    rlist,
+    Rdisop,
+    foreach,
+    tibble
 Suggests:
     testthat (>= 3.0.0),
     arrow (>= 3.0.0),
+    entropy,
+    gplots,
     readr,
-    rhdf5,
-    patrick
+    patrick,
+    dataCompareR,
+    covr
 Config/testthat/edition: 3
 SystemRequirements: C++11
 LinkingTo: 
     Rcpp
-Depends: 
-    R (>= 3.5.0),
-    Rcpp (>= 0.11.0)
+

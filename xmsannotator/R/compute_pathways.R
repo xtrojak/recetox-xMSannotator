@@ -108,11 +108,11 @@ update_pathway_scores <- function (annotations, pathways) {
 
 #' Based on pathway data adjust the scores.
 #'
-#' @param annotations
-#' @param pathways
-#' @param exluded_pathways
-#' @param exluded_pathway_compounds
-#' @param score_threshold
+#' @param annotations Table with feature annotations
+#' @param pathways Database of pathways to check for matching annotations
+#' @param exluded_pathways Pathways that are excluded from the matching
+#' @param exluded_pathway_compounds Compounds which should be excluded from pathway analysis
+#' @param score_threshold Score threshold to use to filter annotations
 #'
 #' @return annotations
 compute_pathways <- function(
