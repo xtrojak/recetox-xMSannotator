@@ -13,7 +13,7 @@ compute_confidence_levels <- function(c,
     
     bool_check <- 1
 
-    if (!is.na(filter.by)) {
+    if (any(!is.na(filter.by))) {
         check_adduct <- which(curdata$Adduct %in% filter.by)
         if (length(check_adduct) <= 0) {
             bool_check <- 0
