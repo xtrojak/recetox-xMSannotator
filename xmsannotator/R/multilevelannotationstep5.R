@@ -67,12 +67,7 @@ multilevelannotationstep5 <- function(outloc,
   setwd(outloc)
   curated_res <- init_chemscoremat(chemscoremat)
 
-  if (any(is.na(adduct_weights))) {
-    adduct_weights <- data.frame(
-      Adduct = c("M+H", "M-H"),
-      Weight = c(1, 1)
-    )
-  }
+  adduct_weights <- create_adduct_weights(adduct_weights)
 
   curated_res <- curated_res[order(curated_res$Confidence,
     curated_res$chemical_ID,

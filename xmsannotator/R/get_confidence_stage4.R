@@ -51,11 +51,9 @@ get_confidence_stage4 <-function(curdata,
     cur_adducts_with_isotopes <- curdata$Adduct
     
     cur_adducts <-gsub(cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[0-9]*\\])", replacement = "")
+
+    adduct_weights <- create_adduct_weights(adduct_weights)
     
-    if (is.na(adduct_weights)) {
-      adduct_weights <- data.frame(Adduct = c("M+H", "M-H"), Weight = c(1, 1))
-    }
-  
     adduct_monoisot <- data.frame(cbind("M", 1, 1, 0, "-", "S"))
     colnames(adduct_monoisot) <- colnames(adduct_table)
     adduct_table <- rbind(adduct_table, adduct_monoisot)

@@ -164,9 +164,7 @@ multilevelannotationstep4 <- function(outloc,
     data(adduct_table)
     adduct_table <- adduct_table[order(adduct_table$Adduct), ]
     
-    if (is.na(adduct_weights)) {
-        adduct_weights <- data.frame(Adduct = c("M+H", "M-H"), Weight = c(1, 1))
-    }
+    adduct_weights <- create_adduct_weights(adduct_weights)
 
     # assign confidence level
     chemscoremat_conf_levels <- lapply(
