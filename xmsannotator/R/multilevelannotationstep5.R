@@ -1,5 +1,5 @@
 init_chemscoremat <- function(chemscoremat) {
-  if (is.na(chemscoremat)) {
+  if (any(is.na(chemscoremat))) {
     chemscoremat <- read.csv("Stage4.csv")
   }
   chemscoremat <- as.data.frame(chemscoremat)
