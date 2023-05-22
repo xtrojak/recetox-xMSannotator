@@ -13,7 +13,7 @@ compute_confidence_levels <- function(c,
     
     bool_check <- 1
 
-    if (any(!is.na(filter.by))) {
+    if (!is.na(filter.by[1])) {
         check_adduct <- which(curdata$Adduct %in% filter.by)
         if (length(check_adduct) <= 0) {
             bool_check <- 0
@@ -32,9 +32,9 @@ compute_confidence_levels <- function(c,
                     )
         if (!is.na(curdata[1, 1])) {
             Confidence <- as.numeric(as.character(curdata[, 1]))
-            if (Confidence < 2) {
+            if (Confidence[1] < 2) {
                 if (length(which(curdata$Adduct %in% adduct_weights[which(as.numeric(adduct_weights[, 2]) > 0), 1])) > 0) {
-                    if (curdata$score > 10) {
+                    if (curdata$score[1] > 10) {
                         mnum <- max(as.numeric(as.character(adduct_weights[which(adduct_weights[, 1] %in% curdata$Adduct), 2])))[1]
                         curdata <- curdata[which(curdata$Adduct %in% adduct_weights[which(as.numeric(as.character(adduct_weights[, 2])) >= mnum), 1]), ]
                         Confidence <- 2
@@ -44,7 +44,7 @@ compute_confidence_levels <- function(c,
         }
     } else {
         if (length(which(curdata$Adduct %in% adduct_weights[, 1])) > 0) {
-            if (curdata$score >= 10) {
+            if (curdata$score[1] >= 10) {
                 mnum <- max(as.numeric(as.character(adduct_weights[which(adduct_weights[, 1] %in% curdata$Adduct), 2])))[1]
                 if (length(which(curdata$Adduct %in% filter.by)) > 0) {
                     curdata <- curdata[which(curdata$Adduct %in% filter.by), ]
@@ -55,7 +55,7 @@ compute_confidence_levels <- function(c,
     }
 
     if (nrow(curdata) > 1) {
-        if (curdata$score < 10) {
+        if (curdata$score[1] < 10) {
             if (length(unique(curdata$Adduct)) < 2) {
                 Confidence <- 0
             }

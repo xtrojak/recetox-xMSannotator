@@ -109,7 +109,7 @@ get_confidence_stage4 <-function(curdata,
       curdata$Module_RTclust <- module_clust
       
       if (length(which(adduct_weights[, 1] %in% cur_adducts)) > 0 && curdata$score[1] > 0.1) {
-        if (is.na(filter.by)) {
+        if (is.na(filter.by[1])) {
           good_mod <- curdata$Module_RTclust[which(curdata$Adduct %in% adduct_weights[, 1])]
         } else {
           good_mod <- curdata$Module_RTclust[which(curdata$Adduct %in% filter.by)]
@@ -120,7 +120,7 @@ get_confidence_stage4 <-function(curdata,
         curdata <- filter_clusters(curdata, names(cluster_table))
         delta_rt <- compute_delta_rt(curdata)
         
-        if (is.na(filter.by)) {
+        if (is.na(filter.by[1])) {
           if (curdata$score[1] > 0 && nrow(curdata) > 1 && length(unique(curdata$Adduct)) > 1 && delta_rt < max_diff_rt) {
             chemscoremat_conf_levels <- "High"
           } else {
