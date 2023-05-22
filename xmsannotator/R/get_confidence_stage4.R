@@ -69,7 +69,7 @@ get_confidence_stage4 <-function(curdata,
     }
     
     if (length(unique(curdata$Adduct)) < 2) {
-      if (curdata$score < 10 && length(which(cur_adducts %in% filter.by)) < 1) {
+      if (curdata$score[1] < 10 && length(which(cur_adducts %in% filter.by)) < 1) {
         chemscoremat_conf_levels <- "None"
       } else if (length(which(cur_adducts %in% filter.by)) > 0) {
         chemscoremat_conf_levels <- "Low"
@@ -142,9 +142,9 @@ get_confidence_stage4 <-function(curdata,
     module_names <- names(table_modules[which(table_modules > 0)])
     
     if (length(module_names) > 1) {
-      if (curdata$score < 10) {
+      if (curdata$score[1] < 10) {
         chemscoremat_conf_levels <- "None"
-      } else if (curdata$score > 10 && length(which(cur_adducts %in% filter.by)) > 0) {
+      } else if (curdata$score[1] > 10 && length(which(cur_adducts %in% filter.by)) > 0) {
         chemscoremat_conf_levels <- "Medium"
       }
     }
@@ -154,7 +154,7 @@ get_confidence_stage4 <-function(curdata,
         chemscoremat_conf_levels <- "Low"
       } else {
         # matches an M+H and score is greater than 10
-        if (curdata$score > 10 && length(which(cur_adducts %in% filter.by)) > 0) {
+        if (curdata$score[1] > 10 && length(which(cur_adducts %in% filter.by)) > 0) {
           chemscoremat_conf_levels <- "Medium"
         } else {
           chemscoremat_conf_levels <- "None"
@@ -282,13 +282,13 @@ get_confidence_stage4 <-function(curdata,
           chemscoremat_conf_levels <- "None"
         }
       } else {
-        if (curdata$score < 10) {
+        if (curdata$score[1] < 10) {
           if (length(which(cur_adducts %in% filter.by)) < 1) {
             chemscoremat_conf_levels <- "None"
           } else {
             chemscoremat_conf_levels <- "Low"
           }
-        } else if (curdata$score > 10 && length(which(cur_adducts %in% filter.by)) > 0) {
+        } else if (curdata$score[1] > 10 && length(which(cur_adducts %in% filter.by)) > 0) {
           chemscoremat_conf_levels <- "Medium"
         }
       }
