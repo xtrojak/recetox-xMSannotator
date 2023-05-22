@@ -1,33 +1,3 @@
-load_expected <- function(test_path) {
-  load(file = file.path(test_path, "step1_results.Rda"))
-  load(file = file.path(test_path, "global_cor.Rda"))
-  load(file = file.path(test_path, "tempobjects.Rda"))
-
-  outloc <- file.path(tempdir(), "get_chemscore", basename(test_path))
-
-  if(!dir.exists(outloc)) {
-      dir.create(outloc, recursive = TRUE)
-  }
-
-  expected <- multilevelannotationstep2(
-      outloc = outloc,
-      max_diff_rt = max.rt.diff,
-      mchemdata = mchemdata,
-      mass_defect_window = mass_defect_window,
-      corthresh = corthresh,
-      global_cor = global_cor,
-      adduct_weights = adduct_weights,
-      max_isp = max_isp,
-      MplusH.abundance.ratio.check = MplusH.abundance.ratio.check,
-      mass_defect_mode = mass_defect_mode,
-      chemids = chemids,
-      isop_res_md = isop_res_md,
-      filter.by = filter.by
-    )
-
-    return(expected)
-}
-
 patrick::with_parameters_test_that("Compute chemscore can be called isolated", {
 
     if (exists("skip_function") && is.function(skip_function)) {
@@ -49,7 +19,7 @@ patrick::with_parameters_test_that("Compute chemscore can be called isolated", {
       dir.create(outloc, recursive = TRUE)
     }
 
-    expected <- unique(load_expected(test_path))
+    expected <- readRDS(file.path(test_path, "expected_chemscore.Rds"))
 
     setwd(testthat_wd)
 
