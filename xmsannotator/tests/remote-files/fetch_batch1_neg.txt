@@ -10,4 +10,4 @@ https://gitlab.ics.muni.cz/umsa/umsa-files/-/raw/master/testdata/recetox-xMSanno
 https://gitlab.ics.muni.cz/umsa/umsa-files/-/raw/master/testdata/recetox-xMSannotator/batch1_neg/global_cor.Rda
 https://gitlab.ics.muni.cz/umsa/umsa-files/-/raw/master/testdata/recetox-xMSannotator/batch1_neg/step1_results.Rda
 https://gitlab.ics.muni.cz/umsa/umsa-files/-/raw/master/testdata/recetox-xMSannotator/batch1_neg/tempobjects.Rda
-
+https://gitlab.ics.muni.cz/umsa/umsa-files/-/raw/master/testdata/recetox-xMSannotator/batch1_neg/global_cor_integ.Rda

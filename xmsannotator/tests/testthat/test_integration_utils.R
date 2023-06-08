@@ -24,7 +24,7 @@ patrick::with_parameters_test_that("Global cor adapter works", {
   testthat_wd <- getwd()
   test_path <- file.path(testthat_wd, "test-data")
 
-  load(file.path(test_path, test_identifier, "global_cor.Rda"))
+  load(file.path(test_path, test_identifier, "global_cor_integ.Rda"))
 
   peaks_filename <- file.path(test_path, paste0(test_identifier, ".parquet"))
   peak_table <- load_peak_table_parquet(peaks_filename)

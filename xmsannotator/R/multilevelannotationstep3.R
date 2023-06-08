@@ -231,9 +231,7 @@ multilevelannotationstep3 <- function(chemCompMZ,
                                       max_diff_rt,
                                       pathwaycheckmode = "p",
                                       scorethresh = 0.1) {
-  if (is.na(adduct_weights)) {
-    adduct_weights <- data.frame(Adduct = c("M+H", "M-H"), Weight = c(1, 1))
-  }
+  adduct_weights <- create_adduct_weights(adduct_weights)
 
   column_names <- c(
     "score",

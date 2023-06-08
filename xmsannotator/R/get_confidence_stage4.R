@@ -51,11 +51,9 @@ get_confidence_stage4 <-function(curdata,
     cur_adducts_with_isotopes <- curdata$Adduct
     
     cur_adducts <-gsub(cur_adducts_with_isotopes, pattern = "(_\\[(\\+|\\-)[0-9]*\\])", replacement = "")
+
+    adduct_weights <- create_adduct_weights(adduct_weights)
     
-    if (is.na(adduct_weights)) {
-      adduct_weights <- data.frame(Adduct = c("M+H", "M-H"), Weight = c(1, 1))
-    }
-  
     adduct_monoisot <- data.frame(cbind("M", 1, 1, 0, "-", "S"))
     colnames(adduct_monoisot) <- colnames(adduct_table)
     adduct_table <- rbind(adduct_table, adduct_monoisot)
@@ -71,7 +69,7 @@ get_confidence_stage4 <-function(curdata,
     }
     
     if (length(unique(curdata$Adduct)) < 2) {
-      if (curdata$score < 10 && length(which(cur_adducts %in% filter.by)) < 1) {
+      if (curdata$score[1] < 10 && length(which(cur_adducts %in% filter.by)) < 1) {
         chemscoremat_conf_levels <- "None"
       } else if (length(which(cur_adducts %in% filter.by)) > 0) {
         chemscoremat_conf_levels <- "Low"
@@ -111,7 +109,7 @@ get_confidence_stage4 <-function(curdata,
       curdata$Module_RTclust <- module_clust
       
       if (length(which(adduct_weights[, 1] %in% cur_adducts)) > 0 && curdata$score[1] > 0.1) {
-        if (is.na(filter.by)) {
+        if (is.na(filter.by[1])) {
           good_mod <- curdata$Module_RTclust[which(curdata$Adduct %in% adduct_weights[, 1])]
         } else {
           good_mod <- curdata$Module_RTclust[which(curdata$Adduct %in% filter.by)]
@@ -122,7 +120,7 @@ get_confidence_stage4 <-function(curdata,
         curdata <- filter_clusters(curdata, names(cluster_table))
         delta_rt <- compute_delta_rt(curdata)
         
-        if (is.na(filter.by)) {
+        if (is.na(filter.by[1])) {
           if (curdata$score[1] > 0 && nrow(curdata) > 1 && length(unique(curdata$Adduct)) > 1 && delta_rt < max_diff_rt) {
             chemscoremat_conf_levels <- "High"
           } else {
@@ -144,9 +142,9 @@ get_confidence_stage4 <-function(curdata,
     module_names <- names(table_modules[which(table_modules > 0)])
     
     if (length(module_names) > 1) {
-      if (curdata$score < 10) {
+      if (curdata$score[1] < 10) {
         chemscoremat_conf_levels <- "None"
-      } else if (curdata$score > 10 && length(which(cur_adducts %in% filter.by)) > 0) {
+      } else if (curdata$score[1] > 10 && length(which(cur_adducts %in% filter.by)) > 0) {
         chemscoremat_conf_levels <- "Medium"
       }
     }
@@ -156,7 +154,7 @@ get_confidence_stage4 <-function(curdata,
         chemscoremat_conf_levels <- "Low"
       } else {
         # matches an M+H and score is greater than 10
-        if (curdata$score > 10 && length(which(cur_adducts %in% filter.by)) > 0) {
+        if (curdata$score[1] > 10 && length(which(cur_adducts %in% filter.by)) > 0) {
           chemscoremat_conf_levels <- "Medium"
         } else {
           chemscoremat_conf_levels <- "None"
@@ -284,13 +282,13 @@ get_confidence_stage4 <-function(curdata,
           chemscoremat_conf_levels <- "None"
         }
       } else {
-        if (curdata$score < 10) {
+        if (curdata$score[1] < 10) {
           if (length(which(cur_adducts %in% filter.by)) < 1) {
             chemscoremat_conf_levels <- "None"
           } else {
             chemscoremat_conf_levels <- "Low"
           }
-        } else if (curdata$score > 10 && length(which(cur_adducts %in% filter.by)) > 0) {
+        } else if (curdata$score[1] > 10 && length(which(cur_adducts %in% filter.by)) > 0) {
           chemscoremat_conf_levels <- "Medium"
         }
       }

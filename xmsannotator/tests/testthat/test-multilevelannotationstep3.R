@@ -21,7 +21,7 @@ patrick::with_parameters_test_that(
     # load and set arguments
     chemscoremat <- readRDS(file.path(testdata_dir, "chemscoremat.Rds"))
     load(file.path(testdata_dir, "chemCompMZ.Rda"))
-    adduct_weights <- data.frame(Adduct = c("M+H", "M-H"), Weight = c(5, 5))
+    adduct_weights <- create_adduct_weights(NA, 5)
     pathwaycheckmode <- "pm"
     
     setwd(outloc)
