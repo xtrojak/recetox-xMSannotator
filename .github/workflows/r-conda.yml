@@ -41,13 +41,13 @@ jobs:
           conda init bash
           conda env list
       - name: Fetch batch1_neg test data
-        run: wget -P xmsannotator/tests/testthat/test-data/batch1_neg -i xmsannotator/tests/remote-files/fetch_batch1_neg.txt
+        run: wget -P tests/testthat/test-data/batch1_neg -i tests/remote-files/fetch_batch1_neg.txt
       - name: Fetch qc_solvent test data
-        run: wget -P xmsannotator/tests/testthat/test-data/qc_solvent -i xmsannotator/tests/remote-files/fetch_qc_solvent.txt
+        run: wget -P tests/testthat/test-data/qc_solvent -i tests/remote-files/fetch_qc_solvent.txt
       - name: Fetch sourceforge test data
-        run: wget -P xmsannotator/tests/testthat/test-data/sourceforge -i xmsannotator/tests/remote-files/fetch_sourceforge.txt
+        run: wget -P tests/testthat/test-data/sourceforge -i tests/remote-files/fetch_sourceforge.txt
       - name: Fetch qc_matrix test data
-        run: wget -P xmsannotator/tests/testthat/test-data/qc_matrix -i xmsannotator/tests/remote-files/fetch_qc_matrix.txt
+        run: wget -P tests/testthat/test-data/qc_matrix -i tests/remote-files/fetch_qc_matrix.txt
       - name: Test coverage
         run: |
           conda activate recetox-xmsannotator-dev
