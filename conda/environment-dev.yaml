@@ -4,7 +4,7 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - r-base >= 4.1.1
+  - r-base = 4.1.1
   - r-devtools >= 2.4.2
   - boost-cpp
   - r-biocmanager >= 1.30.16
@@ -16,7 +16,7 @@ dependencies:
   - r-tibble >= 3.1.5
   - r-dplyr >= 1.0.0
   - r-rcpp >= 0.11.0
-  - r-arrow >=7.0.0,<10.0.0
+  - r-arrow >=9.0.0,<10.0.0
   - r-data.table >= 1.14.2
   - r-testthat >= 3.0.0
   - r-readr >= 2.0.2
