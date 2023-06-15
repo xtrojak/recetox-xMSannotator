@@ -18,31 +18,31 @@ Depends:
     R (>= 4.1.1),
     Rcpp (>= 0.11.0)
 Imports: 
-    plyr,
+    plyr (>= 1.8.6),
     dplyr (>= 1.0.0),
     rlang,
-    WGCNA,
-    flashClust,
+    WGCNA (>= 1.69),
+    flashClust (>= 1.01-2),
     dynamicTreeCut,
-    tidyr,
-    RANN,
-    pastecs,
-    purrr,
-    rcdk,
+    tidyr (>= 1.1.4),
+    RANN (>= 2.6.1),
+    pastecs (>= 1.3.21),
+    purrr (>= 0.3.4),
+    rcdk (>= 3.5.0),
     magrittr,
-    rlist,
+    rlist (>= 0.4.6.2),
     Rdisop,
     foreach,
-    tibble
+    tibble (>= 3.1.5)
 Suggests:
     testthat (>= 3.0.0),
-    arrow (>= 3.0.0),
-    entropy,
+    arrow (>=7.0.0,<10.0.0),
+    entropy (>= 1.3.1),
     gplots,
-    readr,
-    patrick,
-    dataCompareR,
-    covr
+    readr (>= 2.0.2),
+    patrick (>= 0.1.0),
+    dataCompareR (>= 0.1.3),
+    covr (<= 3.5.1)
 Config/testthat/edition: 3
 SystemRequirements: C++11
 LinkingTo: 
