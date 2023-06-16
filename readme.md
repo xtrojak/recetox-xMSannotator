@@ -1,5 +1,5 @@
 [![R Conda](https://github.com/RECETOX/recetox-xMSannotator/actions/workflows/r-conda.yml/badge.svg?branch=main)](https://github.com/RECETOX/recetox-xMSannotator/actions/workflows/r-conda.yml)
-![GitHub R package version (branch & subdirectory of monorepo)](https://img.shields.io/github/r-package/v/RECETOX/recetox-xMSannotator/main?filename=xmsannotator%2FDESCRIPTION)
+![GitHub R package version (branch & subdirectory of monorepo)](https://img.shields.io/github/r-package/v/RECETOX/recetox-xMSannotator/main?filename=DESCRIPTION)
 [![Conda](https://img.shields.io/conda/v/bioconda/r-recetox-xmsannotator)](https://anaconda.org/bioconda/r-recetox-xmsannotator)
 
 # recetox-xMSannotator
